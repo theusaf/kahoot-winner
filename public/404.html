@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Kawhooops! - True Typo or 404 Hunter?</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="theusaf">
+    <meta name="language" content="EN">
+    <meta name="subject" content="Kahoot">
+    <meta name="topic" content="games">
+    <meta name="abstract" content="A website for winning Kahoot games.">
+    <meta name="designer" content="theusaf">
+    <meta name="owner" content="theusaf">
+    <meta name="summary" content="Kahoot. Join. Play. Win">
+    <link rel="stylesheet" href="/index.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5S0LGKYC6M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5S0LGKYC6M');
+    </script>
+    <!-- End Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://apis.google.com/js/platform.js"></script>
+  </head>
+  <body class="rainbow">
+    <h1>Kawhooops! That's an error!</h1>
+    <h2>Perhaps you meant to visit:</h2>
+    <h4><a href="/" id="redir">https://kahoot-win.herokuapp.com</a></h4>
+    <style>
+      body{
+        text-align: center;
+      }
+    </style>
+    <script>
+    const urls = [
+      "https://kahoot-win.herokuapp.com",
+      "https://kahoot-win.herokuapp.com/quiz",
+      "https://kahoot-win.herokuapp.com/creator",
+      "https://kahoot-win.herokuapp.com/how-it-works",
+      "https://kahoot-win.herokuapp.com/api",
+      "https://kahoot-win.herokuapp.com/privacy",
+      "https://kahoot-win.herokuapp.com/brew-me-a-coffee",
+      "https://kahoot-win.herokuapp.com/blog/welcome",
+      "https://kahoot-win.herokuapp.com/blog/about",
+      "https://kahoot-win.herokuapp.com/blog/kahoot-is-not-a-testing-tool",
+      "https://kahoot-win.herokuapp.com/blog/quiz-not-found",
+      "https://kahoot-win.herokuapp.com/blog/download"
+    ];
+    function similarity(s1, s2) {
+      var longer = s1;
+      var shorter = s2;
+      if (s1.length < s2.length) {
+        longer = s2;
+        shorter = s1;
+      }
+      var longerLength = longer.length;
+      if (longerLength == 0) {
+        return 1.0;
+      }
+      return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+    }
+    function editDistance(s1, s2) {
+      s1 = s1.toLowerCase();
+      s2 = s2.toLowerCase();
+
+      var costs = new Array();
+      for (var i = 0; i <= s1.length; i++) {
+        var lastValue = i;
+        for (var j = 0; j <= s2.length; j++) {
+          if (i == 0)
+          costs[j] = j;
+          else {
+            if (j > 0) {
+              var newValue = costs[j - 1];
+              if (s1.charAt(i - 1) != s2.charAt(j - 1))
+              newValue = Math.min(Math.min(newValue, lastValue),
+              costs[j]) + 1;
+              costs[j - 1] = lastValue;
+              lastValue = newValue;
+            }
+          }
+        }
+        if (i > 0)
+        costs[s2.length] = lastValue;
+      }
+      return costs[s2.length];
+    }
+    const a = urls.sort((a,b)=>{
+      return similarity(location.href,b) - similarity(location.href,a);
+    });
+    const r = document.getElementById("redir");
+    r.href = a[0];
+    r.innerHTML = a[0];
+    </script>
+  </body>
+</html>

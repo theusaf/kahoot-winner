@@ -1,0 +1,21 @@
+{
+  "short_name": "KahootWin",
+  "name": "Kahoot Winner",
+  "icons": [
+    {
+      "src": "/resource/icon192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/resource/icon512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#d19432",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#3235d1"
+}
