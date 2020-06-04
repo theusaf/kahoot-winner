@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
 @keyframes rainbow {
   0% { background: rgb(65, 196, 222); }
   25% { background: rgb(140, 199, 63); }
@@ -83,6 +82,9 @@
 }
 .correct{
   animation: rainbowBorder 7s infinite;
+  border-width: 0.5rem !important;
+  box-shadow: black 0.25rem 0.25rem 0.15rem;
+  z-index: 0;
 }
 .rainbow.correct{
   animation: rainbow 14s infinite,rainbowBorder 7s infinite;
@@ -98,6 +100,9 @@ body.red{
 }
 body.purple{
   background: rgb(70,23,143);
+}
+body.purple2{
+  background: rgb(134, 76, 191);
 }
 body{
   position: relative;
@@ -117,33 +122,36 @@ body,html{
   display: block;
 }
 #settings{
+  pointer-events: none;
   touch-action: inherit;
-  top: calc(-100% - 8px);
+  top: 0;
   position: absolute;
+  opacity: 0;
   left: 0px;
   width: calc(100% - 8px);
   height: 100%;
-  max-height: 100%;
-  transition: 1s;
-  background: white;
+  max-height: calc(100% - 8px);
+  transition: 0.5s;
+  color: #f8f8f8;
+  background: rgba(0,0,0,0.8);
   border: solid 4px grey;
   overflow: visible;
   z-index: 100;
 }
-#settings img:last-child{
-  width: 50px;
-  height: 50px;
-  position: absolute;
-  bottom: calc(-25px);
-  left: calc(50% - 25px);
+.misc img{
+  width: 5rem;
+  height: 5rem;
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
   z-index: 5000;
 }
 #menu_toggle{
   display: none;
 }
 #menu_toggle:checked + #settings{
-  top: 0;
-  max-height: 90%;
+  pointer-events: all;
+  opacity: 1;
 }
 .form h3 label{
   font-style: normal !important;
@@ -156,7 +164,8 @@ body,html{
   margin-bottom: 0.25rem;
   font-size: 1.4rem;
   border-bottom: 0.1rem solid #44a;
-  background: #6e6;
+  background: rgb(104,155,60); /* #6e6 (old color) */
+  color: #efefef;
 }
 .form h3{
   margin-top: 0px;
@@ -193,14 +202,17 @@ body,html{
   margin-bottom: 0.25rem;
   border: 0px solid transparent;
   border-bottom: 0.1rem solid #44a;
-  background: #adf;
-  color: black;
+  background: #59c; /* #adf (old) */
+  color: #efefef;
   border-radius: 0.5rem;
   padding: 0.5rem;
   width: 15rem;
   height: 1.6rem;
   font-weight: 300;
   font-size: 1.2em;
+}
+.form input::placeholder{
+  color: #bbb;
 }
 .form input.ch{
   display: none;
@@ -228,7 +240,8 @@ body,html{
   margin: 0;
   margin-left: 0.25rem;
   font-size: 1.2rem;
-  color: #777777;
+  color: #ddd;
+  font-style: normal;
 }
 .shortcut::after{
   content: ")"
@@ -393,6 +406,13 @@ body,html{
   color: rgb(50,50,50);
   margin-bottom: 0.5rem;
   border: solid rgb(204,204,204) 0.125rem;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+}
+.Login input::placeholder{
+  color: #b2b2b2;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
 }
 .Login button{
   vertical-align: middle;
@@ -438,8 +458,8 @@ body,html{
   font-weight: 800;
   color: rgb(51,51,51);
   text-align: left;
-  font-size: 1.4rem;
-  line-height: 1.25rem;
+  font-size: 1.25rem;
+  padding: 1rem;
 }
 .extra > *{
   display: inline-block;
@@ -455,9 +475,15 @@ body,html{
   margin: 0;
   margin-top: 50vh;
   flex: 0;
+  font-size: 2.75rem;
+  position: relative;
+  z-index: 0;
 }
 .lobby h2{
   margin: 0;
+  margin-top: 1.25rem;
+  position: relative;
+  z-index: 0;
   /*flex: 1;*/
 }
 #L1{
@@ -491,31 +517,38 @@ body,html{
   border-radius: 0.125rem;
 }
 .Answers{
-  width: 100vw;
-  height: calc(100% - 4.25rem);
+  width: calc(100vw - 2rem);
+  padding: 1rem;
+  height: calc(100% - 8.25rem);
   display: flex;
   flex-flow: wrap;
-  margin-top: 4.25rem;
+  margin-top: 6rem;
 }
 .Answers img{
   flex: 50%;
-  max-height: 50%;
-  max-width: 50%;
+  max-height: calc(50% - 1rem);
+  max-width: calc(50% - 1rem);
   box-sizing: border-box;
   border: solid white 0.25rem;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin: 0.5rem;
 }
 .Answers img:nth-child(1){
   background: rgb(226,27,60);
+  border-color: rgb(226,27,60);
 }
 .Answers img:nth-child(2){
   background: rgb(19,104,206);
+  border-color: rgb(19,104,206);
 }
 .Answers img:nth-child(3){
   background: rgb(216,158,0);
+  border-color: rgb(216,158,0);
 }
 .Answers img:nth-child(4){
   background: rgb(38,137,12);
+  border-color: rgb(38,137,12);
 }
 [css="layout-tfr"]{
   background: rgb(226,27,60) !important;
@@ -553,15 +586,15 @@ body,html{
 }
 #resultMedal{
   position: absolute;
-  top: 4.25rem;
+  top: 8.25rem;
   width: 10rem;
   left: calc((100vw - 10rem)/2);
 }
 .textAnswer{
   position: absolute;
   display: flex;
-  width: 100%;
-  height: calc(100% - 4.25rem);
+  width: calc(100% - 2rem);
+  height: calc(100% - 8.25rem);
   flex-flow: wrap;
   pointer-events: none;
 }
@@ -571,8 +604,17 @@ body,html{
   text-align: center;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
-.shadow{
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+.shadow::after{
+  content: attr(text);
+  text-shadow: black -1pt 2.25pt 0px, black 1pt 2.25pt 0px;
+  -webkit-text-stroke: black 2pt;
+  opacity: 0.35;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  z-index: -1;
 }
 .About{
   top: 100%;
@@ -698,24 +740,25 @@ body,html{
   margin-top: 30vh;
 }
 #correctMark{
-  height: 5rem;
+  height: 4.5rem;
 }
 .lobby h3{
   font-size: 2rem;
   padding: .625rem;
   line-height: 2.625rem;
   color: white;
-  background-color: rgba(0,0,0,0.15);
+  background-color: rgba(0,0,0,0.35);
   margin: 0;
-  margin-left: calc(50% - 7.625rem);
-  width: 14rem;
+  margin-left: calc(50% - 9.625rem);
+  width: 18rem;
+  border-radius: 0.25rem;
 }
 #bottomText{
   margin-top: 14rem;
 }
 #timer{
   position: fixed;
-  top: calc(50% - 1.75rem);
+  top: calc(50% - 3rem);
   width: 100%;
   font-size: 3rem;
   font-weight: bolder;
@@ -754,7 +797,7 @@ body,html{
   background: #eee;
   border: solid;
 }
-.sm img{
+.sm img,.sm object{
   width: 2rem;
   display: inline-block;
   margin: 0;
@@ -858,6 +901,22 @@ body,html{
 }
 .failChoice input:checked + label{
   animation: rainbowBorder 7s infinite;
+}
+.mobishow{
+  display: none;
+}
+
+/* Scrollbar stuff */
+::-webkit-scrollbar{
+  background: transparent;
+}
+::-webkit-scrollbar-thumb{
+  background: #888;
+  border-radius: 0.5rem;
+  width: 0.5rem;
+}
+::-webkit-scrollbar-thumb:hover{
+  background: #555;
 }
 
 /* Tutorial CSS */
@@ -969,6 +1028,9 @@ body,html{
 }
 
 @media screen and (max-width: 800px) {
+  #resultMedal{
+    top: 4.25rem;
+  }
   .ad-container{
     display: none;
   }
@@ -981,9 +1043,6 @@ body,html{
   .openended{
     max-width: 90vw;
     margin-left: 5vw;
-  }
-  #menu_toggle:checked + #settings{
-    max-height: 80%;
   }
   .form{
     display: block;
@@ -1010,11 +1069,12 @@ body,html{
     bottom: 0;
     position: absolute;
     right: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     margin-right: 2.5rem;
   }
   .Answers{
     height: calc(100% - 4.75rem);
+    margin-top: 3.5rem;
   }
   #L2.darker{
     background-color: rgb(51,51,51);
@@ -1062,6 +1122,17 @@ body,html{
   .sect:checked + h3::before{
     content: ">";
   }
+  .mobihide2{
+    display: none;
+  }
+  .misc img{
+    width: 4rem;
+    height: 4rem;
+    bottom: 4rem;
+  }
+  .extra{
+    padding: unset;
+  }
 }
 @media (pointer: coarse) {
   .mobireload{
@@ -1078,5 +1149,23 @@ body,html{
   }
   .mobihide{
     display: none;
+  }
+  .mobishow{
+    display: unset;
+  }
+  nav.mobishow{
+    display: flex;
+  }
+  /* Scrollbar stuff */
+  ::-webkit-scrollbar{
+    background: unset;
+  }
+  ::-webkit-scrollbar-thumb{
+    background: unset;
+    border-radius: unset;
+    width: unset;
+  }
+  ::-webkit-scrollbar-thumb:hover{
+    background: unset;
   }
 }

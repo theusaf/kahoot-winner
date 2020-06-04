@@ -48,7 +48,7 @@ const MessageHandler = {
       <br>
       <a class="mobihide" href="${url}" onclick="dataLayer.push({event:'download_app'})" target="_blank">Download App</a>
       <br>
-      <button onclick="send({type:'HANDSHAKE_ISSUES',message:'AAAA!'});this.innerHTML = 'Issue has been reported.';this.onclick = null;" title="This button may decrease the amount of time to reset the server.">Report Issues</button>`;
+      <button onclick="send({type:'HANDSHAKE_ISSUES',message:'AAAA!'});this.innerHTML = 'Issue has been reported.';this.onclick = null;dataLayer.push({event:'report_error'});" title="This button may decrease the amount of time to reset the server.">Report Issues</button>`;
       div.id = "handshake-fail-div";
       div.style = `
         position: fixed;
@@ -99,9 +99,11 @@ const MessageHandler = {
       return new GetReadyPage(data);
     },
     QuestionBegin: question=>{
+      game.questionAnswered = false;
       return new QuestionAnswererPage(question);
     },
     QuestionSubmit: message=>{
+      game.questionAnswered = true;
       return new QuestionSnarkPage(message);
     },
     QuestionEnd: info=>{
@@ -201,6 +203,8 @@ class Game{
     this.theme = "Kahoot";
     this.opts = {};
     this.correctIndex = null;
+    this.questionStarted = false;
+    this.questionAnswered = false;
   }
   sendPin(pin){
     this.pin = pin;
@@ -270,8 +274,12 @@ class Game{
       div_search_options: opts.div_search_options,
       div_challenge_options: opts.div_search_options
     });
+    const oldOpts = game.opts;
     game.opts = opts;
     send({type:"SET_OPTS",message:JSON.stringify(opts)});
+    if(game.questionStarted && !game.questionAnswered && oldOpts.manual && !game.opts.manual){
+      send({type:"ANSWER_QUESTION",message:null});
+    }
   }
   loadOptions(){
     let opts;

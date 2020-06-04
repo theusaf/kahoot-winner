@@ -68,7 +68,7 @@ function tutorialSteps(n){
       template.innerHTML = `
         <div class="tut_cont">
           <div id="t_step3">
-            <h1>Here are the settings that you can change. You can access this menu by clicking the bars, or pressing ESCAPE.</h1>
+            <h1>Here are the settings that you can change. You can access this menu by clicking the gear at the bottom right, or pressing ESCAPE.</h1>
             <button onclick="tutorialSteps(3)">Next</button>
             <button onclick="tutorialSteps(10)">Done</button>
           </div>

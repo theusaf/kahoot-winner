@@ -78,10 +78,17 @@ class LoginPage{
     }
     const social = document.createElement("div");
     social.className = "sm sidebar correct";
-    social.innerHTML = `<a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg"><span>Discord</span></a>
-    <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg"><span>Twitter</span></a>
-    <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg"><span>Facebook</span></a>
-    <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/logo-paypal.svg"><span>Donate</span></a>`;
+    social.innerHTML = `<div class="mobihide2 mobihide">
+    <a href="/creator" target="_blank"><img src="/resource/icon-kahoot.svg" alt="create"><span>Creator</span></a>
+    <a href="/api" target="_blank"><img src="/resource/icon-api.svg" alt="api"><span>Kahoot API</span></a>
+    <a href="/how-it-works" target="_blank"><img src="/resource/icon-about.svg" alt="info mark"><span>How it Works</span></a>
+    <a href="/blog" target="_blank"><img src="/resource/icon-blog.svg" alt="Icon made from http://www.onlinewebfonts.com/icon is licensed by CC BY 3.0"><span>Blog</span></a>
+    <hr/>
+    </div>
+    <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg" alt="discord"><span>Discord</span></a>
+    <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
+    <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>
+    <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/logo-paypal.svg" alt="paypal"><span>Donate</span></a>`;
     div.append(social);
     UIDiv.append(div);
   }
@@ -155,9 +162,11 @@ class LobbyPage{
     nameText.innerHTML = game.name.replace(/"<"/gm,"&lt;");
     const text = document.createElement("h1");
     text.className = "shadow";
+    text.setAttribute("text","You're in!");
     text.innerHTML = "You're in!";
     const subtext = document.createElement("h2");
     subtext.innerHTML = "See your nickname on screen?";
+    subtext.setAttribute("text","See your nickname on screen?");
     subtext.className = "shadow";
     pinDiv.append(pinText);
     nameDiv.append(nameText);
@@ -181,6 +190,7 @@ class GetReadyPage{
     ChallengeContinueButton.style.display = "none";
     document.body.className = "rainbow";
     objects.texts[0].innerHTML = `Question ${question.index + 1}`;
+    objects.texts[0].setAttribute("text",objects.texts[0].innerHTML);
     objects.texts[0].id = "snarkText";
     objects.texts[1].id = "bottomText";
     game.answers = question.data;
@@ -198,6 +208,7 @@ class GetReadyPage{
       });
     }
     objects.texts[1].innerHTML = "Ready...";
+    objects.texts[1].setAttribute("text","Ready...");
     const score = document.createElement("p");
     const qoft = document.createElement("p");
     score.innerHTML = String(game.score);
@@ -222,6 +233,7 @@ class GetReadyPage{
         }else{
           timer.innerHTML = secs;
           objects.texts[1].innerHTML = ["Go!","Set.","Ready...","Ready...","Ready...","Ready..."][secs];
+          objects.texts[1].setAttribute("text",objects.texts[1].innerHTML);
         }
       }catch(err){
         clearInterval(int);
@@ -463,10 +475,12 @@ class QuizStartPage{
     const objects = new LobbyPage;
     ChallengeContinueButton.style.display = "none";
     objects.texts[0].innerHTML = "Get ready!";
+    objects.texts[0].setAttribute("text","Get ready!");
     objects.texts[0].id = "snarkText";
-    objects.texts[1].innerHTML = "Loading..."
+    objects.texts[1].innerHTML = "Loading...";
+    objects.texts[1].setAttribute("text","Loading...");
     objects.texts[1].id = "bottomText";
-    document.body.className = "purple";
+    document.body.className = "purple2";
     activateLoading(true,false,"",false);
     return objects;
   }
@@ -474,8 +488,9 @@ class QuizStartPage{
 class QuestionAnswererPage{
   constructor(){
     ChallengeContinueButton.style.display = "none";
-    if(game.opts.searchLoosely == 2 && !game.questionStarted){
-      return game.questionStarted = true;
+    if(game.opts.searchLoosely == 2){
+      game.questionStarted = true;
+      return;
     }else if(game.opts.searchLoosely == 2 && !game.opts.manual){
       setTimeout(()=>{
         send({
@@ -485,6 +500,7 @@ class QuestionAnswererPage{
       },(game.opts.timeout * 1000) - (Date.now() - game.recievedTime));
     }
     const objects = new GetReadyPage(game.question,true);
+    game.questionStarted = true;
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "";
     // content slides
     if(game.question.type == "content"){
@@ -664,7 +680,9 @@ class QuestionSnarkPage{
     const stuff = new GetReadyPage(game.question,true);
     ChallengeContinueButton.style.display = "none";
     stuff.texts[1].innerHTML = text;
+    stuff.texts[1].setAttribute("text",text);
     stuff.texts[0].innerHTML = "";
+    stuff.texts[0].setAttribute("text","");
     stuff.texts[0].id = "snarkText";
     stuff.texts[1].id = "bottomText";
     activateLoading(true,false,"",false);
@@ -682,11 +700,14 @@ class QuestionEndPage{
     document.body.className = info.correct ? "green" : "red";
     objects.bottom.querySelector(".dark").innerHTML = info.total;
     objects.texts[0].innerHTML = info.correct ? "Correct" : "Incorrect";
+    objects.texts[0].setAttribute("text",objects.texts[0].innerHTML);
     objects.texts[1].innerHTML = `You are in ${info.rank}${info.rank == 1 ? "st" : info.rank == 2 ? "nd" : info.rank == 3 ? "rd" : "th"} place`;
+    objects.texts[1].setAttribute("text",objects.texts[1].innerHTML);
     const nemesis = document.createElement("h2");
     nemesis.className = "shadow";
     try{
       nemesis.innerHTML = info.nemesis.name.replace(/</gm,"&lt;") ? `Just ${info.nemesis.score - info.total} from ${info.nemesis.name}` : "";
+      nemesis.setAttribute("text",nemesis.innerHTML);
     }catch(e){}
     const correctMark = new Image;
     correctMark.id = "correctMark";
@@ -700,6 +721,7 @@ class QuestionEndPage{
     const tx = document.createElement("h2");
     tx.innerHTML = "Answer Streak";
     tx.className = "shadow";
+    tx.setAttribute("text","Answer Streak");
     tx.style = "display: inline-block; font-size: 1.5rem";
     di.style.position = "relative";
     streakImageContainer.id = "streakImage";
@@ -715,6 +737,7 @@ class QuestionEndPage{
       if(game.hadStreak){
         tx.style.display = "inline-block";
         tx.innerHTML = "Answer Streak Lost";
+        tx.setAttribute("text","Answer Streak Lost");
         game.hadStreak = false;
       }
       streakImageContainer.style.display = "none";
@@ -750,7 +773,9 @@ class QuizEndPage{
     }
     document.body.className = "purple";
     objects.texts[0].innerHTML = message;
+    objects.texts[0].setAttribute("text","");
     objects.texts[1].innerHTML = "Good Game!";
+    objects.texts[1].setAttribute("text","Good Game!");
     objects.texts[0].id = "";
     objects.texts[1].id = "";
     objects.top.className = "extra darker";
@@ -940,22 +965,40 @@ window.addEventListener("keydown",e=>{
           document.querySelector(".Changelog").style = "";
           document.querySelector(".About").style = "";
           document.getElementById("tutorial").style = "";
-          document.querySelector(".sm.sidebar").style = "";
           document.getElementById("logotext").style = "";
           document.getElementById("abtlnk").style = "";
           document.getElementById("chnge").style = "";
+          document.querySelector(".misc").style = "";
+          document.querySelector(".Error").style = "";
+          document.querySelector(".sm.sidebar").style = "";
         }else{
           SettingDiv.style = "display: none";
           document.querySelector(".Changelog").style = "display: none";
           document.querySelector(".About").style = "display: none";
           document.getElementById("tutorial").style = "display: none";
-          document.querySelector(".sm.sidebar").style = "display: none";
           document.getElementById("logotext").style = "display: none";
           document.getElementById("abtlnk").style = "display: none";
           document.getElementById("chnge").style = "display: none";
+          document.querySelector(".misc").style = "display: none";
+          document.querySelector(".Error").style = "display: none";
+          document.querySelector(".sm.sidebar").style = "display: none";
         }
-      }catch(e){console.log(e)}
-      dataLayer.push({type:"panick",value:""});
+      }catch(e){
+        console.log(e);
+      }finally{
+        const icon = document.head.querySelector('[rel="shortcut icon"]') || document.createElement("link");
+        if(!icon.isConnected){
+          icon.rel = "shortcut icon";
+          icon.href = "https://kahoot.it/favicon.ico";
+          document.head.append(icon);
+          document.title = "Play Kahoot!";
+        }
+        document.getElementById("manual").checked = true;
+        document.getElementById("hideAnswers").checked = Boolean(SettingDiv.style.display);
+        game.saveOptions();
+        // yes, that is a typo
+        dataLayer.push({type:"panick",value:""});
+      }
       break;
     case "d":
       document.getElementById("ChallengeDisableAutoplay").click();

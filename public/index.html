@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
     <meta charset="utf-8">
-    <meta name="version" content="2.13.2">
+    <meta name="version" content="2.14.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="Kahoot Winner">
     <meta name="description" content="A hack for winning Kahoot quizzes and challenges. Just enter your pin, choose a fancy name and go! It will find the answers for you! One of the best and actively maintained Kahoot bots online, working 2020!">
@@ -109,13 +110,9 @@
           <h3><label for="div_game_options">Game Options</label></h3>
           <div>
             <label for="timeout">Answer Timeout</label>
-            <input type="number" id="timeout" placeholder="1">
+            <input type="number" id="timeout" placeholder="# seconds">
             <label for="teamMembers">Team Members, split by comma</label>
             <input type="text" id="teamMembers" placeholder="Kirito, Asuna">
-            <meta content="toggle" itemprop="result"/>
-            <input class="ch" type="checkbox" id="brute">
-            <label class="ch button" for="brute"><span>Bypass 2FA</span><p class="shortcut">ctrl + b</p></label>
-            <meta content="toggle" itemprop="result"/>
             <label for="fail"><span>Fail Purposely</span><p class="shortcut">ctrl + p</p></label>
             <select class="block" id="fail">
               <option value="0">Off</option>
@@ -126,18 +123,22 @@
               <option value="0.7">Fail 30%</option>
               <option value="0.5">Fail 50%</option>
             </select>
-            <meta content="toggle" itemprop="result"/>
-            <input class="ch" type="checkbox" id="manual">
-            <label class="ch button" for="manual"><span>Manual Control</span><p class="shortcut">ctrl + m</p></label>
-            <meta content="toggle" itemprop="result"/>
-            <input class="ch" type="checkbox" id="previewQuestion">
-            <label class="ch button" for="previewQuestion"><span>Preview Question</span><p class="shortcut">ctrl + u</p></label>
             <label for="searchLoosely"><span>Search Loosely</span><p class="shortcut">ctrl + k</p></label>
             <select class="block" id="searchLoosely">
               <option value="0">Off</option>
               <option value="1">On</option>
               <option value="2">On, wait for confirmation</option>
             </select>
+            <meta content="toggle" itemprop="result"/>
+            <input class="ch" type="checkbox" id="brute">
+            <label class="ch button" for="brute"><span>Bypass 2FA</span><p class="shortcut">ctrl + b</p></label>
+            <meta content="toggle" itemprop="result"/>
+            <meta content="toggle" itemprop="result"/>
+            <input class="ch" type="checkbox" id="manual">
+            <label class="ch button" for="manual"><span>Manual Control</span><p class="shortcut">ctrl + m</p></label>
+            <meta content="toggle" itemprop="result"/>
+            <input class="ch" type="checkbox" id="previewQuestion">
+            <label class="ch button" for="previewQuestion"><span>Preview Question</span><p class="shortcut">ctrl + u</p></label>
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="hideAnswers">
             <label class="ch button" for="hideAnswers"><span>Hide Correct</span><p class="shortcut">ctrl + h</p></label>
@@ -157,19 +158,19 @@
             <label class="ch button" for="ChallengeDisableAutoplay"><span>Disable Autoplay</span><p class="shortcut">ctrl + d</p></label>
           </div>
         </div>
-        <nav class="bottom">
+        <nav class="bottom mobishow">
           <a href="/creator" title="Create Kahoots using all premium features!">Kahoot Creator</a>
           <a href="/api" title="Learn the Kahoot API">Kahoot API Docs</a>
           <a href="/how-it-works" title="Learn how this website works">How Kahoot Winner Works</a>
         </nav>
         <!-- TODO: Add hover options, implement more shortcuts, simplify and improve menu -->
       </div>
-      <meta content="toggle" itemprop="result"/>
-      <div class="misc">
-        <label for="menu_toggle">
-          <img src="resource/menu.svg" alt="Menu Icon. Credit to Freepik, flaticon.com">
-        </label>
-      </div>
+    </div>
+    <meta content="toggle" itemprop="result"/>
+    <div class="misc">
+      <label for="menu_toggle">
+        <img src="resource/icon-gear.svg" alt="Icons made by Pixel perfect from www.flaticon.com">
+      </label>
     </div>
     <div id="ui">
       <div class="Loading">
@@ -265,10 +266,10 @@
         <button class="shortcut" type="button" name="button" onclick="activateTutorial()">Tutorial</button>
         <br>
         <div class="sm">
-          <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/logo-paypal.svg"><span>Donate</span></a>
-          <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg"><span>Discord</span></a>
-          <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg"><span>Twitter</span></a>
-          <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg"><span>Facebook</span></a>
+          <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/logo-paypal.svg" alt="paypal"><span>Donate</span></a>
+          <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg" alt="discord"><span>Discord</span></a>
+          <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
+          <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>
         </div>
       </div>
       <meta content="toggle" itemprop="result"/>
@@ -276,6 +277,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p>2.14.0 - Improved functionality for <code>ctrl+j</code>. Now changes title of page and icon. Improved styling of menu. UI style updated to match Kahoot!'s styles. Correct answers should now be more obvious.</p>
           <p>2.13.2 - Search loosely is no longer in beta. You can now confirm to continue to the question instead.</p>
           <p>2.13.1 - Added a "not working" reporting system. Loose search has been improved, showing less options after each question. There are certain quizzes that loose search will not work well on though. (Quizzes with the same question for all questions. Quizzes with multiple questions with the same correct answer)</p>
           <p>2.13.0 - Bug fixes, client now reconnects to the game if the sever goes down. For true/false questions, layout is modified to show blue:red instead of red:blue</p>

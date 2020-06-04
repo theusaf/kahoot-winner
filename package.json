@@ -1,6 +1,6 @@
 {
   "name": "kahoot-win",
-  "version": "2.13.2",
+  "version": "2.14.0",
   "description": "A Kahoot Cheating Website",
   "main": "kahoot.js",
   "scripts": {
