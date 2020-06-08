@@ -3,8 +3,7 @@
   <head>
     <link rel="preload" href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta charset="utf-8">
-    <meta name="version" content="2.14.0">
+    <meta name="version" content="2.14.1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="Kahoot Winner">
     <meta name="description" content="A hack for winning Kahoot quizzes and challenges. Just enter your pin, choose a fancy name and go! It will find the answers for you! One of the best and actively maintained Kahoot bots online, working 2020!">
@@ -27,6 +26,21 @@
     <link rel="apple-touch-icon-precomposed" href="favicon.ico">
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Scheme.org metadata -->
+    <script type="application/ld+json">
+    {
+      "@context" : "http://schema.org",
+      "@type" : "WebSite",
+      "name" : "Kahoot Winner",
+      "url" : "https://kahoot-win.herokuapp.com",
+      "sameAs" : [
+        "https://twitter.com/theusafyt",
+        "https://www.facebook.com/theusafmc",
+        "https://www.youtube.com/theusaf",
+        "https://discord.gg/58SHzC2"
+      ]
+    }
+    </script>
     <!-- Facebook Pixel Code -->
     <script>
       !function(f,b,e,v,n,t,s)
@@ -80,20 +94,29 @@
     <input type="checkbox" id="menu_toggle">
     <div id="settings" itemscope itemtype="https://schema.org/ControlAction">
       <div class="form">
-        <div>
-          <label onclick="window.location.reload(true)" class="mobireload button" itemprop="result"><span>Refresh Page</span></label>
-          <br class="mobireload">
-          <!-- Reconnect button removed in 2.13.0 (deprecated.) No use for it, can cause issues. Shortcut is usable still -->
-          <!-- label onclick="send({type:'RECONNECT',message:'I think i lost connection'})" class="button block" itemprop="result"><span>Reconnect Bot</span><p class="shortcut">ctrl + e</p></label -->
-          <label for="theme block"><span>Theme</span></label>
-          <select id="theme" class="block">
-            <option value="Kahoot">Kahoot</option>
-            <option value="KonoSuba">KonoSuba</option>
-            <option value="Rainbow">Kahoot + RGB UI</option>
-          </select>
+        <div id="firstdiv">
+          <div class="displayFlex">
+            <label onclick="window.location.reload(true);return false;" class="mobireload" itemprop="result"><img src="resource/reset.svg"></img></label>
+            <br class="mobireload">
+            <!-- Reconnect button removed in 2.13.0 (deprecated.) No use for it, can cause issues. Shortcut is usable still -->
+            <!-- label onclick="send({type:'RECONNECT',message:'I think i lost connection'})" class="button block" itemprop="result"><span>Reconnect Bot</span><p class="shortcut">ctrl + e</p></label -->
+            <div class="flex displayFlex" style="flex-flow: column;">
+              <label for="theme"><span>Theme</span></label>
+              <select id="theme" class="block">
+                <option value="Kahoot">Kahoot</option>
+                <option value="KonoSuba">KonoSuba</option>
+                <option value="Rainbow">Kahoot + RGB UI</option>
+              </select>
+            </div>
+          </div>
           <hr>
-          <input type="checkbox" class="ch sect" id="div_search_options">
-          <h3><label for="div_search_options">Search Options</label></h3>
+          <div class="displayFlex mobishow2">
+            <h3 class="flex" id="dso"><label class="block" for="div_search_options">Search</label></h3>
+            <h3 class="flex" id="dgo"><label class="block" for="div_game_options">Game</label></h3>
+            <h3 class="flex" id="dco"><label class="block" for="div_challenge_options">Challenge</label></h3>
+          </div>
+          <h3 class="mobihide2">Search Options</h3>
+          <input type="radio" name="settings" class="ch sect" id="div_search_options">
           <div>
             <label for="author">Quiz Author</label>
             <input type="text" id="author" placeholder="Author">
@@ -106,8 +129,8 @@
           </div>
         </div>
         <div>
-          <input class="ch sect" type="checkbox" id="div_game_options"/>
-          <h3><label for="div_game_options">Game Options</label></h3>
+          <h3 class="mobihide2">Game Options</h3>
+          <input checked class="ch sect" name="settings" type="radio" id="div_game_options"/>
           <div>
             <label for="timeout">Answer Timeout</label>
             <input type="number" id="timeout" placeholder="# seconds">
@@ -145,8 +168,8 @@
           </div>
         </div>
         <div>
-          <input type="checkbox" class="ch sect" id="div_challenge_options">
-          <h3><label for="div_challenge_options">Challenge Options</label></h3>
+          <h3 class="mobihide2">Challenge Options</h3>
+          <input type="radio" name="settings" class="ch sect" id="div_challenge_options"/>
           <div>
             <label for="challengePoints">Points</label>
             <input type="number" id="challengePoints" placeholder="1000">
@@ -159,11 +182,11 @@
           </div>
         </div>
         <nav class="bottom mobishow">
-          <a href="/creator" title="Create Kahoots using all premium features!">Kahoot Creator</a>
-          <a href="/api" title="Learn the Kahoot API">Kahoot API Docs</a>
-          <a href="/how-it-works" title="Learn how this website works">How Kahoot Winner Works</a>
+          <a href="/creator" title="Create Kahoots using all premium features!"><span class="mobihide2">Kahoot </span>Creator</a>
+          <a href="/api" title="Learn the Kahoot API"><span class="mobihide2">Kahoot </span>API<span class="mobihide2"> Docs</span></a>
+          <a href="/how-it-works" title="Learn how this website works">How<span class="mobihide2"> Kahoot Winner </span><span class="mobishow2"> it </span>Works</a>
         </nav>
-        <!-- TODO: Add hover options, implement more shortcuts, simplify and improve menu -->
+        <!-- TODO: Add hover options -->
       </div>
     </div>
     <meta content="toggle" itemprop="result"/>
@@ -277,6 +300,8 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p>2.14.2 - Improved styling for mobile devices, fixed some bugs</p>
+          <p>2.14.1 - Locked quiz detection and bug fixes</p>
           <p>2.14.0 - Improved functionality for <code>ctrl+j</code>. Now changes title of page and icon. Improved styling of menu. UI style updated to match Kahoot!'s styles. Correct answers should now be more obvious.</p>
           <p>2.13.2 - Search loosely is no longer in beta. You can now confirm to continue to the question instead.</p>
           <p>2.13.1 - Added a "not working" reporting system. Loose search has been improved, showing less options after each question. There are certain quizzes that loose search will not work well on though. (Quizzes with the same question for all questions. Quizzes with multiple questions with the same correct answer)</p>
@@ -305,7 +330,7 @@
           <p>2.7.0 - Removed bugs, added custom team support (in options). Improved Two Factor Authentification pages. Deactivated the supervolcano. Unfortunately, this added a garbage disposal, which nobody knows what it actually does.</p>
           <p>2.6.11 - Vastly improved styling. You can now click the "WINNER" text to hide it.</p>
           <p>2.6.10 - Removed Hijacking. Kahoot patched this. Greatly improved styling!</p>
-          <p>2.6.9 - :)</p>
+          <p>2.6.9 - <span style="display: inline-block;animation: infinite 1s windance">:)</span></p>
           <p>2.6.8 - Improved Styling, improved backend quiz searching.</p>
           <p>2.6.7 - Improved Styling, limited quiz searches to 10,000 (at this point, we assume that the quiz is probably unfindable)</p>
           <p>2.6.6 - Improved Mobile Styles, can use ESCAPE for menu bar.</p>

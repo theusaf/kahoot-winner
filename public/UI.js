@@ -263,6 +263,8 @@ class GetReadyPage{
       timer.outerHTML = "";
       objects.texts[0].innerHTML = "";
       objects.texts[1].innerHTML = "";
+      objects.texts[0].setAttribute("text","");
+      objects.texts[1].setAttribute("text","");
       if(game.guesses.length == 0){
         const chdiv = document.createElement("div");
         chdiv.className = "ChallengeQuestion";
@@ -391,6 +393,8 @@ class GetReadyPage{
       timer.outerHTML = "";
       objects.texts[0].innerHTML = "";
       objects.texts[1].innerHTML = "";
+      objects.texts[0].setAttribute("text","");
+      objects.texts[1].setAttribute("text","");
       const chdiv = document.createElement("div");
       chdiv.className = "ChallengeQuestion";
       const sp = document.createElement("span");
@@ -877,6 +881,33 @@ const LoadingText = document.getElementById("loadingText");
 const ThemeChooser = document.getElementById("theme");
 const login = new LoginPage(false);
 let closePage = 0;
+
+const SearchDivSettings = document.getElementById("div_search_options");
+const GameDivSettings = document.getElementById("div_game_options");
+const ChallengeDivSettings = document.getElementById("div_challenge_options");
+const dso = document.getElementById("dso");
+const dgo = document.getElementById("dgo");
+const dco = document.getElementById("dco");
+SearchDivSettings.onchange = GameDivSettings.onchange = ChallengeDivSettings.onchange = function(e){
+  switch (e.target.id) {
+    case "div_search_options":
+    dso.className = "flex selected";
+    dgo.className = "flex";
+    dco.className = "flex";
+    break;
+    case "div_game_options":
+    dso.className = "flex";
+    dgo.className = "flex selected";
+    dco.className = "flex";
+    break;
+    case "div_challenge_options":
+    dso.className = "flex";
+    dgo.className = "flex";
+    dco.className = "flex selected";
+    break;
+  }
+}
+dgo.className = "flex selected";
 
 AboutSwitch.addEventListener("click",()=>{
   if(AboutSwitch.checked){

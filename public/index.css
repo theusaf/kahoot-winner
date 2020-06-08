@@ -232,6 +232,17 @@ body,html{
   transition: 1s;
   background: url(resource/red.png);
 }
+.form .mobireload img{
+  max-width: 4rem;
+  display: inline-block;
+  margin-right: 1rem;
+}
+.displayFlex{
+  display: flex;
+}
+.flex{
+  flex: 1;
+}
 .mobireload{
   display: none;
 }
@@ -586,7 +597,7 @@ body,html{
 }
 #resultMedal{
   position: absolute;
-  top: 8.25rem;
+  top: 6.25rem;
   width: 10rem;
   left: calc((100vw - 10rem)/2);
 }
@@ -770,13 +781,15 @@ body,html{
   bottom: 0;
   z-index: 1;
   left: 0;
-  background: #aaa;
+  background-image: linear-gradient(rgba(0,0,0,0),#999,#999,rgba(0,0,0,0));
   width: 100%;
   display: flex;
   text-align: center;
 }
 .bottom a{
   flex: 1;
+  text-decoration: none;
+  color: white;
 }
 .sm a{
   display: flex;
@@ -905,6 +918,9 @@ body,html{
 .mobishow{
   display: none;
 }
+.mobishow2{
+  display: none;
+}
 
 /* Scrollbar stuff */
 ::-webkit-scrollbar{
@@ -952,12 +968,14 @@ body,html{
 }
 #t_step1 {
   width: 25%;
+  max-height: 75%;
   background: #29f;
   border-radius: 3rem;
   padding: 1rem;
   position: absolute;
   top: 20%;
   left: 5%;
+  overflow: auto;
 }
 #t_step3 {
   width: 25%;
@@ -1109,18 +1127,30 @@ body,html{
   .sm.sidebar span{
     display: none;
   }
-  .sect + h3 + div{
-    display: block;
-  }
-  .sect:checked + h3 + div{
+  .sect + div{
     display: none;
   }
-  .form h3::before{
-    content: "||";
-    margin-right: 0.25rem;
+  .sect:checked + div{
+    display: block;
   }
-  .sect:checked + h3::before{
-    content: ">";
+  .form > div{
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  #firstdiv{
+    margin-top: 1rem;
+  }
+  .form h3{
+    font-weight: normal;
+    font-size: 1.25rem;
+    text-align: center;
+    background: #333;
+  }
+  .form h3.selected{
+    background: #ddd;
+    color: black;
   }
   .mobihide2{
     display: none;
@@ -1132,6 +1162,16 @@ body,html{
   }
   .extra{
     padding: unset;
+  }
+  #theme{
+    max-width: none;
+    min-width: unset;
+  }
+  .mobishow2{
+    display: unset;
+  }
+  .mobishow2.displayFlex{
+    display: flex;
   }
 }
 @media (pointer: coarse) {
@@ -1153,17 +1193,22 @@ body,html{
   .mobishow{
     display: unset;
   }
+  .mobishow.displayFlex{
+    display: flex;
+  }
   nav.mobishow{
     display: flex;
+    align-items: center;
   }
   /* Scrollbar stuff */
   ::-webkit-scrollbar{
     background: unset;
+    width: 0;
   }
   ::-webkit-scrollbar-thumb{
     background: unset;
     border-radius: unset;
-    width: unset;
+    width: 0;
   }
   ::-webkit-scrollbar-thumb:hover{
     background: unset;

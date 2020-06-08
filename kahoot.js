@@ -15,7 +15,7 @@ const startupDate = Date.now();
 const EventEmitter = require("events");
 const GlobalMessageSender = new EventEmitter();
 const {URL} = require("url");
-const {edit} = require(path.join(__dirname,"regex.js"));
+const {edit} = require("./regex.js");
 app.enable('trust proxy');
 app.use(compression({
   filter: (req,res)=>{
@@ -52,7 +52,14 @@ app.use((req,res,next)=>{
   }
   next();
 });
-app.use(express.static(path.join(__dirname,"public"),{maxAge:"1y"}));
+app.use(express.static(path.join(__dirname,"public"),{
+  maxAge:"1y",
+  setHeaders: (res)=>{
+    let d = new Date;
+    d.setYear(d.getFullYear() + 1);
+    res.setHeader("Expires", d.toUTCString());
+  }
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 const port = process.env.PORT || 2000;
@@ -64,7 +71,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.13.2");
+console.log("Using version 2.14.2");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -138,11 +145,6 @@ class Cheater{
       gotQuestion: false
     };
     this.pinger = setInterval(()=>{
-      if(++this.pings > 180){
-        clearInterval(me.pinger);
-        this.close();
-        return;
-      }
       this.send({message:"ping",type:"Message.Ping"});
     },30*1000);
   }
@@ -177,7 +179,11 @@ class Cheater{
   generateRandomName(){
     return new Promise(res=>{
       request("https://apis.kahoot.it/namerator",(e,r,b)=>{
-        res(JSON.parse(b).name);
+        try{
+          res(JSON.parse(b).name);
+        }catch(e){
+          res("BadHtml");
+        }
       });
     });
   }
@@ -206,7 +212,7 @@ class QuizFinder{
           ans = shuffle([0,1,2,3]);
           break;
         case "multiple_select_quiz":
-          ans = shuffle([0,1,2,3]).slice(q.quiz.answerCounts[q.index] - Math.floor(Math.random() * (q.quiz.answerCounts[q.index] - 1)));
+          ans = shuffle([0,1,2,3]).slice(q.quiz.answerCounts[q.index] - Math.floor(Math.random() * (q.quiz.answerCounts[q.index] + 1)));
           break;
         default:
           ans = Math.floor(Math.random() * q.quiz.answerCounts[q.index]);
@@ -718,7 +724,12 @@ const Messages = {
     if(!game.options.isChallenge || !game.security.joined || game.kahoot._wsHandler.phase == "leaderboard"){
       return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
     }
-    game.kahoot._wsHandler.next();
+    try{
+      game.kahoot._wsHandler.next();
+    }catch(e){
+      console.log("Caught CHALLENGE ERROR:");
+      console.log(e);
+    }
   },
   FAIL_CURRENT_QUESTION: (game,choice)=>{
     if(!game.security.joined || !game.kahoot.quiz || !game.kahoot.quiz.currentQuestion){
@@ -726,17 +737,6 @@ const Messages = {
     }
     game.fails[game.kahoot.quiz.currentQuestion.index] = Boolean(choice);
     game.send({message:Boolean(choice),type:"Message.Ping"});
-  },
-  SCM_DEBUG_SCRT: (game,message)=>{ // Send Custom Message Debug Script
-    if(!game.security.joined){
-      return game.send({message:"INVALID_USER_INPUT",type:"Error"});
-    }
-    try{
-      game.kahoot._wsHandler.send(JSON.parse(message));
-    }catch(err){
-      console.log("A debug message caused an error" + message);
-    }
-    game.send({message:"INVALID_USER_INPUT",type:"Error"});
   },
   RECOVER_DATA: (game,message)=>{
     // message should be an object containing quiz name, answers, etc.
@@ -901,7 +901,12 @@ const Listeners = {
     if(k.parent.options.isChallenge){
       k.options.ChallengeAutoContinue = false;
       setTimeout(()=>{
-        k._wsHandler.next();
+        try{
+          k._wsHandler.next();
+        }catch(err){
+          console.log("Caught CHALLENGE ERROR:");
+          console.log(err);
+        }
       },1000 * 60 * 2);
     }
   },
@@ -944,6 +949,9 @@ const Listeners = {
     console.log("Handshake failure occured.");
     k.parent.handshakeIssues = true;
     k.parent.send({message:"HANDSHAKE",type:"Error"});
+  },
+  locked: k=>{
+    k.parent.send({message:"GAME_LOCKED",type:"Error"});
   }
 };
 function applyListeners(kahoot){

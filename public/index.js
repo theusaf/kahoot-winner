@@ -61,6 +61,11 @@ const MessageHandler = {
         border-radius: 5rem;
       `;
       document.body.append(div);
+    },
+    GAME_LOCKED: ()=>{
+      clearTimeout(game.handshakeTimeout);
+      new ErrorHandler("Game Locked.");
+      return resetGame();
     }
   },
   Message: {
