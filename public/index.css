@@ -318,7 +318,7 @@ body,html{
   text-align: center;
   font-size: 3rem;
   max-width: 30rem;
-  margin-left: calc(50vw - 15rem);
+  margin-left: calc((50vw - 1rem) - 15rem);
   background: skyblue;
   margin-top: 25%;
 }
@@ -563,9 +563,11 @@ body,html{
 }
 [css="layout-tfr"]{
   background: rgb(226,27,60) !important;
+  border-color: rgb(226,27,60) !important;
 }
 [css="layout-tfb"]{
   background: rgb(19,104,206) !important;
+  border-color: rgb(19,104,206) !important;
 }
 .Answers .AnswerOptions{
   position: absolute;
@@ -1059,8 +1061,8 @@ body,html{
     display: none;
   }
   .openended{
-    max-width: 90vw;
-    margin-left: 5vw;
+    max-width: calc(90% - 1rem);
+    margin-left: calc(5% - 1rem);
   }
   .form{
     display: block;
@@ -1110,6 +1112,12 @@ body,html{
   }
   .lobby{
     height: calc(100% - 4rem);
+  }
+  .lobby h1{
+    margin-top: calc((100% - 4rem) / 2 + 2rem);
+  }
+  .lobby h2{
+    margin-top: 1rem;
   }
   #snarkText{
     margin-top: 20vh;
@@ -1172,6 +1180,37 @@ body,html{
   }
   .mobishow2.displayFlex{
     display: flex;
+  }
+  .questionPreviewAnswers{
+    top: 6rem;
+  }
+  .questionPreviewAnswers h4{
+    margin: 0px;
+    margin-bottom: 0.25rem;
+    font-size: 1.15rem;
+  }
+  .questionPreviewAnswers div{
+    padding-right: 1rem;
+    padding-left: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    max-height: 2.5rem;
+    overflow: auto;
+  }
+  .questionPreviewAnswers img{
+    height: 2.5rem;
+    margin-right: 0.1rem;
+  }
+  .ChallengeQuestion span{
+    font-size: 0.9rem;
+    max-height: 2.5rem;
+    overflow: auto;
+  }
+  #bottomText{
+    margin-top: 10rem;
+  }
+  #finalText{
+    margin-top: 2rem;
   }
 }
 @media (pointer: coarse) {

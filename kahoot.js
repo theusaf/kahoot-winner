@@ -12,8 +12,6 @@ const upload = multer();
 const cookieParser = require("cookie-parser");
 const userAgents = require("user-agents");
 const startupDate = Date.now();
-const EventEmitter = require("events");
-const GlobalMessageSender = new EventEmitter();
 const {URL} = require("url");
 const {edit} = require("./regex.js");
 app.enable('trust proxy');
@@ -71,7 +69,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.14.2");
+console.log("Using version 2.14.3");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -79,8 +77,11 @@ const Search = require("kahoot-search");
 const wss = new ws.Server({server: server});
 wss.on("connection",(c,request)=>{
   const a = new Cheater(c,request);
-  c.on("message",m=>{a.message(m);});
-  c.on("close",()=>{
+  const msgl = m=>{a.message(m);};
+  c.on("message",msgl);
+  const cl = ()=>{
+    c.removeListener("message",msgl);
+    c.removeListener("close",cl);
     if(a.handshakeIssues){
       try {
         a.kahoot._wsHandler.ws.close();
@@ -91,8 +92,28 @@ wss.on("connection",(c,request)=>{
       a.kahoot.leave();
     }
     a.finder.hax.stop = true;
-  });
+    clearMemory(a);
+  };
+  c.on("close",cl);
 });
+function clearMemory(c){ // attempt to remove references to reduce memory leaks
+  if(!c.finishedProcessing){ // to prevent any crashes, make sure the process is done searching
+    setTimeout(()=>{
+      clearMemory(c);
+    },1000);
+    return;
+  }
+  for(let i in Listeners){
+    c.kahoot.removeListener(i,c.kahoot.list[i]);
+  }
+  c.finder.parent = null;
+  c.finder = null;
+  c.kahoot.parent = null;
+  c.kahoot._wsHandler.kahoot = null;
+  c.kahoot._wsHandler = null;
+  c.kahoot = null;
+  clearInterval(c.pinger);
+}
 function shuffle(array) {
   array = Array.from(array);
   var currentIndex = array.length, temporaryValue, randomIndex;
@@ -268,6 +289,7 @@ class QuizFinder{
     }
     var self = this;
     if(self.hax.stop){
+      this.parent.finishedProcessing = true;
       return; // stop searching! the quiz ended or the user is disconnected!
     }
     // these filters are to filter out quizzes based on new answers
@@ -367,6 +389,10 @@ class QuizFinder{
       }
       console.log(searchText + " | " + this.parent.kahoot.quiz.name);
       let results = await Searching(searchText,options,self);
+      if(!this.parent){
+        this.hax.stop = true;
+        return;
+      }
       // Limit searches to 7500 (300 total searches / quiz)
       if(typeof results.totalHits == "number"){
         this.hax.totalHits = results.totalHits;
@@ -413,6 +439,9 @@ async function Searching(term,opts,finder){
   try{
     return await a.search(o=>{
       o = o.kahoot;
+      if(!finder.parent){
+        return false;
+      }
       if(!finder.parent.kahoot.quiz){
         return true;
       }
@@ -789,6 +818,9 @@ const QuestionAnswer = (k,q)=>{
   if(!q){
     return;
   }
+  if(!k.parent){ // prevent more crashes...
+    return;
+  }
   let answer = k.parent.finder.hax.correctAnswer;
   if(Number(k.parent.options.fail) && k.parent.fails[q.index]){
     switch (q.type) {
@@ -917,6 +949,7 @@ const Listeners = {
     k.parent.send({message:"Quiz has ended.",type:"Message.QuizEnd"});
     k.parent.finder.hax.stop = true;
     k.parent.security.joined = false;
+    k.parent.finishedProcessing = true;
   },
   "2Step": k=>{
     if(k.parent.options.brute){
@@ -955,10 +988,13 @@ const Listeners = {
   }
 };
 function applyListeners(kahoot){
+  kahoot.list = {};
   for(let i in Listeners){
-    kahoot.on(i,info=>{
+    const l = info=>{
       Listeners[i](kahoot,info);
-    });
+    };
+    kahoot.on(i,l);
+    kahoot.list[i] = l;
   }
 }
 const BruteForces = [[0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,2,1],[0,3,1,2],[1,0,2,3],[1,0,3,2],[1,2,0,3],[1,2,3,0],[1,3,0,2],[1,3,2,0],[2,0,1,3],[2,0,3,1],[2,1,0,3],[2,1,3,0],[2,3,0,1],[2,3,1,0],[3,0,1,2],[3,0,2,1],[3,1,0,2],[3,1,2,0],[3,2,0,1],[3,2,1,0]];

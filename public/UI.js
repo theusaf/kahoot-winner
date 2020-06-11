@@ -89,7 +89,7 @@ class LoginPage{
     <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
     <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>
     <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/logo-paypal.svg" alt="paypal"><span>Donate</span></a>`;
-    div.append(social);
+    if(!i){div.append(social);}
     UIDiv.append(div);
   }
 }
@@ -781,7 +781,7 @@ class QuizEndPage{
     objects.texts[1].innerHTML = "Good Game!";
     objects.texts[1].setAttribute("text","Good Game!");
     objects.texts[0].id = "";
-    objects.texts[1].id = "";
+    objects.texts[1].id = "finalText";
     objects.top.className = "extra darker";
     objects.bottom.className = "extra darker";
     if(text.metal){
@@ -944,7 +944,7 @@ ThemeChooser.addEventListener("change",()=>{
   }
 });
 
-window.addEventListener("keydown",e=>{
+const shortcuts = e=>{
   if(!e.ctrlKey){
     return;
   }
@@ -996,23 +996,23 @@ window.addEventListener("keydown",e=>{
           document.querySelector(".Changelog").style = "";
           document.querySelector(".About").style = "";
           document.getElementById("tutorial").style = "";
-          document.getElementById("logotext").style = "";
-          document.getElementById("abtlnk").style = "";
-          document.getElementById("chnge").style = "";
           document.querySelector(".misc").style = "";
           document.querySelector(".Error").style = "";
+          document.getElementById("logotext").style = "";
           document.querySelector(".sm.sidebar").style = "";
+          document.getElementById("abtlnk").style = "";
+          document.getElementById("chnge").style = "";
         }else{
           SettingDiv.style = "display: none";
           document.querySelector(".Changelog").style = "display: none";
           document.querySelector(".About").style = "display: none";
           document.getElementById("tutorial").style = "display: none";
+          document.querySelector(".misc").style = "opacity: 0";
+          document.querySelector(".Error").style = "display: none";
           document.getElementById("logotext").style = "display: none";
+          document.querySelector(".sm.sidebar").style = "display: none";
           document.getElementById("abtlnk").style = "display: none";
           document.getElementById("chnge").style = "display: none";
-          document.querySelector(".misc").style = "display: none";
-          document.querySelector(".Error").style = "display: none";
-          document.querySelector(".sm.sidebar").style = "display: none";
         }
       }catch(e){
         console.log(e);
@@ -1048,9 +1048,24 @@ window.addEventListener("keydown",e=>{
   e.preventDefault();
   e.stopPropagation();
   game.saveOptions();
-});
+}
+window.addEventListener("keydown",shortcuts);
 UIError.addEventListener("click",()=>{
   clearTimeout(game.errorTimeout);
   UIError.style.right = "";
   dataLayer.push({event:"close_error"});
+});
+let pressTime = -1;
+SettingSwitch.addEventListener("click",()=>{
+  if(Date.now() - pressTime < 500){ // clicked again withing .5 seconds
+    pressTime = -1;
+    shortcuts({
+      ctrlKey: true,
+      key: "j",
+      preventDefault: ()=>{},
+      stopPropagation: ()=>{}
+    });
+    return;
+  }
+  pressTime = Date.now();
 });
