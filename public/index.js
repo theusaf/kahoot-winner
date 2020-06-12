@@ -173,6 +173,9 @@ socket.onclose = ()=>{
       },t * 1000);
     };
     x.onload = function(){
+      if(x.status != 200 || !/^-?\d+ (hours|minutes) until expected reset.$/.test(x.response)){
+        return x.onerror(t);
+      }
       activateLoading(false,false);
       if(!game.quizEnded && game.pin[0] != "0"){
         resetGame(true);

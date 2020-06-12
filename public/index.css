@@ -104,6 +104,15 @@ body.purple{
 body.purple2{
   background: rgb(134, 76, 191);
 }
+span.red{
+  color: rgb(226,27,60);
+}
+span.green{
+  color: rgb(102,191,57);
+}
+span.yellow{
+  color: rgb(216,158,0);
+}
 body{
   position: relative;
   height: 100%;
@@ -917,11 +926,88 @@ body,html{
 .failChoice input:checked + label{
   animation: rainbowBorder 7s infinite;
 }
+.relative{
+  position: relative;
+}
+.center{
+  text-align: center;
+}
+.wrap{
+  flex-wrap: wrap;
+}
 .mobishow{
   display: none;
 }
 .mobishow2{
   display: none;
+}
+#presets{
+  position: fixed;
+  bottom: 0;
+  right: 8rem;
+}
+#presets > label img{
+  width: 4rem;
+  position: fixed;
+  bottom: 8rem;
+  right: 1rem;
+  background: white;
+  border-radius: 2rem;
+}
+#preset_toggle + div > label > span::before{
+  content: "Open ";
+}
+#preset_toggle:checked + div > label > span::before{
+  content: "Close ";
+}
+#preset_toggle + div > div {
+  display: none;
+  pointer-events: none;
+}
+#preset_toggle:checked + div > div {
+  pointer-events: all;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  width: calc(100% - 2rem);
+  height: calc(100% - 2rem);
+  max-height: calc(100% - 2rem);
+  overflow: auto;
+  display: block;
+  background: #222;
+}
+.preset{
+  background: #555;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  max-width: 16rem;
+  min-width: 10rem;
+}
+.preset img{
+  display: inline-block;
+  width: 1rem;
+}
+.preset p{
+  font-size: 0.75rem;
+  margin: 0;
+}
+.preset button{
+  width: 100%;
+  max-width: 10rem;
+  border-radius: 0.5rem;
+  display: inline-block;
+  padding: 0.25rem;
+  border: solid 0.1rem #222;
+  color: white;
+  background: #222;
+}
+.preset input + div{
+  display: none;
+}
+.preset input:checked + div{
+  display: block;
 }
 
 /* Scrollbar stuff */
@@ -1048,6 +1134,9 @@ body,html{
 }
 
 @media screen and (max-width: 800px) {
+  .preset{
+    min-width: 7rem;
+  }
   #resultMedal{
     top: 4.25rem;
   }
@@ -1160,9 +1249,6 @@ body,html{
     background: #ddd;
     color: black;
   }
-  .mobihide2{
-    display: none;
-  }
   .misc img{
     width: 4rem;
     height: 4rem;
@@ -1211,6 +1297,9 @@ body,html{
   }
   #finalText{
     margin-top: 2rem;
+  }
+  .mobihide2{
+    display: none !important;
   }
 }
 @media (pointer: coarse) {

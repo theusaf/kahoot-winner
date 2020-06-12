@@ -44,7 +44,7 @@ app.use(compression({
 }));
 app.use(cookieParser());
 app.use((req,res,next)=>{
-  const origins = ["kahoot.it","play.kahoot.it","create.kahoot.it","code.org","studio.code.org"];
+  const origins = ["theusaf.github.io","kahoot.it","play.kahoot.it","create.kahoot.it","code.org","studio.code.org"];
   if(req.get("origin") && origins.includes(req.get("origin").split("://")[1])){
     res.header("Access-Control-Allow-Origin",req.get("origin"));
   }
@@ -69,7 +69,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.14.3");
+console.log("Using version 2.15.0");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -109,9 +109,8 @@ function clearMemory(c){ // attempt to remove references to reduce memory leaks
   c.finder.parent = null;
   c.finder = null;
   c.kahoot.parent = null;
-  c.kahoot._wsHandler.kahoot = null;
-  c.kahoot._wsHandler = null;
   c.kahoot = null;
+  c.socket = null;
   clearInterval(c.pinger);
 }
 function shuffle(array) {
@@ -640,7 +639,7 @@ const Messages = {
         game.kahoot.options.ChallengeAutoContinue = true;
       }
       // remove default fail.
-      if(game.options.fail == 2 && (game.fails.length == 1 || game.options.fail != old.fail)){
+      if((game.options.fail == 2 && game.fails.length == 1) || game.options.fail != old.fail){
         game.fails = [false];
       }
     }catch(err){
@@ -805,6 +804,7 @@ const Messages = {
       return;
     }
     if(game.handshakeIssues && game.ip && !(handshakeVotes.includes(game.ip))){
+      console.log("A handshake error was reported at " + (new Date()).toString());
       handshakeVotes.push(game.ip);
     }else{ // liar
       game.send({
@@ -953,9 +953,14 @@ const Listeners = {
   },
   "2Step": k=>{
     if(k.parent.options.brute){
-      for(let i = 0;i < BruteForces.length;++i){
-        k.answer2Step(BruteForces[i]);
-      }
+      clearInterval(k.bruter);
+      let i = 0;
+      k.bruter = setInterval(()=>{
+        k.answer2Step(BruteForces[i++]);
+        if(!BruteForces[i]){
+          clearInterval(k.bruter);
+        }
+      },250);
     }else{
       k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
     }

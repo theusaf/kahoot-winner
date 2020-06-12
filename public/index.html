@@ -3,7 +3,7 @@
   <head>
     <link rel="preload" href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta name="version" content="2.14.3">
+    <meta name="version" content="2.15.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="Kahoot Winner">
     <meta name="description" content="A hack for winning Kahoot quizzes and challenges. Just enter your pin, choose a fancy name and go! It will find the answers for you! One of the best and actively maintained Kahoot bots online, working 2020!">
@@ -187,6 +187,40 @@
           <a href="/how-it-works" title="Learn how this website works">How<span class="mobihide2"> Kahoot Winner </span><span class="mobishow2"> it </span>Works</a>
         </nav>
         <!-- TODO: Add hover options -->
+        <meta content="toggle" itemprop="result" itemtype="https://schema.org/ActivateAction"/>
+        <input type="checkbox" class="ch" id="preset_toggle">
+        <div id="presets">
+          <div> <!-- Actual container of presets -->
+            <h4>Presets</h4>
+            <div class="displayFlex wrap" id="preset_container">
+              <div class="preset flex">
+                <div class="center">
+                  <span class="presetTitle">Default <label for="preset_-1">(?)</label></span>
+                  <input type="checkbox" id="preset_-1" class="ch">
+                  <div>
+                    <p>Theme <span class="yellow">Kahoot</span></p>
+                    <p>Timeout <span class="yellow">0</span></p>
+                    <p>Team <span class="yellow">(unset)</span></p>
+                    <p>Fail <span class="red">OFF</span></p>
+                    <p>Loose <span class="red">OFF</span></p>
+                    <p>Brute <span class="red">OFF</span></p>
+                    <p>Manual <span class="red">OFF</span></p>
+                    <p>Preview <span class="red">OFF</span></p>
+                  </div>
+                  <button class="block" onclick="loadSetting({theme:'Kahoot',fail:'0',brute:false,manual:false,searchLoosely:'0',teamMembers:'',timeout:'',previewQuestion:false},'Default');">Restore</button>
+                </div>
+              </div>
+              <div class="preset flex" id="preset_add_div">
+                <div class="center">
+                  <span class="presetTitle">Save New Preset</span>
+                  <input style="max-width: calc(100% - 1rem)" type="text" id="preset_add">
+                  <button class="block" onclick="addPreset(document.getElementById('preset_add').value)">Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <label class="button relative" for="preset_toggle"><span class="mobihide2">Presets</span><img src="/resource/icon-about.svg" alt="preset" class="mobishow2"/></label>
+        </div>
       </div>
     </div>
     <meta content="toggle" itemprop="result"/>
@@ -300,6 +334,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p>2.15.0 - Added presets and fixed bugs. Access presets in <label for="menu_toggle"><u>settings</u></label> and press the "i" or the "presets" button. Saving a new preset will use current settings. Duplicate names are valid but all will be removed if one is deleted.</p>
           <p>2.14.3 - Improved mobile styles, fixed some UI bugs. Added the ability to double-click the settings button to "panic" and hide the non-kahoot UI (same functionality as <code>ctrl+j</code>).</p>
           <p>2.14.2 - Improved styling for mobile devices, fixed some bugs</p>
           <p>2.14.1 - Locked quiz detection and bug fixes</p>

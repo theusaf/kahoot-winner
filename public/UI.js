@@ -73,7 +73,9 @@ class LoginPage{
       bottomDiv.id = "chnge";
       const trademark = document.createElement("span");
       trademark.innerHTML = "Kahoot! and the K! logo are trademarks of Kahoot! AS.";
-      bottomDiv.append(changelog,trademark);
+      const policy = document.createElement("span");
+      policy.innerHTML = '<a href="/privacy/">Privacy</a> | <a href="/terms/">Terms</a>'
+      bottomDiv.append(changelog,trademark,policy);
       div.append(logo,logoText,pin,but,abt,bottomDiv);
     }
     const social = document.createElement("div");
@@ -83,6 +85,7 @@ class LoginPage{
     <a href="/api" target="_blank"><img src="/resource/icon-api.svg" alt="api"><span>Kahoot API</span></a>
     <a href="/how-it-works" target="_blank"><img src="/resource/icon-about.svg" alt="info mark"><span>How it Works</span></a>
     <a href="/blog" target="_blank"><img src="/resource/icon-blog.svg" alt="Icon made from http://www.onlinewebfonts.com/icon is licensed by CC BY 3.0"><span>Blog</span></a>
+    <a href="/blog/download" target="_blank" class="mobihide2 mobihide"><img src="/resource/icon512.png" alt="download mark"><span>App Download</span></a>
     <hr/>
     </div>
     <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg" alt="discord"><span>Discord</span></a>
@@ -868,6 +871,102 @@ function clearUI(){
   return document.createElement("div");
 }
 
+let presetNumber = 0;
+function loadSetting(setting,name){
+  for(let i in setting){
+    const e = document.getElementById(i);
+    if(e.type == "checkbox" || e.type == "radio"){
+      e.checked = setting[i];
+    }else{
+      e.value = setting[i];
+    }
+  }
+  game.saveOptions();
+  new ErrorHandler("Restored preset '" + name + "'",true);
+}
+function addPreset(name){
+  game.saveOptions();
+  document.querySelectorAll(".preset.remove").forEach((item) => {
+    item.outerHTML = "";
+  });
+  let list = [];
+  if(localStorage.presets){
+    try {
+      list = JSON.parse(localStorage.presets);
+    } catch (e) {}
+  }
+  list.push({
+    name: name,
+    options: {
+      brute: game.opts.brute,
+      fail: game.opts.fail,
+      manual: game.opts.manual,
+      previewQuestion: game.opts.previewQuestion,
+      searchLoosely: game.opts.searchLoosely,
+      teamMembers: game.opts.teamMembers,
+      theme: game.opts.theme,
+      timeout: game.opts.timeout
+    }
+  });
+  localStorage.presets = JSON.stringify(list);
+  loadPresets();
+}
+function loadPresets(){
+  document.querySelectorAll(".preset.remove").forEach((item) => {
+    item.outerHTML = "";
+  });
+  try {
+    const presets = JSON.parse(localStorage.presets);
+    const after = document.getElementById("preset_add_div");
+    for(let preset of presets){
+      const info = preset.options;
+      const template = document.createElement("template");
+      template.innerHTML = `<div class="preset flex remove">
+        <div class="center">
+          <span class="presetTitle">${preset.name} <label for="preset_${presetNumber}">(?)</label></span>
+          <input type="checkbox" id="preset_${presetNumber}" class="ch">
+          <div>
+            <p>Theme <span class="yellow">${info.theme}</span></p>
+            <p>Timeout <span class="yellow">${info.timeout || "0"}</span></p>
+            <p>Team <span class="yellow">${info.teamMembers || "(unset)"}</span></p>
+            <p>Fail <span class="${(Number(info.fail) && "green") || "red"}">${(Number(info.fail) && "ON") || "OFF"}</span></p>
+            <p>Loose <span class="${(Number(info.searchLoosely) && "green") || "red"}">${(Number(info.searchLoosely) && "ON") || "OFF"}</span></p>
+            <p>Brute <span class="${(info.brute && "green") || "red"}">${(info.brute && "ON") || "OFF"}</span></p>
+            <p>Manual <span class="${(info.manual && "green") || "red"}">${(info.manual && "ON") || "OFF"}</span></p>
+            <p>Preview <span class="${(info.previewQuestion && "green") || "red"}">${(info.previewQuestion && "ON") || "OFF"}</span></p>
+          </div>
+          <button id="restore_${presetNumber}" class="block">Restore</button>
+          <img src="/resource/cross.svg" alt="delete" id="delete_${presetNumber}">
+        </div>
+      </div>`;
+      document.getElementById("preset_container").insertBefore(template.content.cloneNode(true),after);
+      document.getElementById("restore_" + presetNumber).onclick = function(){
+        loadSetting({
+          theme: info.theme,
+          timeout: info.timeout,
+          teamMembers: info.teamMembers,
+          fail: info.fail,
+          searchLoosely: info.searchLoosely,
+          brute: info.brute,
+          manual: info.manual,
+          previewQuestion: info.previewQuestion
+        },preset.name);
+      };
+      document.getElementById("delete_" + presetNumber).onclick = function(){
+        try {
+          let things = JSON.parse(localStorage.presets);
+          things = things.filter(pre=>{
+            return pre.name != preset.name;
+          });
+          localStorage.presets = JSON.stringify(things);
+          loadPresets();
+        } catch (e) {}
+      };
+      presetNumber++;
+    }
+  } catch (e) {}
+}
+
 const ChallengeContinueButton = document.getElementById("ChallengeNext");
 const SettingDiv = document.getElementById("settings");
 const SettingSwitch = document.getElementById("menu_toggle");
@@ -880,6 +979,7 @@ const HideAnswers = document.getElementById("hideAnswers");
 const LoadingText = document.getElementById("loadingText");
 const ThemeChooser = document.getElementById("theme");
 const login = new LoginPage(false);
+loadPresets();
 let closePage = 0;
 
 const SearchDivSettings = document.getElementById("div_search_options");
