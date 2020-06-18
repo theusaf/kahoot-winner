@@ -69,7 +69,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.15.0");
+console.log("Using version 2.16.0");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -169,7 +169,11 @@ class Cheater{
     },30*1000);
   }
   isOffline(){
-    return this.socket.readyState == 3;
+    try{
+      return this.socket.readyState == 3;
+    }catch(e){
+      return true;
+    }
   }
   close(){
     if(this.isOffline()){
@@ -640,7 +644,31 @@ const Messages = {
       }
       // remove default fail.
       if((game.options.fail == 2 && game.fails.length == 1) || game.options.fail != old.fail){
-        game.fails = [false];
+        if(game.options.fail == 2){
+          game.fails = [false];
+        }else{
+          game.fails = [true];
+        }
+      }
+      // timeframe
+      if(isNaN(game.options.timeout)){
+        try { // assume [-]d[s]-[s][-]d
+          let args = game.options.timeout.split("-");
+          if(args.length === 2){
+            game.options.timeout = Number(args[0]);
+            game.options.timeoutEnd = Number(args[1]);
+          }else if(args.length === 3){
+            game.options.timeout = -Number(args[1]);
+            game.options.timeoutEnd = Number(args[2]);
+          }else{ // assume 4
+            game.options.timeout = -Number(args[1]);
+            game.options.timeoutEnd = Number(args[3]);
+          }
+          game.options.timeout = game.options.timeout || 0;
+        } catch (e) {
+          game.options.timeout = 0;
+          game.options.timeoutEnd = 0;
+        }
       }
     }catch(err){
       game.send({message:"INVALID_USER_INPUT",type:"Error"});
@@ -652,7 +680,7 @@ const Messages = {
       return;
     }
     game.security.joined = true;
-    if(name == "debug_server_messages"){
+    if(name == "de_se_me"){
       game.kahoot.loggingMode = true;
     }
     game.kahoot.join(game.options.pin,name,game.options.teamMembers ? game.options.teamMembers.toString().split(",") : undefined).catch(err=>{
@@ -891,9 +919,11 @@ const Listeners = {
       k.parent.send({message:"Question has started!",type:"Message.QuestionBegin"});
     }else{
       k.parent.send({message:"Question has started!",type:"Message.QuestionBegin"});
+      const start = k.parent.options.timeout * 1000 + (Number(k.parent.options.variableTimeout) * Math.random() * 1000);
+      const end = Math.random() * ((Number(k.parent.options.timeoutEnd) - (start/1000) || 0)) * 1000;
       k.parent.waiter = setTimeout(()=>{
         QuestionAnswer(k,q);
-      },k.parent.options.timeout * 1000 + (Number(k.parent.options.variableTimeout) * Math.random() * 1000));
+      },start + end);
     }
   },
   questionSubmit: k=>{
@@ -960,7 +990,7 @@ const Listeners = {
         if(!BruteForces[i]){
           clearInterval(k.bruter);
         }
-      },250);
+      },350);
     }else{
       k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
     }
@@ -979,9 +1009,9 @@ const Listeners = {
   error: k=>{
     k.parent.send({message:"UNKNOWN",type:"Error"});
   },
-  invalidName: k=>{
+  invalidName: (k,e)=>{
     k.parent.security.joined = false;
-    k.parent.send({message:"INVALID_NAME",type:"Error"});
+    k.parent.send({message:"INVALID_NAME",type:"Error",data:e});
   },
   handshakeFailed: k=>{
     console.log("Handshake failure occured.");

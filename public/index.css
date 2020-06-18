@@ -166,8 +166,8 @@ body,html{
   font-style: normal !important;
 }
 .form select{
-  min-width: 16rem;
-  max-width: 16rem;
+  min-width: 15rem;
+  max-width: 15rem;
   border-radius: 0.75rem;
   min-height: 1.6rem;
   margin-bottom: 0.25rem;
@@ -185,7 +185,7 @@ body,html{
   border-radius: 0.5rem;
   padding: 0.5rem;
   color: #efefef;
-  min-width: 15rem;
+  min-width: 14rem;
   text-align: center;
   background: #39f;
   font-style: normal;
@@ -207,7 +207,7 @@ body,html{
   margin-bottom: 2rem;
 }
 .form input{
-  display: block;
+  display: inline-block;
   margin-bottom: 0.25rem;
   border: 0px solid transparent;
   border-bottom: 0.1rem solid #44a;
@@ -215,7 +215,7 @@ body,html{
   color: #efefef;
   border-radius: 0.5rem;
   padding: 0.5rem;
-  width: 15rem;
+  width: 14rem;
   height: 1.6rem;
   font-weight: 300;
   font-size: 1.2em;
@@ -264,10 +264,24 @@ body,html{
   font-style: normal;
 }
 .shortcut::after{
-  content: ")"
+  content: ")";
 }
 .shortcut::before{
-  content: "("
+  content: "(";
+}
+.shortcut2{
+  display: inline-block;
+  margin: 0;
+  margin-left: 0.25rem;
+  font-size: 1.2rem;
+  color: #ddd;
+  font-style: normal;
+}
+.shortcut2::after{
+  content: ")";
+}
+.shortcut2::before{
+  content: "(";
 }
 .faded{
   opacity: 0.7;
@@ -935,6 +949,47 @@ body,html{
 .wrap{
   flex-wrap: wrap;
 }
+code{
+  background: #333;
+  border-radius: 0.25rem;
+  color: #f8f8f8;
+}
+input.info + div{
+  display: none;
+}
+input.info:checked + div{
+  display: flex;
+  z-index: 500;
+  align-items: center;
+  flex-flow: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+div.info > div{
+  margin: auto;
+  position: relative;
+  overflow-y: auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: gray;
+}
+div.info > div img{
+  max-width: 100%;
+}
+div.info > div label{
+  position: absolute;
+  top: 0.5rem;
+  padding: 0.5rem;
+  right: 0.5rem;
+  background: #a00;
+  border-radius: 0.25rem;
+  font-style: normal;
+}
 .mobishow{
   display: none;
 }
@@ -943,6 +998,7 @@ body,html{
 }
 #presets{
   position: fixed;
+  overflow: visible;
   bottom: 0;
   right: 8rem;
 }
@@ -1134,6 +1190,9 @@ body,html{
 }
 
 @media screen and (max-width: 800px) {
+  div.info > div{
+    max-width: 100%;
+  }
   .preset{
     min-width: 7rem;
   }

@@ -118,26 +118,85 @@
           <h3 class="mobihide2">Search Options</h3>
           <input type="radio" name="settings" class="ch sect" id="div_search_options">
           <div>
-            <label for="author">Quiz Author</label>
-            <input type="text" id="author" placeholder="Author">
-            <label for="uuid">Quiz ID</label>
-            <input type="text" id="uuid" placeholder="ID">
-            <label for="name">Quiz Name</label>
-            <input type="text" id="name" placeholder="Quiz">
-            <label for="searchTerm">Search Term</label>
-            <input type="text" id="searchTerm" placeholder="Search">
+            <label for="author" class="block">Quiz Author</label>
+            <input type="text" id="author" placeholder="Author"><label for="info-author"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-author">
+            <div class="info">
+              <div>
+                <label for="info-author">X</label>
+                <h4>Quiz Author</h4>
+                <p>The <code>Quiz Author</code> setting helps the server find the quiz by providing the creator of the quiz.</p>
+                <p>If you know the quiz author, putting their name here helps greatly.</p>
+              </div>
+            </div>
+            <label for="uuid" class="block">Quiz ID</label>
+            <input type="text" id="uuid" placeholder="ID"><label for="info-uuid"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-uuid">
+            <div class="info">
+              <div>
+                <label for="info-uuid">X</label>
+                <h4>Quiz UUID</h4>
+                <p>The <code>Quiz UUID</code> setting specifies the quiz you are playing.</p>
+                <p>If you know the exact URL or id of the quiz, you can use that here to tell the server which quiz to use.</p>
+                <p>For example, for the url <code>https://create.kahoot.it/details/movie-quotes/c2227e28-5cd0-41b6-a758-1d4aca486bda</code> you would input <code>c2227e28-5cd0-41b6-a758-1d4aca486bda</code></p>
+              </div>
+            </div>
+            <label for="name" class="block">Quiz Name</label>
+            <input type="text" id="name" placeholder="Quiz"><label for="info-name"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-name">
+            <div class="info">
+              <div>
+                <label for="info-name">X</label>
+                <h4>Quiz Name</h4>
+                <p>The <code>Quiz Name</code> setting specifies the name of the quiz.</p>
+                <p>This settings should only be used when joining a game late. If you join the game before the game starts, the quiz name is given to the server already.</p>
+                <p>The quiz name must be exact, including all special characters and casing.</p>
+              </div>
+            </div>
+            <label for="searchTerm" class="block">Search Term</label>
+            <input type="text" id="searchTerm" placeholder="Search"><label for="info-search"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-search">
+            <div class="info">
+              <div>
+                <label for="info-search">X</label>
+                <h4>Search Term</h4>
+                <p>The <code>Search Term</code> setting specifies the search term used to find the quiz.</p>
+                <p>This settings is mostly pointless, but can help find the quiz a bit faster.</p>
+                <p>If you know which search term the host used to find the quiz, you can put that here, and it may help find the quiz faster.</p>
+              </div>
+            </div>
           </div>
         </div>
         <div>
           <h3 class="mobihide2">Game Options</h3>
           <input checked class="ch sect" name="settings" type="radio" id="div_game_options"/>
           <div>
-            <label for="timeout">Answer Timeout</label>
-            <input type="number" id="timeout" placeholder="# seconds">
-            <label for="teamMembers">Team Members, split by comma</label>
-            <input type="text" id="teamMembers" placeholder="Kirito, Asuna">
-            <label for="fail"><span>Fail Purposely</span><p class="shortcut">ctrl + p</p></label>
-            <select class="block" id="fail">
+            <label for="timeout" class="block">Answer Timeout</label>
+            <input type="text" id="timeout" placeholder="# seconds"><label for="info-timeout"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-timeout">
+            <div class="info">
+              <div>
+                <label for="info-timeout">X</label>
+                <h4>Answer Timeout</h4>
+                <p>The <code>Answer Timeout</code> setting  allows you to delay answering the question for a specified amount of seconds.</p>
+                <p>Valid settings are <code>4</code> <code>-4</code> <code>1 - 5</code></p>
+                <p>By setting a negative number, the answer timeout varies from that number by one second</p>
+                <p>To customize the variation, use a range: <code>min - max</code></p>
+              </div>
+            </div>
+            <label for="teamMembers" class="block">Team Members</label>
+            <input type="text" id="teamMembers" placeholder="Kirito, Asuna"><label for="info-team"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-team">
+            <div class="info">
+              <div>
+                <label for="info-team">X</label>
+                <h4>Team Members</h4>
+                <p>The <code>Team Members</code> setting specifies the team member names used in team mode games.</p>
+                <p>Input team members split by a comma. Team members default to "Player 1,Player 2,Player 3,Player 4"</p>
+              </div>
+            </div>
+            <label for="fail" class="block"><span>Fail Purposely</span></label>
+            <select id="fail">
               <option value="0">Off</option>
               <option value="2">Ask to fail</option>
               <option value="1">Fail Once</option>
@@ -145,40 +204,151 @@
               <option value="0.8">Fail 20%</option>
               <option value="0.7">Fail 30%</option>
               <option value="0.5">Fail 50%</option>
-            </select>
-            <label for="searchLoosely"><span>Search Loosely</span><p class="shortcut">ctrl + k</p></label>
-            <select class="block" id="searchLoosely">
+            </select><label for="info-fail"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-fail">
+            <div class="info">
+              <div>
+                <label for="info-fail">X</label>
+                <h4>Fail Purposely</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + p</code></p>
+                <p>The <code>Fail Purposely</code> setting enables the server to randomly answer questions.</p>
+                <p>Setting the option to <code>Ask to fail</code> will put a button at the bottom of the screen each question asking whether to fail the question or not. It will not fail the question if you do not choose to fail.</p>
+              </div>
+            </div>
+            <label for="searchLoosely"  class="block"><span>Search Loosely</span></label>
+            <select id="searchLoosely">
               <option value="0">Off</option>
               <option value="1">On</option>
               <option value="2">On, wait for confirmation</option>
-            </select>
+            </select><label for="info-loose"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-loose">
+            <div class="info">
+              <div>
+                <label for="info-loose">X</label>
+                <h4>Search Loosely</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + k</code></p>
+                <p>The <code>Search Loosely</code> setting allows you to play quizzes that randomize the order of questions.</p>
+                <img src="" id="image-loose" alt="Loose Search image">
+                <p>Before each question, you must input the question text and choose the question being used. The selected question will be used when the question starts.</p>
+                <p>If the question starts too quickly, you can use <code>On, wait for confirmation</code> to input the question and then when ready, press the "Ready" button.</p>
+                <p>Questions are filtered out based on the previous answers and the type of question to help you find the correct question faster.</p>
+                <script>
+                  document.getElementById("info-loose").addEventListener("click",function(){
+                    document.getElementById("image-loose").src = "/resource/misc/loose-search.png";
+                  },{once:true});
+                </script>
+              </div>
+            </div>
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="brute">
-            <label class="ch button" for="brute"><span>Bypass 2FA</span><p class="shortcut">ctrl + b</p></label>
-            <meta content="toggle" itemprop="result"/>
+            <label class="ch button" for="brute"><span>Bypass 2FA</span><label for="info-brute"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-brute">
+            <div class="info">
+              <div>
+                <label for="info-brute">X</label>
+                <h4>Bypass 2FA</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + b</code></p>
+                <p>The <code>Bypass 2FA</code> setting allows you to join games with two-factor authentification without inputting the 4 pattern code.</p>
+                <img id="image-brute" src="" alt="2 factor code under pin">
+                <p>It may take a few seconds to enter the game when two factor is enabled.</p>
+                <p>When this is disabled, you will be sent to a screen to enter in the two factor pattern yourself.</p>
+                <script>
+                  document.getElementById("info-brute").addEventListener("click",function(){
+                    document.getElementById("image-brute").src = "/resource/misc/2facode.png";
+                  },{once:true});
+                </script>
+              </div>
+            </div></label>
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="manual">
-            <label class="ch button" for="manual"><span>Manual Control</span><p class="shortcut">ctrl + m</p></label>
+            <label class="ch button" for="manual"><span>Manual Control</span><label for="info-man"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-man">
+            <div class="info">
+              <div>
+                <label for="info-man">X</label>
+                <h4>Manual Control</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + m</code></p>
+                <p>The <code>Manual Control</code> setting allows you to answer questions for the server.</p>
+                <p>This allows you to have control over failing, timing, etc. You should use this setting if you notice that the server cannot find your quiz. That way, you can answer the question normally instead of randomly guessing.</p>
+              </div>
+            </div></label>
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="previewQuestion">
-            <label class="ch button" for="previewQuestion"><span>Preview Question</span><p class="shortcut">ctrl + u</p></label>
+            <label class="ch button" for="previewQuestion"><span>Preview Question</span><label for="info-preview"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-preview">
+            <div class="info">
+              <div>
+                <label for="info-preview">X</label>
+                <h4>Preview Question</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + u</code></p>
+                <p>The <code>Preview Question</code> setting allows you to view the question and answers before the question starts.</p>
+                <img id="image-preview" src="" alt="2 factor code under pin">
+                <p>Other settings, like <code>Search Loosely</code> may override this setting. Also, when <code>Hide Correct</code> is enabled, the answers will not be shown.</p>
+                <script>
+                  document.getElementById("info-preview").addEventListener("click",function(){
+                    document.getElementById("image-preview").src = "/resource/misc/preview-question.png";
+                  },{once:true});
+                </script>
+              </div>
+            </div></label>
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="hideAnswers">
-            <label class="ch button" for="hideAnswers"><span>Hide Correct</span><p class="shortcut">ctrl + h</p></label>
+            <label class="ch button" for="hideAnswers"><span>Hide Correct</span><label for="info-hide"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-hide">
+            <div class="info">
+              <div>
+                <label for="info-hide">X</label>
+                <h4>Hide Correct</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + h</code></p>
+                <p>The <code>Hide Correct</code> setting hides the correct answers, making the page look more like Kahoot!</p>
+                <p>This setting affects <code>Preview Question</code>. You would only use this if you want to hide that you are using Kahoot Winner or if you prefer this site's UI more than Kahoot's.</p>
+                <p>This setting is also enabled when your enter <b>Panic Mode</b>. To enable panic mode,<span class="mobihide"> do <code>ctrl + j</code> or</span> double-click the settings gear button.</p>
+                <p>Panic Mode hides the settings menu, enables <code>Manual Control</code> and <code>Hide Correct</code>.</p>
+              </div>
+            </div></label>
           </div>
         </div>
         <div>
           <h3 class="mobihide2">Challenge Options</h3>
           <input type="radio" name="settings" class="ch sect" id="div_challenge_options"/>
           <div>
-            <label for="challengePoints">Points</label>
-            <input type="number" id="challengePoints" placeholder="1000">
+            <label for="challengePoints" class="block">Points</label>
+            <input type="number" id="challengePoints" placeholder="1000"><label for="info-points"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-points">
+            <div class="info">
+              <div>
+                <label for="info-points">X</label>
+                <h4>Points</h4>
+                <p>The <code>Points</code> setting specifies the amount of points per correct answer on Kahoot <strong>Challenges</strong>. It has <b>NO AFFECT</b> on <b>LIVE GAMES</b></p>
+                <p>From testing, the maximum working value is <code>1,500</code>. Any higher numbers break and result in <code>0</code> on the challenge host's results.</p>
+              </div>
+            </div>
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="challengeCorrect">
-            <label class="ch button" for="challengeCorrect"><span>Always Correct</span><p class="shortcut">ctrl + o</p></label>
+            <label class="ch button" for="challengeCorrect"><span>Always Correct</span><label for="info-correct"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-correct">
+            <div class="info">
+              <div>
+                <label for="info-correct">X</label>
+                <h4>Always Correct</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + o</code></p>
+                <p>The <code>Always Correct</code> setting is an optional setting that forces Kahoot <strong>Challenge</strong> questions to be correct, even if it is incorrect. This has <b>NO AFFECT</b> on <b>LIVE GAMES</b></p>
+                <p>By default, the bot will get all the challenge questions correct, so you don't need to use this, but you can confuse the host of the Kahoot Challenge by enabling this and manual control and choosing the wrong choice, but still getting full marks.</p>
+              </div>
+            </div></label>
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="ChallengeDisableAutoplay">
-            <label class="ch button" for="ChallengeDisableAutoplay"><span>Disable Autoplay</span><p class="shortcut">ctrl + d</p></label>
+            <label class="ch button" for="ChallengeDisableAutoplay"><span>Disable Autoplay</span><label for="info-auto"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-auto">
+            <div class="info">
+              <div>
+                <label for="info-auto">X</label>
+                <h4>Disable Autoplay</h4>
+                <p class="mobihide">Shortcut: <code>ctrl + d</code></p>
+                <p>The <code>Disable Autoplay</code> setting allows you to wait after answering a Kahoot <strong>Challenge</strong> question. It has <b>NO AFFECT</b> on <b>LIVE GAMES</b>.</p>
+                <p>To continue to the next question, press the <b>Next</b> button.</p>
+              </div>
+            </div></label>
           </div>
         </div>
         <nav class="bottom mobishow">
@@ -249,7 +419,7 @@
       <div class="About" itemscope itemtype="https://schema.org/AboutPage">
         <label for="about" id="abtclose" itemtype="https://schema.org/ActivateAction" itemprop="result">X</label>
         <h1>About this website</h1>
-        <p itemprop="about">This website is a kahoot bot/hack made for the purpose of simply winning the game. It summons a single bot into your game, which uses complex hacks to find the game you are playing and answers for you. You can use the menu (esc) to set more options to help it find the quiz! I am also pretty sure that it is working currently as of May 2020.</p>
+        <p itemprop="about">This website is a kahoot bot/"hack" made for the purpose of simply winning the game. It summons a single bot into your game, which uses complex "hacks" to find the game you are playing and answers for you. You can use the menu (esc) to set more options to help it find the quiz! I am also pretty sure that it is working currently as of May 2020.</p>
         <p>User theusaf created this website so that he could easily find the answers to quizzes and win.</p>
         <p>As time went on, this site got a bunch of features, including random names, improved searching of quizzes and even answering for other players.</p>
         <h2>Why use this website?</h2>
@@ -334,6 +504,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p>2.16.0 - Added detailed information, fixed bugs, and added the ability to set a custom time frame for answer timeout.</p>
           <p>2.15.0 - Added presets and fixed bugs. Access presets in <label for="menu_toggle"><u>settings</u></label> and press the "i" or the "presets" button. Saving a new preset will use current settings. Duplicate names are valid but all will be removed if one is deleted.</p>
           <p>2.14.3 - Improved mobile styles, fixed some UI bugs. Added the ability to double-click the settings button to "panic" and hide the non-kahoot UI (same functionality as <code>ctrl+j</code>).</p>
           <p>2.14.2 - Improved styling for mobile devices, fixed some bugs</p>

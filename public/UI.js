@@ -254,7 +254,9 @@ class GetReadyPage{
             if(game.questionStarted){
               return new QuestionAnswererPage;
             }else{
-              setTimeout(start,500);
+              setTimeout(function(){
+                start();
+              },500);
             }
           }
           start();
@@ -495,7 +497,7 @@ class QuizStartPage{
 class QuestionAnswererPage{
   constructor(){
     ChallengeContinueButton.style.display = "none";
-    if(game.opts.searchLoosely == 2){
+    if(game.opts.searchLoosely == 2 && !game.questionStarted){
       game.questionStarted = true;
       return;
     }else if(game.opts.searchLoosely == 2 && !game.opts.manual){
@@ -924,7 +926,7 @@ function loadPresets(){
       template.innerHTML = `<div class="preset flex remove">
         <div class="center">
           <span class="presetTitle">${preset.name} <label for="preset_${presetNumber}">(?)</label></span>
-          <input type="checkbox" id="preset_${presetNumber}" class="ch">
+          <input type="checkbox" id="preset_${presetNumber}" class="ch nosend">
           <div>
             <p>Theme <span class="yellow">${info.theme}</span></p>
             <p>Timeout <span class="yellow">${info.timeout || "0"}</span></p>
@@ -1032,6 +1034,9 @@ ChallengeContinueButton.addEventListener("click",()=>{
 SettingSwitch.onclick = ()=>{
   if(!SettingSwitch.checked){
     dataLayer.push({event:"toggle_settings"});
+    if(document.getElementById("preset_toggle").checked){
+      document.getElementById("preset_toggle").checked = false;
+    }
     game.saveOptions();
   }
   closePage = 0;

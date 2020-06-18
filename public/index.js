@@ -15,8 +15,23 @@ const MessageHandler = {
     UNKNOWN: ()=>{
       return new ErrorHandler("An unknown error occured.");
     },
-    INVALID_NAME: ()=>{
+    MAX_SESSION_COUNT: ()=>{
+      setTimeout(()=>{
+        new ErrorHandler("Your IP address has too many sessions/tabs connected currently.");
+        activateLoading(true,true,"Too many sessions. Please wait.");
+        setTimeout(()=>{
+          resetGame();
+        },30000);
+      },5000);
+    },
+    INVALID_NAME: (error)=>{
       clearTimeout(game.handshakeTimeout);
+      if(typeof error == "undefined"){
+        return;
+      }else if(error !== "USER_INPUT"){
+        new ErrorHandler("Specified PIN Broken.");
+        return new LoginPage();
+      }
       new ErrorHandler("Invalid name.");
       return new LoginPage(true);
     },
@@ -150,7 +165,7 @@ socket.onmessage = evt=>{
   evt = evt.data;
   let data = JSON.parse(evt);
   if(data.type == "Error"){
-    return MessageHandler.Error[data.message]();
+    return MessageHandler.Error[data.message](data.data);
   }
   eval(`MessageHandler.${data.type}("${data.message.replace(/\\/img,"\\\\").replace(/"/img,"\\\"")}")`);
 };
