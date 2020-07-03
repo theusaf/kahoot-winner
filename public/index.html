@@ -3,10 +3,10 @@
   <head>
     <link rel="preload" href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta name="version" content="2.15.0">
+    <meta name="version" content="2.17.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="Kahoot Winner">
-    <meta name="description" content="A hack for winning Kahoot quizzes and challenges. Just enter your pin, choose a fancy name and go! It will find the answers for you! One of the best and actively maintained Kahoot bots online, working 2020!">
+    <meta name="description" content="A hack for winning Kahoot quizzes and challenges. Enter your PIN or Challenge URL, enter the name of the quiz, and go! The server will try to find the answers for you! One of the best and actively maintained Kahoot bots online, working 2020!">
     <meta name="keywords" content="kahoot, winner, cheat, hack, website, correct, challenge, answers, kahoot hack, kahoot winner, kahoot win, heroku, theusaf, kahoot bot, kahoot cheat">
     <meta name="language" content="EN">
     <meta name="subject" content="Kahoot">
@@ -141,18 +141,6 @@
                 <p>For example, for the url <code>https://create.kahoot.it/details/movie-quotes/c2227e28-5cd0-41b6-a758-1d4aca486bda</code> you would input <code>c2227e28-5cd0-41b6-a758-1d4aca486bda</code></p>
               </div>
             </div>
-            <label for="name" class="block">Quiz Name</label>
-            <input type="text" id="name" placeholder="Quiz"><label for="info-name"><p class="shortcut2">?</p></label>
-            <input type="checkbox" class="ch info" id="info-name">
-            <div class="info">
-              <div>
-                <label for="info-name">X</label>
-                <h4>Quiz Name</h4>
-                <p>The <code>Quiz Name</code> setting specifies the name of the quiz.</p>
-                <p>This settings should only be used when joining a game late. If you join the game before the game starts, the quiz name is given to the server already.</p>
-                <p>The quiz name must be exact, including all special characters and casing.</p>
-              </div>
-            </div>
             <label for="searchTerm" class="block">Search Term</label>
             <input type="text" id="searchTerm" placeholder="Search"><label for="info-search"><p class="shortcut2">?</p></label>
             <input type="checkbox" class="ch info" id="info-search">
@@ -161,8 +149,7 @@
                 <label for="info-search">X</label>
                 <h4>Search Term</h4>
                 <p>The <code>Search Term</code> setting specifies the search term used to find the quiz.</p>
-                <p>This settings is mostly pointless, but can help find the quiz a bit faster.</p>
-                <p>If you know which search term the host used to find the quiz, you can put that here, and it may help find the quiz faster.</p>
+                <p>This is now used as of 2.17.0+ to find the quiz and is required if you want to use this to cheat.</p>
               </div>
             </div>
           </div>
@@ -260,7 +247,7 @@
               </div>
             </div></label>
             <meta content="toggle" itemprop="result"/>
-            <input class="ch" type="checkbox" id="manual">
+            <input class="ch" type="checkbox" id="manual" checked>
             <label class="ch button" for="manual"><span>Manual Control</span><label for="info-man"><p class="shortcut2">?</p></label>
             <input type="checkbox" class="ch info" id="info-man">
             <div class="info">
@@ -374,10 +361,10 @@
                     <p>Fail <span class="red">OFF</span></p>
                     <p>Loose <span class="red">OFF</span></p>
                     <p>Brute <span class="red">OFF</span></p>
-                    <p>Manual <span class="red">OFF</span></p>
+                    <p>Manual <span class="green">ON</span></p>
                     <p>Preview <span class="red">OFF</span></p>
                   </div>
-                  <button class="block" onclick="loadSetting({theme:'Kahoot',fail:'0',brute:false,manual:false,searchLoosely:'0',teamMembers:'',timeout:'',previewQuestion:false},'Default');">Restore</button>
+                  <button class="block" onclick="loadSetting({theme:'Kahoot',fail:'0',brute:false,manual:true,searchLoosely:'0',teamMembers:'',timeout:'',previewQuestion:false},'Default');">Restore</button>
                 </div>
               </div>
               <div class="preset flex" id="preset_add_div">
@@ -439,15 +426,13 @@
         <h2 itemtype="https://schema.org/Question">Hey! It's not finding the quiz!</h2>
         <p itemtype="https://schema.org/Answer">There are many reasons why it might not find the quiz:</p>
         <ol>
-          <li>There are many quizzes of the same name.</li>
+          <li>You did not input the quiz name or search term yet.</li>
+          <ul>
+            <li>Please input the name in the input at the top or in the settings.</li>
+            <li>Kahoot recently removed the quiz name from being sent to the client, meaning that you need to find the quiz yourself.</li>
+          </ul>
           <li>The quiz is not public.</li>
           <li>The quiz has randomized questions</li>
-          <li>You joined in the middle of the game.</li>
-          <ul>
-            <li>Input the name of the quiz if you joined in the middle.</li>
-            <li>You can also input the UUID if you know that.</li>
-            <li>Otherwise, play normally.</li>
-          </ul>
         </ol>
         <h2 itemtype="https://scheme.org/Question">It isn't working/connecting.</h2>
         <p itemtype="https://schema.org/Answer">This website has been getting lots of traffic, so Kahoot can detect this as a bot when too many quizzes are joined.</p>
@@ -504,6 +489,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p>2.17.0 - Removed Quiz Name from options, made some changes to make it easier to search for Kahoots.</p>
           <p>2.16.0 - Added detailed information, fixed bugs, and added the ability to set a custom time frame for answer timeout.</p>
           <p>2.15.0 - Added presets and fixed bugs. Access presets in <label for="menu_toggle"><u>settings</u></label> and press the "i" or the "presets" button. Saving a new preset will use current settings. Duplicate names are valid but all will be removed if one is deleted.</p>
           <p>2.14.3 - Improved mobile styles, fixed some UI bugs. Added the ability to double-click the settings button to "panic" and hide the non-kahoot UI (same functionality as <code>ctrl+j</code>).</p>

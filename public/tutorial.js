@@ -237,6 +237,7 @@ function tutorialSteps(n){
       <div class="tut_cont">
         <div id="t_step11">
           <h1>I often get asked why it is answering <span style="color: rgb(226,27,60);">incorrectly</span>.</h1>
+          <p>Recently, Kahoot! removed the quiz name from being sent to the client. Input the quiz name in the input box above as best you can.</p>
           <p>Most of the time, it is because the quiz is private (unable to be found on Discover)</p>
           <p>It is not possible to get the answers to a private quiz hosted live. Challenges are still ok.</p>
           <p>Another reason that prevents it from finding the quiz is that you joined the game late. In this case, you must provide the <strong>EXACT</strong> name of the quiz, otherwise the server doesn't know what to search for.</p>

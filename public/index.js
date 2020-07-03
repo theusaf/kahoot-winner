@@ -106,12 +106,7 @@ const MessageHandler = {
       clearTimeout(game.handshakeTimeout);
       return new LobbyPage;
     },
-    QuizStart: name=>{
-      try{
-        const n = JSON.parse(name).name;
-        game.quizName = n;
-        new ErrorHandler("Playing: " + n,true);
-      }catch(err){}
+    QuizStart: ()=>{
       return new QuizStartPage;
     },
     QuestionGet: info=>{
@@ -369,6 +364,10 @@ class Game{
     }else{
       thing.className = this.multiAnswer[id] ? "fadedm" : "";
     }
+  }
+  updateName(){
+    clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(this.saveOptions,500);
   }
 }
 

@@ -174,6 +174,14 @@ class LobbyPage{
     pinDiv.append(pinText);
     nameDiv.append(nameText);
     div.append(pinDiv,nameDiv,text,subtext);
+    if(game.guesses.length === 0){
+      const l = document.createElement("div");
+      l.className = "ChallengeQuestion noQuiz";
+      const sp = document.createElement("span");
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      l.append(document.createElement("br"),document.createElement("br"),sp);
+      div.append(l);
+    }
     UIDiv.append(div);
     return {
       main: div,
@@ -272,9 +280,9 @@ class GetReadyPage{
       objects.texts[1].setAttribute("text","");
       if(game.guesses.length == 0){
         const chdiv = document.createElement("div");
-        chdiv.className = "ChallengeQuestion";
+        chdiv.className = "ChallengeQuestion noQuiz";
         const sp = document.createElement("span");
-        sp.innerHTML = 'Quiz not found yet. <a href="/personal/blog/quiz-not-found" style="color: white" target="_blank">[?]</a>';
+        sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
         chdiv.append(document.createElement("br"),document.createElement("br"),sp);
         objects.main.append(chdiv);
       }else{
@@ -404,7 +412,8 @@ class GetReadyPage{
       chdiv.className = "ChallengeQuestion";
       const sp = document.createElement("span");
       if(game.guesses.length == 0){
-        sp.innerHTML = 'Quiz not found yet. <a href="/personal/blog/quiz-not-found" style="color: white" target="_blank">[?]';
+        chdiv.className = "ChallengeQuestion noQuiz";
+        sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
       }else{
         sp.innerHTML = "Question: " + (game.guesses[0].questions[game.index].question || game.guesses[0].questions[game.index].title);
       }
@@ -434,9 +443,9 @@ class GetReadyPage{
       objects.main.append(chdiv);
     }else if(game.guesses.length == 0){
       const chdiv = document.createElement("div");
-      chdiv.className = "ChallengeQuestion";
+      chdiv.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = 'Quiz not found yet. <a href="/personal/blog/quiz-not-found" style="color: white" target="_blank">[?]';
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
       chdiv.append(document.createElement("br"),document.createElement("br"),sp);
       objects.main.append(chdiv);
     }
@@ -491,6 +500,14 @@ class QuizStartPage{
     objects.texts[1].id = "bottomText";
     document.body.className = "purple2";
     activateLoading(true,false,"",false);
+    if(game.pin[0] !== "0"){
+      const l = document.createElement("div");
+      l.className = "ChallengeQuestion noQuiz";
+      const sp = document.createElement("span");
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      l.append(document.createElement("br"),document.createElement("br"),sp);
+      objects.main.append(l);
+    }
     return objects;
   }
 }
@@ -681,6 +698,13 @@ class QuestionAnswererPage{
         }
       },1000);
       objects.bottom.prepend(qdiv);
+    }else if(game.guesses.length === 0){
+      const l = document.createElement("div");
+      l.className = "ChallengeQuestion noQuiz";
+      const sp = document.createElement("span");
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      l.append(document.createElement("br"),document.createElement("br"),sp);
+      objects.main.append(l);
     }
   }
 }
@@ -694,6 +718,14 @@ class QuestionSnarkPage{
     stuff.texts[0].setAttribute("text","");
     stuff.texts[0].id = "snarkText";
     stuff.texts[1].id = "bottomText";
+    if(game.guesses.length === 0){
+      const l = document.createElement("div");
+      l.className = "ChallengeQuestion noQuiz";
+      const sp = document.createElement("span");
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      l.append(document.createElement("br"),document.createElement("br"),sp);
+      stuff.main.append(l);
+    }
     activateLoading(true,false,"",false);
   }
 }
@@ -704,6 +736,13 @@ class QuestionEndPage{
     const objects = new GetReadyPage(game.question,true);
     if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
+    }else if(game.guesses.length === 0){
+      const l = document.createElement("div");
+      l.className = "ChallengeQuestion noQuiz";
+      const sp = document.createElement("span");
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      l.append(document.createElement("br"),document.createElement("br"),sp);
+      objects.main.append(l);
     }
     objects.texts[1].id = "";
     document.body.className = info.correct ? "green" : "red";
@@ -835,10 +874,8 @@ function resetGame(recover){
         let data = JSON.parse(evt);
         if(data.type == "Message.PinGood"){
           new LobbyPage;
-          document.getElementById("name").value = game.quizName;
           send({
             message: {
-              name: game.quizName,
               cid: game.cid,
               answers: game.got_answers
             },
@@ -862,7 +899,6 @@ function resetGame(recover){
   document.body.className = "rainbow";
   document.getElementById("author").value = "";
   document.getElementById("uuid").value = "";
-  document.getElementById("name").value = "";
   document.getElementById("searchTerm").value = "";
   game.loadOptions();
 }

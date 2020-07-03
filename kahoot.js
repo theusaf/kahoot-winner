@@ -69,7 +69,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.16.0");
+console.log("Using version 2.17.0");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -144,13 +144,12 @@ class Cheater{
     this.options = {
       pin: 0,
       fail: false,
-      manual: false,
+      manual: true,
       brute: false,
       timeout: 0,
       searchTerm: "",
       author: "",
       uuid: "",
-      name: "",
       hijack: false,
       hijackPassword: "",
       teamMembers: "",
@@ -290,8 +289,7 @@ class QuizFinder{
     if(this.parent.options.isChallenge){
       return;
     }
-    var self = this;
-    if(self.hax.stop){
+    if(this.hax.stop){
       this.parent.finishedProcessing = true;
       return; // stop searching! the quiz ended or the user is disconnected!
     }
@@ -370,16 +368,14 @@ class QuizFinder{
       cursor: this.hax.cursor,
       limit: 25,
       type: ["quiz"],
-      includeCard: false
+      includeCard: false,
+      searchStrictly: false
     };
     if(this.parent.options.author){
       options.author = this.parent.options.author;
     }
-    if(this.parent.options.searchTerm){
-      options.searchStrictly = false;
-    }
     if(!this.parent.options.uuid){
-      const searchText = (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : this.parent.options.name ? edit(this.parent.options.name) : edit(this.parent.kahoot.quiz.name));
+      const searchText = (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : "");
       if((searchText.replace(/\s\*/g,"")) == ""){
         if(!this.hax.noQuiz){
           this.hax.noQuiz = true;
@@ -390,8 +386,8 @@ class QuizFinder{
         }
         return console.log("No quiz specified.");
       }
-      console.log(searchText + " | " + this.parent.kahoot.quiz.name);
-      let results = await Searching(searchText,options,self);
+      console.log(searchText);
+      let results = await Searching(searchText,options,this);
       if(!this.parent){
         this.hax.stop = true;
         return;
@@ -406,21 +402,20 @@ class QuizFinder{
       delete results.totalHits;
       this.hax.cursor += 25;
       if(this.parent.kahoot.quiz.currentQuestion && index < this.parent.kahoot.quiz.currentQuestion.index + 1){
-        self.hax.validOptions = results;
+        this.hax.validOptions = results;
         return;
       }
       if(results.length == 0){
         console.log("Researching");
-        self.searchKahoot(index);
+        this.searchKahoot(index);
       }else{
         console.log("Setting results");
-        self.hax.validOptions = results;
+        this.hax.validOptions = results;
         return;
       }
     }else{
       //console.log("uuid specified");
-      let me = this;
-      request(`https://create.kahoot.it/rest/kahoots/${me.parent.options.uuid}`,(e,r,b)=>{
+      request(`https://create.kahoot.it/rest/kahoots/${this.parent.options.uuid}`,(e,r,b)=>{
         let data;
         try{
           data = JSON.parse(b);
@@ -429,10 +424,10 @@ class QuizFinder{
           return this.searchKahoot(index);
         }
         if(data.error){
-          me.parent.options.uuid = "";
-          return me.searchKahoot(index);
+          this.parent.options.uuid = "";
+          return this.searchKahoot(index);
         }
-        me.hax.validOptions = [data];
+        this.hax.validOptions = [data];
       });
     }
   }
@@ -463,7 +458,7 @@ async function Searching(term,opts,finder){
             k=>{
               return (
                 (k.correct && (k.answer == a[i].n)) || (k.correct && (((typeof k.answer == "undefined") ? "" : k.answer) == a[i].n))
-              ) || o.type == "survey" || o.type == "word_cloud" || o.type == "content" || (o.type == "jumble" /* TODO: Add Extra checks for JUMBLES and multi select*/ );
+              ) || o.type == "survey" || o.type == "multiple_select_poll" || o.type == "word_cloud" || o.type == "content" || (o.type == "jumble" /* TODO: Add Extra checks for JUMBLES and multi select*/ );
             }
           ).length){
             b = true;
@@ -499,7 +494,7 @@ async function Searching(term,opts,finder){
               if(question.choices.filter(k=>{
                 return (
                   (k.correct && (k.answer == a[i].n)) || (k.correct && (((typeof k.answer == "undefined") ? "" : k.answer) == a[i].n))
-                ) || o.type == "survey" || o.type == "word_cloud" || o.type == "content" || (o.type == "jumble" /* TODO: Add Extra checks for JUMBLES*/ );
+                ) || o.type == "survey" || o.type == "multiple_select_poll" || o.type == "word_cloud" || o.type == "content" || (o.type == "jumble" /* TODO: Add Extra checks for JUMBLES*/ );
               }).length){
                 b = true;
               }
@@ -535,10 +530,9 @@ async function Searching(term,opts,finder){
         filter = looseFilter;
         filter2 = looseFilter2;
       }
-      return (o.title == (finder.parent.kahoot.quiz.name ? finder.parent.kahoot.quiz.name : finder.parent.options.name)
-      && (finder.parent.options.author ? o.creator_username == finder.parent.options.author : true)
+      return (finder.parent.options.author ? o.creator_username == finder.parent.options.author : true)
       && (o.questions.length == finder.parent.kahoot.quiz.questionCount)
-      && filter() && filter2());
+      && filter() && filter2();
     });
   }catch(err){
     return [];
@@ -626,8 +620,10 @@ const Messages = {
       opts.searchLoosely = Number(opts.searchLoosely);
       Object.assign(game.options,JSON.parse(opts));
       // if these changed, reset cursor.
-      if(old.searchLoosely != game.options.searchLoosely || old.author != game.options.author || old.name != game.options.name || old.searchTerm != game.options.searchTerm){
+      if(old.searchLoosely != game.options.searchLoosely || old.author != game.options.author || old.searchTerm != game.options.searchTerm){
         game.finder.hax.cursor = 0;
+        game.finder.hax.noQuiz = false;
+        game.finder.hax.stop = false;
       }
       // variable answer
       if(Number(game.options.timeout) < 0){
@@ -792,12 +788,12 @@ const Messages = {
       return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
     }
     game.fails[game.kahoot.quiz.currentQuestion.index] = Boolean(choice);
-    game.send({message:Boolean(choice),type:"Message.Ping"});
+    game.send({message:Boolean(choice).toString(),type:"Message.Ping"});
   },
   RECOVER_DATA: (game,message)=>{
     // message should be an object containing quiz name, answers, etc.
     // base validation. Does not work on challenges
-    if(game.security.joined || !game.options.pin || game.options.pin[0] == "0" || !message || !message.name || !message.answers || !message.cid){
+    if(game.security.joined || !game.options.pin || game.options.pin[0] == "0" || !message || !message.answers || !message.cid){
       return game.send({message:"INVALID_USER_INPUT",type:"Error"});
     }
     // answers validation
@@ -811,15 +807,10 @@ const Messages = {
         return game.send({message:"INVALID_USER_INPUT",type:"Error"});
       }
     }
-    // quiz name validation
-    if(typeof message.name != "string"){
-      return game.send({message:"INVALID_USER_INPUT",type:"Error"});
-    }
     // updating information
     game.finder.answers = message.answers;
     game.kahoot.cid = message.cid;
     game.kahoot.sessionID = game.options.pin;
-    game.options.name = message.name;
     game.kahoot._wsHandler = {
       ws: {
         readyState: 3
@@ -854,20 +845,17 @@ const QuestionAnswer = (k,q)=>{
     switch (q.type) {
       case "open_ended":
       case "word_cloud":
-        answer = "sorry, i have no idea.";
+        answer = "fgwadsfihwksdxfs";
         break;
       case "jumble":
-        answer = shuffle([0,1,2,3]);
+        answer = [-1,0,1,2];
         break;
+      case "multiple_select_poll":
       case "multiple_select_quiz":
-        answer = shuffle([0,1,2,3]).slice(q.quiz.answerCounts[q.index] - Math.floor(Math.random() * (q.quiz.answerCounts[q.index] - 1)));
+        answer = [-1];
         break;
       default:
-        if(typeof q.quiz.answerCounts[q.index] != "number"){
-          answer = 0;
-        }else{
-          answer = Math.floor(Math.random() * q.quiz.answerCounts[q.index]);
-        }
+        answer = -1;
     }
   }
   q.answer(answer,{

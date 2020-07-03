@@ -421,8 +421,8 @@ body,html{
   align-items: center;
 }
 .Login img{
-  width: 16rem;
-  height: 6rem;
+  max-height: 5.75rem;
+  height: 5.75rem;
   margin-bottom: 1.5rem;
   margin-top: calc(50vh - 9.5rem);
 }
@@ -672,7 +672,19 @@ body,html{
   font-size: 1.5rem;
   opacity: 0.7;
 }
-.ChallengeQuestion span{
+.noQuiz{
+  z-index: 5000;
+}
+.noQuiz input{
+  border: transparent;
+  background: black;
+  color: white;
+  padding: 0.5rem;
+  width: 15rem;
+  border-radius: 0.5rem;
+  font-weight: bolder;
+}
+.ChallengeQuestion:not(.noQuiz) span{
   background: #333;
   border-radius: .3rem;
   padding: .1rem;
