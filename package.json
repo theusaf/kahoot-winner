@@ -1,6 +1,6 @@
 {
   "name": "kahoot-win",
-  "version": "2.17.0",
+  "version": "2.17.2",
   "description": "A Kahoot Cheating Website",
   "main": "kahoot.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "cookie-parser": "^1.4.5",
     "emoji-regex": "^9.0.0",
     "express": "^4.17.1",
+    "firebase": "^7.15.5",
     "ip": "^1.1.5",
     "kahoot-search": "^1.0.4",
     "kahoot.js-updated": "^1.4.24",

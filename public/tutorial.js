@@ -1,4 +1,7 @@
 window.addEventListener("load",()=>{
+  if(!localStorage.seenNotice){
+    showNotice();
+  }
   if(localStorage.returningUser){
     return;
   }
@@ -144,12 +147,13 @@ function tutorialSteps(n){
             }
           }
         ],
-        total: "42.069"
+        total: "42.069",
+        currentGuesses: [{}]
       }
       game.question.ans = [game.question.data.length];
       game.score = -Infinity;
       game.name = "Tutorial";
-      game.pin = "12345-LUGGAGE"
+      game.pin = "12345-LUGGAGE";
       new QuestionAnswererPage();
       activateLoading(false);
       TutorialDiv.innerHTML = "";
@@ -258,4 +262,20 @@ function tutorialSteps(n){
       },300);
       break;
   }
+}
+
+function showNotice(){
+  localStorage.seenNotice = true;
+  const temp = document.createElement("template");
+  temp.innerHTML = `<div class="notice">
+    <button onclick="document.querySelector('.notice').outerHTML = '';">OK</button>
+    <h3><b>Important notice: </b><span class="red">Kahoot no longer sends the quiz name to the client.</span></h3>
+    <h4>What does this mean?</h4>
+    <p>You now need to input the quiz name yourself. You may get lucky if the quiz is super popular, as we now store Kahoot quizzes that have been played in the database.</p>
+    <p>You can put the quiz name at the input at the top:</p>
+    <div>
+      <img src="/resource/misc/notice-2020-07-03.png" alt="input at the top">
+    </div>
+  </div>`;
+  document.body.append(temp.content.cloneNode(true));
 }

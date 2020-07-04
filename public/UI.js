@@ -174,7 +174,7 @@ class LobbyPage{
     pinDiv.append(pinText);
     nameDiv.append(nameText);
     div.append(pinDiv,nameDiv,text,subtext);
-    if(game.guesses.length === 0){
+    if(typeof game.guesses == "undefined"){
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
@@ -300,6 +300,7 @@ class GetReadyPage{
                 }).length){
                   // already used this question
                   add = false;
+                  break;
                 }
               }
             }
@@ -358,7 +359,7 @@ class GetReadyPage{
                   });
                   game.correctIndex = qs[i].i;
                   game.question.data = game.guesses[0].questions[qs[i].i].choices;
-                  game.ans[game.index] = game.question.data ? game.question.data.length : 4;
+                  // game.ans[game.index] = game.question.data ? game.question.data.length : 4; // removed because this shouldn't be needed
                   game.question.ans = game.ans;
                   f = true;
                 }
@@ -606,7 +607,7 @@ class QuestionAnswererPage{
         };
         submitter.append(ok,reset);
         div.append(submitter);
-      }else if(game.question.type == "multiple_select_quiz"){
+      }else if(game.question.type == "multiple_select_quiz" || game.question.type == "multiple_select_poll"){
         game.multiAnswer = {
           0: false,
           1: false,
@@ -881,6 +882,7 @@ function resetGame(recover){
             },
             type: "RECOVER_DATA"
           });
+          game.saveOptions();
         }else{ // asumming that the first result should be "pingood" after sending the pin.
           resetGame();
         }

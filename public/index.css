@@ -584,13 +584,19 @@ body,html{
   background: rgb(38,137,12);
   border-color: rgb(38,137,12);
 }
-[css="layout-tfr"]{
+[css="layout-tfr"]:not(.correct){
   background: rgb(226,27,60) !important;
   border-color: rgb(226,27,60) !important;
 }
-[css="layout-tfb"]{
+[css="layout-tfb"]:not(.correct){
   background: rgb(19,104,206) !important;
   border-color: rgb(19,104,206) !important;
+}
+[css="layout-tfr"].correct{
+  background: rgb(226,27,60) !important;
+}
+[css="layout-tfb"].correct{
+  background: rgb(19,104,206) !important;
 }
 .Answers .AnswerOptions{
   position: absolute;
@@ -1001,6 +1007,33 @@ div.info > div label{
   background: #a00;
   border-radius: 0.25rem;
   font-style: normal;
+}
+.notice{
+  position: fixed;
+  width: calc(80% - 2rem);
+  max-height: calc(90% - 2rem);
+  top: 5%;
+  color: white;
+  border-radius: 1rem;
+  margin: auto;
+  left: 10%;
+  overflow: scroll;
+  background: black;
+  padding: 1rem;
+  z-index: 50;
+}
+.notice img{
+  width: 100%;
+}
+.notice button{
+  font-size: 2rem;
+  position: absolute;
+  background: rgba(255,255,255,0.3);
+  color: white;
+  border-radius: 0.5rem;
+  border: transparent;
+  right: 1rem;
+  top: 1rem;
 }
 .mobishow{
   display: none;
