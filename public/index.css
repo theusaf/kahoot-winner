@@ -372,6 +372,9 @@ body,html{
   height: 100%;
   transition: 0.5s;
 }
+.Changelog a{
+  color: white;
+}
 .Changelog > div{
   position: relative;
   flex: 1;

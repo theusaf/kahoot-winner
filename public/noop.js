@@ -1,5 +1,5 @@
 function noop(){}
-const CACHE_NAME = "kahoot-win-cache-v2.17.2";
+const CACHE_NAME = "kahoot-win-cache-v2.17.3";
 const CONST_NAME = "kahoot-win-cache-consts-v2.17.2";
 const URLCONSTS = [
   "/resource/blue.svg",

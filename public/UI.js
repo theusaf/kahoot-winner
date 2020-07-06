@@ -198,6 +198,9 @@ class GetReadyPage{
     game.jumbleAnswer = [];
     game.question = question;
     const objects = new LobbyPage;
+    try {
+      document.querySelector(".noQuiz").outerHTML = "";
+    } catch (e) {}
     ChallengeContinueButton.style.display = "none";
     document.body.className = "rainbow";
     objects.texts[0].innerHTML = `Question ${question.index + 1}`;
@@ -243,7 +246,7 @@ class GetReadyPage{
           clearInterval(int);
         }else{
           timer.innerHTML = secs;
-          objects.texts[1].innerHTML = ["Go!","Set.","Ready...","Ready...","Ready...","Ready..."][secs];
+          objects.texts[1].innerHTML = ["Go!","Set.","Ready..."][secs >= 3 ? 2 : secs];
           objects.texts[1].setAttribute("text",objects.texts[1].innerHTML);
         }
       }catch(err){
@@ -282,29 +285,36 @@ class GetReadyPage{
         const chdiv = document.createElement("div");
         chdiv.className = "ChallengeQuestion noQuiz";
         const sp = document.createElement("span");
-        sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+        sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
         chdiv.append(document.createElement("br"),document.createElement("br"),sp);
         objects.main.append(chdiv);
       }else{
         const as = game.guesses[0].questions;
         const qs = [];
         for(let i = 0; i < as.length; i++){
-          if(as[i].type == game.question.type && (as[i].layout == game.rawData.layout || !as[i].layout)){
+          if(as[i].type == game.question.type && (as[i].layout == game.rawData.layout || !as[i].layout) && ((typeof as[i].choices === "object" && as[i].choices.length) || null) == game.ans[game.index]){
             // answer filter
             let add = true;
+            let add2 = 0;
             const ca = game.got_answers.slice(0);
             for(let j = 0; j < ca.length; j++){
               if(as[i].choices){
                 if(as[i].choices.filter(choice=>{
                   return choice.answer == ca[j].n && choice.correct;
                 }).length){
-                  // already used this question
                   add = false;
+                  for(let k = 0;k < as.length;k++){
+                    if(as[k].choices.filter(choice=>{
+                      return choice.answer == ca[j].n && choice.correct;
+                    }).length){
+                      add2++;
+                    }
+                  }
                   break;
                 }
               }
             }
-            if(!add){
+            if(!add && add2 === 1){
               continue;
             }
             qs.push({
@@ -414,7 +424,7 @@ class GetReadyPage{
       const sp = document.createElement("span");
       if(game.guesses.length == 0){
         chdiv.className = "ChallengeQuestion noQuiz";
-        sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+        sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
       }else{
         sp.innerHTML = "Question: " + (game.guesses[0].questions[game.index].question || game.guesses[0].questions[game.index].title);
       }
@@ -446,7 +456,7 @@ class GetReadyPage{
       const chdiv = document.createElement("div");
       chdiv.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
       chdiv.append(document.createElement("br"),document.createElement("br"),sp);
       objects.main.append(chdiv);
     }
@@ -501,14 +511,6 @@ class QuizStartPage{
     objects.texts[1].id = "bottomText";
     document.body.className = "purple2";
     activateLoading(true,false,"",false);
-    if(game.pin[0] !== "0"){
-      const l = document.createElement("div");
-      l.className = "ChallengeQuestion noQuiz";
-      const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
-      l.append(document.createElement("br"),document.createElement("br"),sp);
-      objects.main.append(l);
-    }
     return objects;
   }
 }
@@ -703,7 +705,7 @@ class QuestionAnswererPage{
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
       l.append(document.createElement("br"),document.createElement("br"),sp);
       objects.main.append(l);
     }
@@ -723,7 +725,7 @@ class QuestionSnarkPage{
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
       l.append(document.createElement("br"),document.createElement("br"),sp);
       stuff.main.append(l);
     }
@@ -741,7 +743,7 @@ class QuestionEndPage{
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Search Term" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
       l.append(document.createElement("br"),document.createElement("br"),sp);
       objects.main.append(l);
     }

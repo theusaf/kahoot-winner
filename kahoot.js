@@ -31,10 +31,13 @@ firebase.initializeApp(firebaseConfig);
 let db = firebase.firestore();
 const KahootDatabase = {};
 let KahootDatabaseInitialized = false;
-let KahootFire = db.collection("KahootData");
-KahootFire.get().then(res=>{
+let KahootFire = db.collection("KahootInfo");
+KahootFire.get().then(async res=>{
   res.forEach((doc) => {
-    KahootDatabase[doc.id] = doc.data();
+    const quizzes = doc.data();
+    for(let id in quizzes){
+      KahootDatabase[id] = quizzes[id];
+    }
   });
   KahootDatabaseInitialized = true;
 });
@@ -94,7 +97,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.17.2");
+console.log("Using version 2.17.3");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -439,7 +442,7 @@ class QuizFinder{
       if(results.length == 0){
         if(results2.length !== 0){
           console.log("Setting results from database");
-          results = results2;
+          this.hax.validOptions = results2;
           return;
         }
         console.log("Researching");
@@ -497,6 +500,9 @@ function SearchDatabase(finder){
         for (let i = 0; i < ans.length; i++) {
           let ok = false;
           for (let j = 0; j<k.questions.length;j++) {
+            if(!k.questions[j].choices){
+              continue;
+            }
             if(k.questions[j].choices.filter(choice=>{
               return choice.answer == ans[i].n;
             }).length){
@@ -518,6 +524,9 @@ function SearchDatabase(finder){
       if(ans.length){
         for (let i = 0; i < ans.length; i++) {
           let ok = false;
+          if(!k.questions[i].choices){
+            continue;
+          }
           const ch = k.questions[ans[i].i].choices;
           for (let j = 0; j < ch.length; j++) {
             if(ch[j].answer == ans[i].n){
@@ -1087,7 +1096,7 @@ const Listeners = {
         if(!BruteForces[i]){
           clearInterval(k.bruter);
         }
-      },350);
+      },280);
     }else{
       k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
     }
