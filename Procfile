@@ -1,1 +1,1 @@
-web:node kahoot.js
+web:node public/index.js
