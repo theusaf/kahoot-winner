@@ -1,1 +1,1 @@
-web:node public\index.js
+worker: node kahoot.js
