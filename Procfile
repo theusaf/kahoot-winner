@@ -1,1 +1,1 @@
-web: node kahoot.js
+web:node kahoot.js
