@@ -1,1 +1,1 @@
-worker: node kahoot.js
+web: node index.js
