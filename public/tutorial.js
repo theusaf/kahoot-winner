@@ -41,6 +41,7 @@ function tutorialSteps(n){
         <div class="tut_cont">
           <div id="t_step1">
             <h1>Here, you input your game PIN from the host's Kahoot game. If you have a challenge link, you can also put that as the pin. To join the weekly kahoots, use "weekly" and "weekly-previous"</h1>
+            <p>At the end of this tutorial, you can also learn about why Kahoot Winner might not win all the time.</p>
             <button onclick="tutorialSteps(1);">Next</button>
             <button onclick="document.getElementById('tutorial').innerHTML = '';new ErrorHandler('If you ever need me again, click the tutorial button in the \\'about\\' section!',true);">Done</button>
           </div>

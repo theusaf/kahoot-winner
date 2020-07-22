@@ -1,5 +1,6 @@
 const electron = require("electron");
 const compression = require("compression");
+const appInformation = require("./package.json");
 const fs = require("fs");
 const express = require("express");
 const path = require("path");
@@ -97,7 +98,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.17.3");
+console.log("Using version 2.18.0");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -194,6 +195,7 @@ class Cheater{
     this.pinger = setInterval(()=>{
       this.send({message:"ping",type:"Message.Ping"});
     },30*1000);
+    this.send({"type":"Message.OK","message":"200 OK"});
   }
   isOffline(){
     try{
@@ -916,6 +918,9 @@ const Messages = {
       if(!Array.isArray(message.answers)){
         return game.send({message:"INVALID_USER_INPUT",type:"Error"});
       }
+      if(message.answers.length > 100){ // probably BS. closing to reduce memory usage
+        return game.send({message:"INVALID_USER_INPUT",type:"Error"});
+      }
       for (var i = 0; i < message.answers.length; i++) {
         const ans = message.answers[i];
         // answers are like {i:0,n:"foobar",t:"quiz",c:false,ns:[]}
@@ -959,20 +964,38 @@ const QuestionAnswer = (k,q)=>{
   }
   let answer = k.parent.finder.hax.correctAnswer;
   if(Number(k.parent.options.fail) && k.parent.fails[q.index]){
-    switch (q.type) {
-      case "open_ended":
-      case "word_cloud":
-        answer = "fgwadsfihwksdxfs";
-        break;
-      case "jumble":
-        answer = [-1,0,1,2];
-        break;
-      case "multiple_select_poll":
-      case "multiple_select_quiz":
-        answer = [-1];
-        break;
-      default:
-        answer = -1;
+    if(k.parent.options.isChallenge){ // to prevent some errors until I fix it in kahoot.js-updated
+      switch (q.type) {
+        case "open_ended":
+        case "word_cloud":
+          answer = "fgwadsfihwksdxfs";
+          break;
+        case "jumble":
+          answer = [0,1,2,3];
+          break;
+        case "multiple_select_poll":
+        case "multiple_select_quiz":
+          answer = [0];
+          break;
+        default:
+          answer = 0;
+      }
+    }else{
+      switch (q.type) {
+        case "open_ended":
+        case "word_cloud":
+          answer = "fgwadsfihwksdxfs";
+          break;
+        case "jumble":
+          answer = [-1,0,1,2];
+          break;
+        case "multiple_select_poll":
+        case "multiple_select_quiz":
+          answer = [-1];
+          break;
+        default:
+          answer = -1;
+      }
     }
   }
   q.answer(answer,{
@@ -1001,11 +1024,11 @@ const Listeners = {
     }
     k.parent.finder.hax.cursor = 0;
     q.name = k.parent.options.name && !q.name ? k.parent.options.name : q.name;
-    k.parent.finder.searchKahoot(0);
     k.parent.send({
       message:JSON.stringify({name:q.name,raw:q.rawEvent}),
       type: "Message.QuizStart"
     });
+    k.parent.finder.searchKahoot(0);
   },
   question: (k,q)=>{
     if(k.parent.fails.length === 1){
@@ -1147,10 +1170,11 @@ app.get("/up",(req,res)=>{
   const minutes = Math.round((end - Date.now()) / (1000 * 60));
   let message = "";
   if(minutes > 60){
-    message = Math.round(minutes / 60) + " hours until expected reset."
+    message = Math.round(minutes / 60) + " hours until expected reset.";
   }else{
-    message = minutes + " minutes until expected reset."
+    message = minutes + " minutes until expected reset.";
   }
+  message += " : v" + appInformation.version;
   res.send(message);
 });
 

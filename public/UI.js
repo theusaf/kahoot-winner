@@ -48,6 +48,7 @@ class LoginPage{
     pin.id = "loginInput";
     pin.placeholder = i ? "Nickname" : "Game PIN";
     but.innerHTML = i ? "OK, Go!" : "Enter";
+    but.id = "loginButton";
     but.onclick = i ? ()=>{return game.join(pin.value);} : ()=>{return game.sendPin(pin.value);};
     pin.onkeydown = i ? e=>{if(e.key == "Enter"){return game.join(pin.value);}} : e=>{if(e.key == "Enter"){return game.sendPin(pin.value);}};
     logoText.onclick = ()=>{
@@ -61,6 +62,7 @@ class LoginPage{
         game.getRandom();
       };
       div.append(logo,logoText,pin,rand,but);
+      document.getElementsByClassName("grecaptcha-badge")[0].style.visibility = "hidden";
     }else{
       const abt = document.createElement("label");
       abt.htmlFor = "about";
@@ -145,6 +147,9 @@ class ErrorHandler{
 }
 class LobbyPage{
   constructor(){
+    window.onbeforeunload = function(e){
+      e.returnValue = "Are you sure you want to leave the page?";
+    }
     document.querySelector(".ad-container").style.display = "none";
     if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
@@ -571,6 +576,7 @@ class QuestionAnswererPage{
       const items = [r,b,y,g];
       const repeats = game.ans[game.index];
       for(let i = 0;i < repeats;i++){
+        items[i].setAttribute("draggable","false");
         div.append(items[i]);
       }
       if(game.ans[game.index] == 2){
@@ -587,10 +593,85 @@ class QuestionAnswererPage{
       activateLoading(false,!document.getElementById("manual").checked);
       // add jumble support here
       if(game.question.type == "jumble"){
-        r.onclick = ()=>{game.answerJ(0,r);};
-        b.onclick = ()=>{game.answerJ(1,b);};
-        y.onclick = ()=>{game.answerJ(2,y);};
-        g.onclick = ()=>{game.answerJ(3,g);};
+        function rearrange(e,a){
+          const info = [];
+          // get all sides
+          let offset = 0;
+          let currentIndex = 0;
+          for(let i = 0;i<a.length;i++){
+            if(a[i].style.visibility === "hidden"){
+              currentIndex = i;
+            }
+            const data = a[i].getBoundingClientRect();
+            offset = data.width / 2 - 16;
+            info.push([
+              data.x,
+              data.x + data.width
+            ]);
+          }
+          // check which is closest
+          const x = (e.x || e.touches[0].clientX) + offset;
+          let closestIndex = 0;
+          let closestValue = Infinity;
+          for(let i = 0;i<info.length;i++){
+            if(Math.abs(x - info[i][0]) < closestValue){
+              closestValue = Math.abs(x - info[i][0]);
+              closestIndex = i;
+            }
+            if(Math.abs(x - info[i][1]) < closestValue){
+              closestValue = Math.abs(x - info[i][1]);
+              closestIndex = i;
+            }
+          }
+          if(a[closestIndex].style.visibility !== "hidden"){
+            // swap
+            const text = document.querySelector(".textAnswer");
+            if(currentIndex > closestIndex){
+              div.insertBefore(a[currentIndex],a[closestIndex]);
+              if(text){
+                text.insertBefore(text.children[currentIndex],text.children[closestIndex]);
+              }
+            }else{
+              div.insertBefore(a[currentIndex],a[closestIndex].nextSibling);
+              if(text){
+                text.insertBefore(text.children[currentIndex],text.children[closestIndex].nextSibling);
+              }
+            }
+          }
+        }
+        function createClone(el,evt){
+          const copy = el.cloneNode(true);
+          div.append(copy);
+          copy.style.left = (evt.x || evt.touches[0].clientX) + "px";
+          el.style.visibility = "hidden";
+          copy.className = "draggable";
+          const mousemove = function(e){
+            copy.style.left = ((e.x || e.touches[0].clientX) - 16) + "px";
+            rearrange(e,div.querySelectorAll("img.jumble"));
+          };
+          const mouseup = function(e){
+            copy.outerHTML = "";
+            el.style.visibility = "";
+            window.removeEventListener("mousemove",mousemove);
+            window.removeEventListener("touchmove",mousemove);
+            window.removeEventListener("mouseup",mouseup);
+            window.removeEventListener("touchend",mouseup);
+          };
+          window.addEventListener("mousemove",mousemove);
+          window.addEventListener("touchmove",mousemove);
+          window.addEventListener("mouseup",mouseup);
+          window.addEventListener("touchend",mouseup);
+        }
+        [r,b,y,g].forEach((e,i)=>{
+          e.className = "jumble";
+          e.setAttribute("index",i);
+          const prep = function(event){
+            createClone(e,event);
+          }
+          e.addEventListener("touchstart",prep);
+          e.addEventListener("mousedown",prep);
+        });
+        div.className = "Answers jumble";
         const submitter = document.createElement("div");
         submitter.className = "AnswerOptions";
         const ok = document.createElement("img");
@@ -598,10 +679,7 @@ class QuestionAnswererPage{
         ok.src = "resource/check.svg";
         reset.src = "resource/reset.svg";
         ok.onclick = ()=>{
-          if(game.jumbleAnswer.length < 4){
-            return;
-          }
-          game.answer(game.jumbleAnswer);
+          game.answerJ(div.querySelectorAll("img.jumble"));
         };
         reset.onclick = ()=>{
           game.jumbleAnswer = [];
@@ -669,14 +747,14 @@ class QuestionAnswererPage{
         }
         // correct
         if(game.answers[i].correct){
-          items[i].className = "correct";
+          items[i].className = (game.question.type === "jumble" ? "jumble " : "") + "correct";
         }
         // setting text
         const text = document.createElement("p");
         if(typeof(game.answers[i].answer) == "undefined"){
           text.innerHTML = "";
         }else{
-          text.innerHTML = (game.question.type == "jumble" ? (Number(i) + 1) + "." : "") + game.answers[i].answer;
+          text.innerHTML = (game.question.type === "jumble" ? (i+1)+". " : "") + game.answers[i].answer;
         }
         textDiv.append(text);
       }
@@ -862,44 +940,37 @@ function setSchema(element,type,scope,prop){
   }
 }
 
-function resetGame(recover){
+async function resetGame(recover){
+  const oldgame = game;
   const oldclose = socket.onclose;
   const oldhandle = socket.onmessage;
   socket.onclose = null;
   socket.close();
-  socket = new WebSocket((location.protocol == "http:" ? "ws://" : "wss://") + location.host);
-  socket.onclose = oldclose;
-  socket.onmessage = oldhandle;
+  game = new Game();
   if(recover){
-    socket.onopen = ()=>{
-      const wait = evt=>{
-        evt = evt.data;
-        let data = JSON.parse(evt);
-        if(data.type == "Message.PinGood"){
-          new LobbyPage;
-          send({
-            message: {
-              cid: game.cid,
-              answers: game.got_answers
-            },
-            type: "RECOVER_DATA"
-          });
-          game.saveOptions();
-        }else{ // asumming that the first result should be "pingood" after sending the pin.
-          resetGame();
-        }
-        socket.removeEventListener("message",wait);
+    await game.sendPin(oldgame.pin);
+    const wait = evt=>{
+      evt = evt.data;
+      let data = JSON.parse(evt);
+      if(data.type == "Message.PinGood"){
+        new LobbyPage;
+        send({
+          message: {
+            cid: oldgame.cid,
+            answers: oldgame.got_answers
+          },
+          type: "RECOVER_DATA"
+        });
+        game.saveOptions();
+      }else{ // asumming that the first result should be "pingood" after sending the pin.
+        resetGame();
       }
-      socket.addEventListener("message",wait);
-      send({
-        message: game.pin,
-        type: "SET_PIN"
-      });
-    };
+      socket.removeEventListener("message",wait);
+    }
+    socket.addEventListener("message",wait);
     return;
   }
-  game = new Game();
-  new LoginPage();
+  new LoginPage;
   document.body.className = "rainbow";
   document.getElementById("author").value = "";
   document.getElementById("uuid").value = "";

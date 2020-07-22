@@ -560,6 +560,7 @@ body,html{
   display: flex;
   flex-flow: wrap;
   margin-top: 6rem;
+  position: relative;
 }
 .Answers img{
   flex: 50%;
@@ -586,6 +587,22 @@ body,html{
 .Answers img:nth-child(4){
   background: rgb(38,137,12);
   border-color: rgb(38,137,12);
+}
+img[index="0"]{
+  background: rgb(226,27,60) !important;
+  border-color: rgb(226,27,60) !important;
+}
+img[index="1"]{
+  background: rgb(19,104,206) !important;
+  border-color: rgb(19,104,206) !important;
+}
+img[index="2"]{
+  background: rgb(216,158,0) !important;
+  border-color: rgb(216,158,0) !important;
+}
+img[index="3"]{
+  background: rgb(38,137,12) !important;
+  border-color: rgb(38,137,12) !important;
 }
 [css="layout-tfr"]:not(.correct){
   background: rgb(226,27,60) !important;
@@ -617,6 +634,24 @@ body,html{
 .Answers .AnswerOptions img:nth-child(1){
   background: rgb(38,137,12);
 }
+.Answers.jumble{
+  flex-flow: row;
+}
+.Answers.jumble .jumble{
+  max-height: 100%;
+  max-width: calc(25% - 1rem);
+}
+.Answers.jumble .textAnswer{
+  flex-flow: row;
+}
+.draggable{
+  position: absolute;
+  margin-top: 1.5rem !important;
+  max-width: calc(25% - 1rem) !important;
+  max-height: calc(100% - 3rem) !important;
+  height: 100%;
+  top: 0;
+}
 #L1.darker{
   background-color: rgb(51,51,51);
   border-bottom: solid 0.25rem black;
@@ -639,7 +674,7 @@ body,html{
   position: absolute;
   display: flex;
   width: calc(100% - 2rem);
-  height: calc(100% - 8.25rem);
+  height: calc(100% - 3rem);
   flex-flow: wrap;
   pointer-events: none;
 }
@@ -1127,6 +1162,27 @@ div.info > div label{
   background: #555;
 }
 
+/* Update CSS */
+#UpdateDiv{
+  position: fixed;
+  width: 90%;
+  height: 80%;
+  margin: 5%;
+  background: black;
+  top: 0;
+  left: 0;
+  color: white;
+  text-align: center;
+}
+#UpdateDiv button{
+  border: 1px solid gray;
+  background: #009900;
+  margin: 0.5rem;
+  color: white;
+  font-weight: 500;
+  font-size: 1.15rem;
+}
+
 /* Tutorial CSS */
 .tutorial{
   position: absolute;
@@ -1258,7 +1314,7 @@ div.info > div label{
   }
   .openended{
     max-width: calc(90% - 1rem);
-    margin-left: calc(5% - 1rem);
+    margin-left: calc(5%);
   }
   .form{
     display: block;
@@ -1297,7 +1353,7 @@ div.info > div label{
     border-top: solid 0.25rem black;
   }
   .textAnswer{
-    height: calc(100% - 8.25rem);
+    height: calc(100% - 2rem);
   }
   .Changelog > div{
     max-width: 90vw;

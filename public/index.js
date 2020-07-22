@@ -1,4 +1,4 @@
-var socket = new WebSocket((location.protocol == "http:" ? "ws://" : "wss://") + location.host);
+var socket = null;
 
 const MessageHandler = {
   Error: {
@@ -152,55 +152,19 @@ const MessageHandler = {
     },
     Maintainance: msg=>{
       return new ErrorHandler("Maintainance Alert: " + msg);
+    },
+    OK: ()=>{
+      game.ready = true;
     }
   }
-};
-
-socket.onmessage = evt=>{
-  evt = evt.data;
-  let data = JSON.parse(evt);
-  if(data.type == "Error"){
-    return MessageHandler.Error[data.message](data.data);
-  }
-  eval(`MessageHandler.${data.type}("${data.message.replace(/\\/img,"\\\\").replace(/"/img,"\\\"")}")`);
-};
-
-socket.onclose = ()=>{
-  new ErrorHandler("Session disconnected.");
-  // attempt to reconnect
-  activateLoading(true,true,"<br><br><br><br><p>Reconnecting</p>");
-  function check(t){
-    const x = new XMLHttpRequest();
-    x.open("GET","/up");
-    x.send();
-    x.onerror = x.ontimeout = function(){
-      t *= 2;
-      if(t > 30){
-        t = 30;
-      }
-      setTimeout(function(){
-        check(t);
-      },t * 1000);
-    };
-    x.onload = function(){
-      if(x.status != 200 || !/^-?\d+ (hours|minutes) until expected reset.$/.test(x.response)){
-        return x.onerror(t);
-      }
-      activateLoading(false,false);
-      if(!game.quizEnded && game.pin[0] != "0"){
-        resetGame(true);
-      }else{
-        resetGame();
-      }
-    }
-  }
-  check(0.5);
 };
 
 class Game{
   constructor(){
+    this.socket = null;
     this.oldQuizUUID = "";
     this.name = "";
+    this.ready = false;
     this.cid = "";
     this.pin = 0;
     this.score = 0;
@@ -225,9 +189,68 @@ class Game{
     this.questionAnswered = false;
   }
   sendPin(pin){
-    this.pin = pin;
-    send({type:"SET_PIN",message:pin});
-    activateLoading(true,true);
+    return new Promise((res,rej)=>{
+      this.pin = pin;
+      grecaptcha.ready(()=>{
+        grecaptcha.execute("6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n",{action:"submit"}).then((token)=>{
+          this.socket = new WebSocket(`${(location.protocol == "http:" ? "ws://" : "wss://")}${location.host}?token=${token}`);
+          socket = this.socket;
+          socket.onmessage = evt=>{
+            evt = evt.data;
+            let data = JSON.parse(evt);
+            if(data.type == "Error"){
+              return MessageHandler.Error[data.message](data.data);
+            }
+            eval(`MessageHandler.${data.type}("${data.message.replace(/\\/img,"\\\\").replace(/"/img,"\\\"")}")`);
+          };
+          socket.onclose = ()=>{
+            new ErrorHandler("Session disconnected.");
+            // attempt to reconnect
+            activateLoading(true,true,"<br><br><br><br><p>Reconnecting</p>");
+            let i = 0;
+            function check(t){
+              const x = new XMLHttpRequest();
+              x.open("GET","/up");
+              x.send();
+              x.onerror = x.ontimeout = function(){
+                if(++i > 10){
+                  return location.href="https://theusaf.github.io/kahoot%20winner%20error.html";
+                }
+                t *= 2;
+                if(t > 30){
+                  t = 30;
+                }
+                setTimeout(function(){
+                  check(t);
+                },t * 1000);
+              };
+              x.onload = function(){
+                if(x.status != 200 || !/^-?\d+ (hours|minutes) until expected reset.*$/.test(x.response)){
+                  return x.onerror(t);
+                }
+                activateLoading(false,false);
+                if(!game.quizEnded && game.pin[0] != "0"){
+                  resetGame(true);
+                }else{
+                  resetGame();
+                }
+              }
+            }
+            check(0.5);
+          };
+          socket.onopen = ()=>{
+            const a = setInterval(()=>{
+              if(this.ready){
+                res();
+                send({type:"SET_PIN",message:pin});
+                clearInterval(a);
+              }
+            },500);
+          };
+        });
+      });
+      activateLoading(true,true);
+    });
   }
   join(name){
     this.name = name;
@@ -318,7 +341,7 @@ class Game{
         elem.value = opts[i];
       }
     }
-    if(socket.readyState === 1){
+    if(socket && socket.readyState === 1){
       game.saveOptions();
       dataLayer.push(Object.assign({event:"load_options"},opts));
       return new ErrorHandler("Restored Options!",true);
@@ -349,13 +372,12 @@ class Game{
       return;
     }
   }
-  answerJ(id,thing){
-    if(this.jumbleAnswer.indexOf(id) != -1){
-      return;
+  answerJ(list){
+    let li = [];
+    for(let i = 0;i<list.length;i++){
+      li.push(Number(list[i].getAttribute("index")));
     }
-    this.jumbleAnswer.push(id);
-    thing.src = "resource/step" + (this.jumbleAnswer.length) + ".svg";
-    thing.className = "faded correct";
+    this.answer(li);
   }
   answerM(id,thing){
     this.multiAnswer[id] = !this.multiAnswer[id];
@@ -372,6 +394,9 @@ class Game{
 }
 
 function send(message){
+  if(socket === null){
+    return;
+  }
   socket.send(JSON.stringify(message));
 }
 
@@ -427,3 +452,50 @@ function detectPlatform(){
   if (navigator.appVersion.indexOf("Linux")!=-1) OSName="Linux";
   return OSName;
 }
+
+localStorage.KW_Version = "v2.18.0";
+const checkVersion = new XMLHttpRequest();
+checkVersion.open("GET","/up");
+checkVersion.send();
+checkVersion.onload = function(){
+  const version = checkVersion.response.split(": ")[1];
+  const locVersion = localStorage.KW_Version || version;
+  if(localStorage.KW_Update == "false"){
+    return;
+  }
+  if(version != locVersion){
+    const ask = document.createElement("div");
+    ask.id = "UpdateDiv";
+    ask.innerHTML = `<h2>A new update is available.</h2>
+    <h4>Would you like to update now?</h4>
+    <button id="UpdateYes">Yes</button><button id="UpdateNo">Not Yet</button><br>
+    <button onclick="localStorage.KW_Update = false;this.parentElement.outerHTML = '';">Disable update notification</button>`;
+    document.body.append(ask);
+    document.getElementById("UpdateYes").onclick = function(){
+      if("serviceWorker" in navigator){
+        document.getElementById("UpdateYes").innerHTML = "Please wait...";
+        navigator.serviceWorker.getRegistrations().then(async function(registrations) {
+          for(let registration of registrations) {
+            await registration.unregister();
+          }
+          setTimeout(function(){
+            localStorage.KW_Version = version;
+            location.reload(true);
+          },3000);
+        }).catch(function(err) {
+          document.getElementById("UpdateDiv").outerHTML = "";
+          new ErrorHandler("There was an error forcing an update. Please clear or reload the page cache manually.");
+        });
+      }else{
+        document.getElementById("UpdateDiv").outerHTML = "";
+        new ErrorHandler("There was an error forcing an update. Please clear or reload the page cache manually.");
+      }
+    };
+    document.getElementById("UpdateNo").onclick = function(){
+      document.getElementById("UpdateDiv").outerHTML = "";
+    };
+  }
+  if(!localStorage.KW_Version){
+    localStorage.KW_Version = version;
+  }
+};
