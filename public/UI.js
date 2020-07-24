@@ -219,6 +219,31 @@ class GetReadyPage{
     game.index = question.index;
     game.ans = question.ans;
     game.rawData = question.raw;
+    let timeinfo = {
+      time: 20000
+    };
+    if(game.guesses.length >= 1){
+      timeinfo.time = game.guesses[0].questions[game.index].time;
+    }
+    // In BETA
+    if(document.getElementById("timeout_custom_1").value !== ""){
+      const time = calculateTimeout(Number(document.getElementById("timeout_custom_1").value),timeinfo.time,0);
+      document.getElementById("timeout").value = time / 1000;
+      game.saveOptions();
+    }else if(document.getElementById("timeout_custom_2").value !== ""){
+      // of course, this doesn't take into account that the min score is 500 points.
+      const val = Number(document.getElementById("timeout_custom_2").value) - game.score;
+      const remaining = game.total - game.index; // remaining questions
+      const min = calculateStreakPoints(game.streak) + 500;
+      let time = 0;
+      if(val / remaining < min){
+        time = timeinfo.time + 500;
+      }else{
+        time = calculateTimeout(val / remaining,timeinfo.time,game.streak);
+      }
+      document.getElementById("timeout").value = time / 1000;
+      game.saveOptions();
+    }
     if(game.guesses && game.guesses.length && game.guesses[0].uuid != game.oldQuizUUID){
       game.oldQuizUUID = game.guesses[0].uuid;
       dataLayer.push({
@@ -813,6 +838,11 @@ class QuestionSnarkPage{
 class QuestionEndPage{
   constructor(info){
     info = JSON.parse(info);
+    if(info.correct){
+      game.streak++;
+    }else{
+      game.streak = 0;
+    }
     game.score = info.total;
     const objects = new GetReadyPage(game.question,true);
     if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
@@ -920,6 +950,23 @@ class QuizEndPage{
   }
 }
 
+function calculateStreakPoints(streak){
+  if(streak > 5){
+    return 500;
+  }else{
+    return streak * 100;
+  }
+}
+
+function calculateTimeout(points,time,streak){
+  const score = points - calculateStreakPoints(streak);
+  const timeout = -2 * time * ((score / 1000) - 1);
+  if(timeout < 0.1){
+    return 0;
+  }
+  return timeout;
+}
+
 function activateLoading(image,show,text,ext){
   HideDiv.style.background = show ? "rgba(0,0,0,0.3)" : "transparent";
   HideDiv.style.pointerEvents = show ? "all" : "none";
@@ -942,10 +989,10 @@ function setSchema(element,type,scope,prop){
 
 async function resetGame(recover){
   const oldgame = game;
-  const oldclose = socket.onclose;
-  const oldhandle = socket.onmessage;
-  socket.onclose = null;
-  socket.close();
+  if(socket){
+    socket.onclose = null;
+    socket.close();
+  }
   game = new Game();
   if(recover){
     await game.sendPin(oldgame.pin);
@@ -975,6 +1022,8 @@ async function resetGame(recover){
   document.getElementById("author").value = "";
   document.getElementById("uuid").value = "";
   document.getElementById("searchTerm").value = "";
+  document.getElementById("timeout_custom_1").value = "";
+  document.getElementById("timeout_custom_2").value = "";
   game.loadOptions();
 }
 

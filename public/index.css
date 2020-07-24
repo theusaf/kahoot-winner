@@ -715,9 +715,13 @@ img[index="3"]{
   width: 100%;
   font-size: 1.5rem;
   opacity: 0.7;
+  pointer-events: none;
 }
 .noQuiz{
-  z-index: 5000;
+  z-index: 99;
+}
+.noQuiz br{
+  pointer-events: none;
 }
 .noQuiz input{
   border: transparent;
@@ -727,6 +731,7 @@ img[index="3"]{
   width: 15rem;
   border-radius: 0.5rem;
   font-weight: bolder;
+  pointer-events: all;
 }
 .ChallengeQuestion:not(.noQuiz) span{
   background: #333;

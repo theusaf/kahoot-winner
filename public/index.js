@@ -164,6 +164,7 @@ class Game{
     this.socket = null;
     this.oldQuizUUID = "";
     this.name = "";
+    this.streak = 0;
     this.ready = false;
     this.cid = "";
     this.pin = 0;
@@ -453,7 +454,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v2.18.0";
+localStorage.KW_Version = "v2.18.1";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
@@ -480,7 +481,7 @@ checkVersion.onload = function(){
           }
           setTimeout(function(){
             localStorage.KW_Version = version;
-            location.reload(true);
+            location.reload();
           },3000);
         }).catch(function(err) {
           document.getElementById("UpdateDiv").outerHTML = "";
