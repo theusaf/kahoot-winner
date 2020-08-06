@@ -244,6 +244,7 @@ class Game{
               if(this.ready){
                 res();
                 send({type:"SET_PIN",message:pin});
+                this.loadOptions();
                 clearInterval(a);
               }
             },500);
@@ -347,8 +348,11 @@ class Game{
       dataLayer.push(Object.assign({event:"load_options"},opts));
       return new ErrorHandler("Restored Options!",true);
     }else{
+      if(socket === null){
+        return;
+      }
       setTimeout(()=>{
-        game.loadOptions();
+        this.loadOptions();
       },3000);
     }
   }
@@ -454,7 +458,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v2.18.1";
+localStorage.KW_Version = "v2.18.2";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
@@ -469,6 +473,7 @@ checkVersion.onload = function(){
     ask.id = "UpdateDiv";
     ask.innerHTML = `<h2>A new update is available.</h2>
     <h4>Would you like to update now?</h4>
+    <p>If this message keeps appearing, try hard refreshing your page or clearing your cache.</p>
     <button id="UpdateYes">Yes</button><button id="UpdateNo">Not Yet</button><br>
     <button onclick="localStorage.KW_Update = false;this.parentElement.outerHTML = '';">Disable update notification</button>`;
     document.body.append(ask);

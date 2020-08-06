@@ -149,7 +149,13 @@ function tutorialSteps(n){
           }
         ],
         total: "42.069",
-        currentGuesses: [{}]
+        currentGuesses: [{
+          questions: [
+            {
+              time: 20000
+            }
+          ]
+        }]
       }
       game.question.ans = [game.question.data.length];
       game.score = -Infinity;

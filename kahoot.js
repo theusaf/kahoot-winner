@@ -73,6 +73,13 @@ app.use(compression({
 }));
 app.use(cookieParser());
 app.use((req,res,next)=>{
+  if(req.protocol == "https"){
+    res.setHeader("Strict-Transport-Security","max-age=31104000");
+  }
+  res.setHeader("X-XSS-Protection","0");
+  next();
+});
+app.use((req,res,next)=>{
   const origins = ["theusaf.github.io","kahoot.it","play.kahoot.it","create.kahoot.it","code.org","studio.code.org"];
   if(req.get("origin") && origins.includes(req.get("origin").split("://")[1])){
     res.header("Access-Control-Allow-Origin",req.get("origin"));
@@ -98,7 +105,7 @@ server.once("error",err=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.18.0");
+console.log("Using version 2.18.2");
 const request = require("request");
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
@@ -220,14 +227,13 @@ class Cheater{
     this.socket.send(message);
   }
   message(message){
-    var self = this;
     let data;
     try{data = JSON.parse(message);}catch(err){return this.send({message:"INVALID_USER_INPUT",type:"Error"});}
     if(typeof(data.type) == "undefined" || typeof(Messages[data.type]) == "undefined" || typeof(data.message) == "undefined"){
       this.send({message:"INVALID_USER_INPUT",type:"Error"});
       return;
     }
-    Messages[data.type](self,data.message);
+    Messages[data.type](this,data.message);
   }
   generateRandomName(){
     return new Promise(res=>{
@@ -244,6 +250,7 @@ class Cheater{
 class QuizFinder{
   constructor(){
     this.cursor = 0;
+    this.ignoreDB = false;
     this.hax = {
       validOptions: [],
       answers: [],
@@ -423,7 +430,7 @@ class QuizFinder{
       }
       console.log(searchText);
       let results = await Searching(searchText,options,this);
-      let results2 = SearchDatabase(this);
+      let results2 = (!this.ignoreDB && SearchDatabase(this)) || [];
       if(!this.parent){
         this.hax.stop = true;
         return;
@@ -446,6 +453,8 @@ class QuizFinder{
           console.log("Setting results from database");
           this.hax.validOptions = results2;
           return;
+        }else{
+          this.ignoreDB = true;
         }
         console.log("Researching");
         this.searchKahoot(index);
@@ -1176,6 +1185,23 @@ app.get("/up",(req,res)=>{
   }
   message += " : v" + appInformation.version;
   res.send(message);
+});
+app.get(/ext\/?https?:\/\/.*\.(google|gstatic|facebook|fb).*\.(com|net)\/.*/i,(req,res)=>{
+  const url = req.url.split("/ext/").slice(1).join("/ext/");
+  request(url,(e,r,b)=>{
+    if(e){
+      res.status(404);
+      res.end();
+      return;
+    }
+    res.status(r.statusCode);
+    res.setHeader("Cache-Control","public, max-age=31622400");
+    let d = new Date;
+    d.setYear(d.getFullYear() + 1);
+    res.setHeader("Expires", d.toUTCString());
+    res.setHeader("Content-Type",r.headers['content-type'] || "text/html");
+    res.send(b);
+  });
 });
 
 // 404 Page

@@ -1309,7 +1309,9 @@ div.info > div label{
     top: 4.25rem;
   }
   .ad-container{
-    display: none;
+    max-height: 90px;
+    overflow: hidden;
+    width: 100%;
   }
   .looseDiv input, .looseDiv div{
     max-width: 15rem;

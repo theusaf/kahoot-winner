@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <link rel="preload" href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
+    <link rel="preload" href="/ext/https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta name="version" content="2.18.1">
+    <meta name="version" content="2.18.2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="Kahoot Winner">
     <meta name="description" content="A hack for winning public Kahoot quizzes and challenges. Enter your PIN or Challenge URL, enter the name of the quiz, and go! The server will try to find the answers for you! One of the best and actively maintained Kahoot bots online, working 2020!">
@@ -50,7 +50,7 @@
       n.queue=[];t=b.createElement(e);t.async=!0;
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
+      '/ext/https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '617836735684525');
       fbq('track', 'PageView');
     </script>
@@ -59,7 +59,7 @@
     </noscript>
     <!-- End Facebook Pixel Code -->
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5S0LGKYC6M"></script>
+    <script async src="/ext/https://www.googletagmanager.com/gtag/js?id=G-5S0LGKYC6M"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -67,16 +67,16 @@
       gtag('config', 'G-5S0LGKYC6M');
     </script>
     <!-- End Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://apis.google.com/js/platform.js"></script>
+    <script async src="/ext/https://apis.google.com/js/platform.js"></script>
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    '/ext/https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-NHVPG7P');</script>
     <!-- End Google Tag Manager -->
-    <script data-ad-client="ca-pub-7270149282957761" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-    <script src="https://www.google.com/recaptcha/api.js?render=6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n"></script>
+    <script data-ad-client="ca-pub-7270149282957761" async src="/ext/https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script src="/ext/https://www.google.com/recaptcha/api.js?render=6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n"></script>
   </head>
   <body class="rainbow" itemscope itemtype="https://schema.org/WebPage">
     <!-- Google Tag Manager (noscript) -->
@@ -87,7 +87,7 @@
       fbq('track', 'ViewContent');
     </script>
     <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0&appId=1132344773559214&autoLogAppEvents=1"></script>
+    <script async defer crossorigin="anonymous" src="/ext/https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0&appId=1132344773559214&autoLogAppEvents=1"></script>
     <noscript>
       This web app requires JavaScript.
     </noscript>
@@ -161,6 +161,28 @@
           <div>
             <label for="timeout" class="block">Answer Timeout</label>
             <input type="text" id="timeout" placeholder="# seconds"><label for="info-timeout"><p class="shortcut2">?</p></label>
+            <label for="sub-timeout">
+              <span class="shortcut2">
+                <div style="width: 1.5rem;background-size: cover;display:inline-block;background-repeat:no-repeat;background-image:url(/resource/icon-gear.svg)">
+                  &nbsp;
+                </div>
+              </span>
+            </label>
+            <input type="checkbox" class="ch info" id="sub-timeout">
+            <div class="info">
+              <div>
+                <label for="sub-timeout">X</label>
+                <h5><code>Timeout</code> Sub Settings <span style="color: gold">BETA</span></h5>
+                <span>By using these settings, you will overwrite your timeout setting.</span>
+                <h6>Points/Question</h6>
+                <p>This sets the timeout each question based on the time left (excluding answer streak).</p>
+                <input type="number" step="1" min="0" max="1000" id="timeout_custom_1">
+                <h6>Custom Total Points</h6>
+                <p>This sets the timeout for each question in order to get a specific total value.</p>
+                <p>This setting may not work as it uses a very simple formula that isn't perfect.</p>
+                <input type="number" step="1" min="0"  id="timeout_custom_2">
+              </div>
+            </div>
             <input type="checkbox" class="ch info" id="info-timeout">
             <div class="info">
               <div>
@@ -170,15 +192,6 @@
                 <p>Valid settings are <code>4</code> <code>-4</code> <code>1 - 5</code></p>
                 <p>By setting a negative number, the answer timeout varies from that number by one second</p>
                 <p>To customize the variation, use a range: <code>min - max</code></p>
-                <h5>Custom Settings <span style="color: gold">BETA</span></h5>
-                <span>By using these settings, you will overwrite your timeout setting.</span>
-                <h6>Points/Question</h6>
-                <p>This sets the timeout each question based on the time left (excluding answer streak).</p>
-                <input type="number" step="1" min="0" max="1000" id="timeout_custom_1">
-                <h6>Custom Total Points</h6>
-                <p>This sets the timeout for each question in order to get a specific total value.</p>
-                <p>This setting may not work as it uses a very simple formula that isn't perfect.</p>
-                <input type="number" step="1" min="0"  id="timeout_custom_2">
               </div>
             </div>
             <label for="teamMembers" class="block">Team Members</label>
@@ -499,6 +512,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p>2.18.2 - Various improvements and bug fixes. Moved sub settings to a seperate button.</p>
           <p>2.18.1 - Added a custom score <label for="menu_toggle"><u>sub-setting</u></label> and fixed some bugs.</p>
           <p>2.18.0 - Added an update detection for future updates. Also, jumble questions have a new UI, now you can drag things around!</p>
           <p>2.17.7 - Bug fixes</p>
@@ -576,7 +590,7 @@
       </div>
       <div class="tutorial" id="tutorial"></div>
       <div class="ad-container">
-        <ins class="adsbygoogle"
+        <ins class="adsbygoogle main-ad"
              style="display:block; text-align:center;"
              data-ad-layout="in-article"
              data-ad-format="fluid"
@@ -585,6 +599,20 @@
         <script>
              (adsbygoogle = window.adsbygoogle || []).push({});
         </script>
+        <style media="screen">
+          .main-ad{
+            width: auto;
+            height: auto;
+          }
+          @media(max-width: 800px){
+            .main-ad{
+              min-width: 400px;
+              max-width: 800px;
+              width: 100%;
+              height: 90px;
+            }
+          }
+        </style>
       </div>
     </div>
     <script type="text/javascript" src="index.js"></script>
@@ -616,10 +644,10 @@
       }
     </script>
     <!-- The core Firebase JS SDK is always required and must be listed first -->
-    <script async src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
+    <script async src="/ext/https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
     <!-- TODO: Add SDKs for Firebase products that you want to use
          https://firebase.google.com/docs/web/setup#available-libraries -->
-    <script async src="https://www.gstatic.com/firebasejs/7.14.2/firebase-analytics.js"></script>
+    <script async src="/ext/https://www.gstatic.com/firebasejs/7.14.2/firebase-analytics.js"></script>
     <script>
       // Your web app's Firebase configuration
       var firebaseConfig = {
