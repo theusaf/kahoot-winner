@@ -1,3 +1,4 @@
+/* global ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, ThemeChooser, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TutorialDiv */
 var socket = null;
 
 const MessageHandler = {
@@ -49,14 +50,14 @@ const MessageHandler = {
       }
       let url;
       switch (detectPlatform()) {
-        case "Windows":
-          url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
-          break;
-        case "MacOS":
-          url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
-          break;
-        default:
-          url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
+      case "Windows":
+        url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
+        break;
+      case "MacOS":
+        url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
+        break;
+      default:
+        url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
       }
       const div = document.createElement("div");
       div.innerHTML = `<span>Hmm, we seem to be having trouble on our end. Try <span class="mobihide">downloading our app or </span>pressing the report button below!</span>
@@ -85,10 +86,10 @@ const MessageHandler = {
   },
   Message: {
     SetName: name=>{
-      const a = document.getElementById("loginInput").value = name;
+      document.getElementById("loginInput").value = name;
     },
     PinGood: m=>{
-      pin = m.match(/\d+/g)[0];
+      const pin = m.match(/\d+/g)[0];
       if(pin != game.pin){
         game.pin = pin;
       }
@@ -190,7 +191,7 @@ class Game{
     this.questionAnswered = false;
   }
   sendPin(pin){
-    return new Promise((res,rej)=>{
+    return new Promise((res)=>{
       this.pin = pin;
       grecaptcha.ready(()=>{
         grecaptcha.execute("6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n",{action:"submit"}).then((token)=>{
@@ -235,7 +236,7 @@ class Game{
                 }else{
                   resetGame();
                 }
-              }
+              };
             }
             check(0.5);
           };
@@ -265,14 +266,14 @@ class Game{
       MessageHandler.Error.HANDSHAKE();
       let url;
       switch (detectPlatform()) {
-        case "Windows":
-          url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
-          break;
-        case "MacOS":
-          url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
-          break;
-        default:
-          url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
+      case "Windows":
+        url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
+        break;
+      case "MacOS":
+        url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
+        break;
+      default:
+        url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
       }
       const div = document.createElement("div");
       div.innerHTML = `<span>Hmm, we seem to be having trouble on our end. Try downloading our app!</span>
@@ -458,7 +459,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v2.18.2";
+localStorage.KW_Version = "v2.18.3";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
@@ -488,7 +489,7 @@ checkVersion.onload = function(){
             localStorage.KW_Version = version;
             location.reload();
           },3000);
-        }).catch(function(err) {
+        }).catch(function() {
           document.getElementById("UpdateDiv").outerHTML = "";
           new ErrorHandler("There was an error forcing an update. Please clear or reload the page cache manually.");
         });

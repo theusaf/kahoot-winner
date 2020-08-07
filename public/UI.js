@@ -1,3 +1,4 @@
+/* global game, dataLayer, send, socket, Game */
 // TODO: finish schema.org markup
 const KahootThemes = {
   Kahoot: {
@@ -76,7 +77,7 @@ class LoginPage{
       const trademark = document.createElement("span");
       trademark.innerHTML = "Kahoot! and the K! logo are trademarks of Kahoot! AS.";
       const policy = document.createElement("span");
-      policy.innerHTML = '<a href="/privacy/">Privacy</a> | <a href="/terms/">Terms</a>'
+      policy.innerHTML = "<a href=\"/privacy/\">Privacy</a> | <a href=\"/terms/\">Terms</a>";
       bottomDiv.append(changelog,trademark,policy);
       div.append(logo,logoText,pin,but,abt,bottomDiv);
     }
@@ -149,7 +150,7 @@ class LobbyPage{
   constructor(){
     window.onbeforeunload = function(e){
       e.returnValue = "Are you sure you want to leave the page?";
-    }
+    };
     document.querySelector(".ad-container").style.display = "none";
     if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
@@ -183,7 +184,7 @@ class LobbyPage{
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById("searchTerm").value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
       l.append(document.createElement("br"),document.createElement("br"),sp);
       div.append(l);
     }
@@ -315,7 +316,7 @@ class GetReadyPage{
         const chdiv = document.createElement("div");
         chdiv.className = "ChallengeQuestion noQuiz";
         const sp = document.createElement("span");
-        sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
+        sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById("searchTerm").value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
         chdiv.append(document.createElement("br"),document.createElement("br"),sp);
         objects.main.append(chdiv);
       }else{
@@ -421,7 +422,7 @@ class GetReadyPage{
                 game.question.data = game.guesses[0].questions[qs[i].i].choices;
                 game.ans[game.index] = game.question.data ? game.question.data.length : 4;
                 game.question.ans = game.ans;
-                Array.from(qdiv.children).forEach((item, i) => {
+                Array.from(qdiv.children).forEach((item) => {
                   item.className = "";
                 });
                 elem.className = "looseChoice";
@@ -432,7 +433,7 @@ class GetReadyPage{
               qdiv.append(elem);
             }
           }
-        }
+        };
         filter("");
         cont.append(inp,qdiv);
         objects.main.append(cont);
@@ -454,7 +455,7 @@ class GetReadyPage{
       const sp = document.createElement("span");
       if(game.guesses.length == 0){
         chdiv.className = "ChallengeQuestion noQuiz";
-        sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
+        sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById("searchTerm").value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
       }else{
         sp.innerHTML = "Question: " + (game.guesses[0].questions[game.index].question || game.guesses[0].questions[game.index].title);
       }
@@ -486,7 +487,7 @@ class GetReadyPage{
       const chdiv = document.createElement("div");
       chdiv.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById("searchTerm").value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
       chdiv.append(document.createElement("br"),document.createElement("br"),sp);
       objects.main.append(chdiv);
     }
@@ -650,7 +651,6 @@ class QuestionAnswererPage{
           }
           if(a[closestIndex].style.visibility !== "hidden"){
             // swap
-            const text = document.querySelector(".textAnswer");
             if(currentIndex > closestIndex){
               div.insertBefore(a[currentIndex],a[closestIndex]);
             }else{
@@ -668,7 +668,7 @@ class QuestionAnswererPage{
             copy.style.left = ((e.x || e.touches[0].clientX) - 16) + "px";
             rearrange(e,div.querySelectorAll("img.jumble"));
           };
-          const mouseup = function(e){
+          const mouseup = function(){
             copy.outerHTML = "";
             el.style.visibility = "";
             window.removeEventListener("mousemove",mousemove);
@@ -686,7 +686,7 @@ class QuestionAnswererPage{
           e.setAttribute("index",i);
           const prep = function(event){
             createClone(e,event);
-          }
+          };
           e.addEventListener("touchstart",prep);
           e.addEventListener("mousedown",prep);
         });
@@ -802,7 +802,7 @@ class QuestionAnswererPage{
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById("searchTerm").value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
       l.append(document.createElement("br"),document.createElement("br"),sp);
       objects.main.append(l);
     }
@@ -822,7 +822,7 @@ class QuestionSnarkPage{
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById("searchTerm").value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
       l.append(document.createElement("br"),document.createElement("br"),sp);
       stuff.main.append(l);
     }
@@ -845,7 +845,7 @@ class QuestionEndPage{
       const l = document.createElement("div");
       l.className = "ChallengeQuestion noQuiz";
       const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById('searchTerm').value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank">[?]</a>`;
+      sp.innerHTML = `<input id="nameInput" placeholder="Enter Quiz Name" value="${document.getElementById("searchTerm").value || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
       l.append(document.createElement("br"),document.createElement("br"),sp);
       objects.main.append(l);
     }
@@ -866,7 +866,7 @@ class QuestionEndPage{
     correctMark.id = "correctMark";
     correctMark.src = info.correct ? "/resource/check.svg" : "/resource/cross.svg";
     const pointsEarned = document.createElement("h3");
-    pointsEarned.innerHTML = info.correct ? "+" + (info.points + (info.streak > 1 ? (info.streak > 5 ? 500 : (info.streak - 1) * 100) : 0)) : "Keep trying at it!";
+    pointsEarned.innerHTML = info.correct ? "+" + info.points : "Keep trying at it!";
     pointsEarned.className = "shadow";
     const streakImage = new Image;
     const streakImageContainer = document.createElement("div");
@@ -914,7 +914,7 @@ class QuizEndPage{
     }else if(game.end.info.rank == 2){
       message = "2<sup>nd</sup>";
     }else if (game.end.info.rank == 3) {
-      message = "3<sup>rd</sup>"
+      message = "3<sup>rd</sup>";
     }else if (game.end.info.rank <= 5) {
       message = "Top 5!";
     }else{
@@ -944,15 +944,7 @@ class QuizEndPage{
   }
 }
 
-function calculateStreakPoints(streak){
-  if(streak > 5){
-    return 500;
-  }else{
-    return streak * 100;
-  }
-}
-
-function calculateTimeout(points,time,streak){
+function calculateTimeout(points,time){
   const score = points; // - calculateStreakPoints(streak);
   const timeout = -2 * time * ((score / 1000) - 1);
   if(timeout < 0.1){
@@ -986,6 +978,7 @@ async function resetGame(recover){
   if(socket){
     socket.onclose = null;
     socket.close();
+    socket = null;
   }
   game = new Game();
   if(recover){
@@ -1007,7 +1000,7 @@ async function resetGame(recover){
         resetGame();
       }
       socket.removeEventListener("message",wait);
-    }
+    };
     socket.addEventListener("message",wait);
     return;
   }
@@ -1134,7 +1127,7 @@ const UIDiv = document.getElementsByClassName("Main")[0];
 const HideAnswers = document.getElementById("hideAnswers");
 const LoadingText = document.getElementById("loadingText");
 const ThemeChooser = document.getElementById("theme");
-const login = new LoginPage(false);
+new LoginPage(false);
 loadPresets();
 let closePage = 0;
 
@@ -1146,23 +1139,23 @@ const dgo = document.getElementById("dgo");
 const dco = document.getElementById("dco");
 SearchDivSettings.onchange = GameDivSettings.onchange = ChallengeDivSettings.onchange = function(e){
   switch (e.target.id) {
-    case "div_search_options":
+  case "div_search_options":
     dso.className = "flex selected";
     dgo.className = "flex";
     dco.className = "flex";
     break;
-    case "div_game_options":
+  case "div_game_options":
     dso.className = "flex";
     dgo.className = "flex selected";
     dco.className = "flex";
     break;
-    case "div_challenge_options":
+  case "div_challenge_options":
     dso.className = "flex";
     dgo.className = "flex";
     dco.className = "flex selected";
     break;
   }
-}
+};
 dgo.className = "flex selected";
 
 AboutSwitch.addEventListener("click",()=>{
@@ -1208,106 +1201,106 @@ const shortcuts = e=>{
     return;
   }
   switch (e.key) {
-    case "e":
-      // reconnect bot
-      send({type:"RECONNECT",message:"I think i lost connection"});
-      dataLayer.push({type:"reconnect",value:""});
-      break;
-    case "b":
-      // brute force
-      document.getElementById("brute").click();
-      new ErrorHandler(`Brute 2FA: ${document.getElementById("brute").checked ? "on" : "off"}`,true);
-      dataLayer.push({type:"brute",value:document.getElementById("brute").checked});
-      break;
-    case "p":
-      // fail on purpose
-      document.getElementById("fail").value = document.getElementById("fail").value == 0 ? 0.9 : 0;
-      new ErrorHandler(`Purposely Fail: ${document.getElementById("fail").value != 0 ? "on" : "off"}`,true);
-      dataLayer.push({type:"fail",value:document.getElementById("fail").value});
-      break;
-    case "m":
-      // manual answering
-      document.getElementById("manual").click();
-      new ErrorHandler(`Manual Control: ${document.getElementById("manual").checked ? "on" : "off"}`,true);
-      dataLayer.push({type:"manual",value:document.getElementById("manual").checked});
-      break;
-    case "h":
-      // hide correct
-      document.getElementById("hideAnswers").click();
-      new ErrorHandler(`Hide Correct: ${document.getElementById("hideAnswers").checked ? "on" : "off"}`,true);
-      dataLayer.push({type:"hide",value:document.getElementById("hideAnswers").checked});
-      break;
-    case "o":
-      // hide correct
-      document.getElementById("challengeCorrect").click();
-      new ErrorHandler(`Challenge Always Correct: ${document.getElementById("challengeCorrect").checked ? "on" : "off"}`,true);
-      dataLayer.push({type:"correct",value:document.getElementById("challengeCorrect").checked});
-      break;
-    case "u":
-      document.getElementById("previewQuestion").click();
-      new ErrorHandler(`Preview Question: ${document.getElementById("previewQuestion").checked ? "on" : "off"}`,true);
-      dataLayer.push({type:"preview",value:document.getElementById("previewQuestion").checked});
-      break;
-    case "j":
-      try{
-        if(SettingDiv.style.display){
-          SettingDiv.style = "";
-          document.querySelector(".Changelog").style = "";
-          document.querySelector(".About").style = "";
-          document.getElementById("tutorial").style = "";
-          document.querySelector(".misc").style = "";
-          document.querySelector(".Error").style = "";
-          document.getElementById("logotext").style = "";
-          document.querySelector(".sm.sidebar").style = "";
-          document.getElementById("abtlnk").style = "";
-          document.getElementById("chnge").style = "";
-        }else{
-          SettingDiv.style = "display: none";
-          document.querySelector(".Changelog").style = "display: none";
-          document.querySelector(".About").style = "display: none";
-          document.getElementById("tutorial").style = "display: none";
-          document.querySelector(".misc").style = "opacity: 0";
-          document.querySelector(".Error").style = "display: none";
-          document.getElementById("logotext").style = "display: none";
-          document.querySelector(".sm.sidebar").style = "display: none";
-          document.getElementById("abtlnk").style = "display: none";
-          document.getElementById("chnge").style = "display: none";
-        }
-      }catch(e){
-        console.log(e);
-      }finally{
-        const icon = document.head.querySelector('[rel="shortcut icon"]') || document.createElement("link");
-        if(!icon.isConnected){
-          icon.rel = "shortcut icon";
-          icon.href = "https://kahoot.it/favicon.ico";
-          document.head.append(icon);
-          document.title = "Play Kahoot!";
-        }
-        document.getElementById("manual").checked = true;
-        document.getElementById("hideAnswers").checked = Boolean(SettingDiv.style.display);
-        game.saveOptions();
-        // yes, that is a typo
-        dataLayer.push({type:"panick",value:""});
+  case "e":
+    // reconnect bot
+    send({type:"RECONNECT",message:"I think i lost connection"});
+    dataLayer.push({type:"reconnect",value:""});
+    break;
+  case "b":
+    // brute force
+    document.getElementById("brute").click();
+    new ErrorHandler(`Brute 2FA: ${document.getElementById("brute").checked ? "on" : "off"}`,true);
+    dataLayer.push({type:"brute",value:document.getElementById("brute").checked});
+    break;
+  case "p":
+    // fail on purpose
+    document.getElementById("fail").value = document.getElementById("fail").value == 0 ? 0.9 : 0;
+    new ErrorHandler(`Purposely Fail: ${document.getElementById("fail").value != 0 ? "on" : "off"}`,true);
+    dataLayer.push({type:"fail",value:document.getElementById("fail").value});
+    break;
+  case "m":
+    // manual answering
+    document.getElementById("manual").click();
+    new ErrorHandler(`Manual Control: ${document.getElementById("manual").checked ? "on" : "off"}`,true);
+    dataLayer.push({type:"manual",value:document.getElementById("manual").checked});
+    break;
+  case "h":
+    // hide correct
+    document.getElementById("hideAnswers").click();
+    new ErrorHandler(`Hide Correct: ${document.getElementById("hideAnswers").checked ? "on" : "off"}`,true);
+    dataLayer.push({type:"hide",value:document.getElementById("hideAnswers").checked});
+    break;
+  case "o":
+    // hide correct
+    document.getElementById("challengeCorrect").click();
+    new ErrorHandler(`Challenge Always Correct: ${document.getElementById("challengeCorrect").checked ? "on" : "off"}`,true);
+    dataLayer.push({type:"correct",value:document.getElementById("challengeCorrect").checked});
+    break;
+  case "u":
+    document.getElementById("previewQuestion").click();
+    new ErrorHandler(`Preview Question: ${document.getElementById("previewQuestion").checked ? "on" : "off"}`,true);
+    dataLayer.push({type:"preview",value:document.getElementById("previewQuestion").checked});
+    break;
+  case "j":
+    try{
+      if(SettingDiv.style.display){
+        SettingDiv.style = "";
+        document.querySelector(".Changelog").style = "";
+        document.querySelector(".About").style = "";
+        document.getElementById("tutorial").style = "";
+        document.querySelector(".misc").style = "";
+        document.querySelector(".Error").style = "";
+        document.getElementById("logotext").style = "";
+        document.querySelector(".sm.sidebar").style = "";
+        document.getElementById("abtlnk").style = "";
+        document.getElementById("chnge").style = "";
+      }else{
+        SettingDiv.style = "display: none";
+        document.querySelector(".Changelog").style = "display: none";
+        document.querySelector(".About").style = "display: none";
+        document.getElementById("tutorial").style = "display: none";
+        document.querySelector(".misc").style = "opacity: 0";
+        document.querySelector(".Error").style = "display: none";
+        document.getElementById("logotext").style = "display: none";
+        document.querySelector(".sm.sidebar").style = "display: none";
+        document.getElementById("abtlnk").style = "display: none";
+        document.getElementById("chnge").style = "display: none";
       }
-      break;
-    case "d":
-      document.getElementById("ChallengeDisableAutoplay").click();
-      new ErrorHandler(`Challenge Autoplay: ${document.getElementById("ChallengeDisableAutoplay").checked ? "off" : "on"}`,true);
-      dataLayer.push({type:"autoplay",value:document.getElementById("ChallengeDisableAutoplay").checked});
-      break;
-    case "k":
-      document.getElementById("searchLoosely").value = Number(document.getElementById("searchLoosely").value) ? 0 : 1;
-      new ErrorHandler(`Loose Searching: ${Number(document.getElementById("searchLoosely").value) ? "on" : "off"}`,true);
-      dataLayer.push({type:"loose",value:document.getElementById("searchLoosely").value});
-      break;
-    default:
-      return;
+    }catch(e){
+      console.log(e);
+    }finally{
+      const icon = document.head.querySelector("[rel=\"shortcut icon\"]") || document.createElement("link");
+      if(!icon.isConnected){
+        icon.rel = "shortcut icon";
+        icon.href = "https://kahoot.it/favicon.ico";
+        document.head.append(icon);
+        document.title = "Play Kahoot!";
+      }
+      document.getElementById("manual").checked = true;
+      document.getElementById("hideAnswers").checked = Boolean(SettingDiv.style.display);
+      game.saveOptions();
+      // yes, that is a typo
+      dataLayer.push({type:"panick",value:""});
+    }
+    break;
+  case "d":
+    document.getElementById("ChallengeDisableAutoplay").click();
+    new ErrorHandler(`Challenge Autoplay: ${document.getElementById("ChallengeDisableAutoplay").checked ? "off" : "on"}`,true);
+    dataLayer.push({type:"autoplay",value:document.getElementById("ChallengeDisableAutoplay").checked});
+    break;
+  case "k":
+    document.getElementById("searchLoosely").value = Number(document.getElementById("searchLoosely").value) ? 0 : 1;
+    new ErrorHandler(`Loose Searching: ${Number(document.getElementById("searchLoosely").value) ? "on" : "off"}`,true);
+    dataLayer.push({type:"loose",value:document.getElementById("searchLoosely").value});
+    break;
+  default:
+    return;
   }
   dataLayer.push({event:"shortcut"});
   e.preventDefault();
   e.stopPropagation();
   game.saveOptions();
-}
+};
 window.addEventListener("keydown",shortcuts);
 UIError.addEventListener("click",()=>{
   clearTimeout(game.errorTimeout);

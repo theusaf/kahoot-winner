@@ -1,5 +1,4 @@
-function noop(){}
-const CACHE_NAME = "kahoot-win-cache-v2.18.2";
+const CACHE_NAME = "kahoot-win-cache-v2.18.3";
 const CONST_NAME = "kahoot-win-cache-consts-v2.18.0";
 const URLCONSTS = [
   "/resource/blue.svg",
@@ -53,7 +52,7 @@ self.addEventListener("install",evt=>{
 
 self.addEventListener("fetch", function(event) {
 
-  if(event.request.url.match('^.*(\/creator\/).*$')){
+  if(event.request.url.match("^.*(/creator/).*$")){
     return false;
   }
 
@@ -66,7 +65,7 @@ self.addEventListener("fetch", function(event) {
         }
         return fetch(event.request);
       }
-    )
+      )
   );
 });
 

@@ -1,17 +1,13 @@
 const electron = require("electron");
 const compression = require("compression");
 const appInformation = require("./package.json");
-const fs = require("fs");
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const app = express();
 const ip = require("ip");
 const http = require("http");
-const multer = require("multer");
-const upload = multer();
 const cookieParser = require("cookie-parser");
-const userAgents = require("user-agents");
 const startupDate = Date.now();
 const {URL} = require("url");
 const {edit} = require("./regex.js");
@@ -43,7 +39,7 @@ KahootFire.get().then(async res=>{
   KahootDatabaseInitialized = true;
 });
 
-app.enable('trust proxy');
+app.enable("trust proxy");
 app.use(compression({
   filter: (req,res)=>{
     const types = {
@@ -99,7 +95,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 const port = process.env.PORT || 2000;
 const server = http.createServer(app);
 let handshakeVotes = [];
-server.once("error",err=>{
+server.once("error",()=>{
   // probably port already in use
   console.log("Port used, assuming kahoot-win already active");
 });
@@ -506,7 +502,7 @@ function SearchDatabase(finder){
       const b = finder.parent.kahoot.quiz.answerCounts.slice().sort();
       if(JSON.stringify(a) !== JSON.stringify(b)){
         return false;
-      };
+      }
       if(ans.length){
         for (let i = 0; i < ans.length; i++) {
           let ok = false;
@@ -832,7 +828,6 @@ const Messages = {
     }
     if(index != game.correctIndex){
       game.correctIndex = index;
-      let ans;
       const type2 = game.kahoot.quiz.currentQuestion.type;
       const type = game.finder.hax.validOptions[0].questions[index].type;
       if(type != type2){ // hmm, wrong question.
@@ -878,7 +873,7 @@ const Messages = {
   },
   DO_TWO_STEP: (game,steps)=>{
     if(!game.security.joined){
-      return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});;
+      return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
     }
     try{game.kahoot.answer2Step(JSON.parse(steps));}catch(err){game.send({message:"INVALID_USER_INPUT",type:"Error"});}
   },
@@ -891,7 +886,7 @@ const Messages = {
     if(game.security.joined){
       game.kahoot._wsHandler.ws = {
         readyState: 3
-      }
+      };
       game.kahoot.reconnect();
     }else{
       game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
@@ -1199,13 +1194,13 @@ app.get(/ext\/?https?:\/\/.*\.(google|gstatic|facebook|fb).*\.(com|net)\/.*/i,(r
     let d = new Date;
     d.setYear(d.getFullYear() + 1);
     res.setHeader("Expires", d.toUTCString());
-    res.setHeader("Content-Type",r.headers['content-type'] || "text/html");
+    res.setHeader("Content-Type",r.headers["content-type"] || "text/html");
     res.send(b);
   });
 });
 
 // 404 Page
-app.use((req,res,next)=>{
+app.use((req,res)=>{
   res.status(404);
 
   // respond with html page
@@ -1232,23 +1227,23 @@ function createWindow () {
     webPreferences: {
       nodeIntegration: true
     }
-  })
+  });
 
   // and load the index.html of the app.
-  win.loadURL('http://localhost:2000');
+  win.loadURL("http://localhost:2000");
 }
 
 electron.app.whenReady().then(createWindow);
 
-electron.app.on('window-all-closed', () => {
+electron.app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
+  if (process.platform !== "darwin") {
     electron.app.quit();
   }
 });
 
-electron.app.on('activate', () => {
+electron.app.on("activate", () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (electron.BrowserWindow.getAllWindows().length === 0) {

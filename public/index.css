@@ -978,6 +978,9 @@ img[index="3"]{
   position: fixed;
   z-index: 30;
 }
+.mobile-ad{
+  display: none;
+}
 .failChoice{
   position: fixed;
   bottom: 4.5rem;
@@ -1153,6 +1156,9 @@ div.info > div label{
 .preset input:checked + div{
   display: block;
 }
+.error-info{
+  pointer-events: all;
+}
 
 /* Scrollbar stuff */
 ::-webkit-scrollbar{
@@ -1312,6 +1318,16 @@ div.info > div label{
     max-height: 90px;
     overflow: hidden;
     width: 100%;
+    max-width: 100%;
+  }
+  .ad-container .main-ad{
+    display: none;
+  }
+  .ad-container .mobile-ad{
+    display: block;
+    height: 90px;
+    max-height: 90px;
+    width: auto;
   }
   .looseDiv input, .looseDiv div{
     max-width: 15rem;
