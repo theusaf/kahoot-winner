@@ -1,4 +1,7 @@
-const electron = require("electron");
+let electron;
+if(!process.argv.includes("--disable-electron")){
+  electron = require("electron");
+}
 const compression = require("compression");
 const appInformation = require("./package.json");
 const express = require("express");
@@ -11,33 +14,45 @@ const cookieParser = require("cookie-parser");
 const startupDate = Date.now();
 const {URL} = require("url");
 const {edit} = require("./regex.js");
+const request = require("request");
+const fs = require('fs');
 
-const firebase = require("firebase/app");
-require("firebase/firestore");
-const firebaseConfig = {
-  apiKey: "AIzaSyCRrA1auaN0lfFVApznuxw4l90sHib_DX4",
-  authDomain: "kahoot-win.firebaseapp.com",
-  databaseURL: "https://kahoot-win.firebaseio.com",
-  projectId: "kahoot-win",
-  storageBucket: "kahoot-win.appspot.com",
-  messagingSenderId: "951940610967",
-  appId: "1:951940610967:web:abee8780fcf3a1433d62d2",
-  measurementId: "G-Z0NR6X6Q9Z"
-};
-firebase.initializeApp(firebaseConfig);
-let db = firebase.firestore();
+let mainPath = __dirname;
+if(electron){
+  try{
+    mainPath = path.join((electron.app || electron.remote.app).getPath("appData"),"Kahoot Winner");
+  }catch(e){
+    console.log("Unable to detect application data folder.");
+  }
+}
+
+if(mainPath != __dirname){
+  try{
+    fs.mkdirSync(mainPath);
+  }catch(e){} // probably already created
+}
+
 const KahootDatabase = {};
 let KahootDatabaseInitialized = false;
-let KahootFire = db.collection("KahootInfo");
-KahootFire.get().then(async res=>{
-  res.forEach((doc) => {
-    const quizzes = doc.data();
-    for(let id in quizzes){
-      KahootDatabase[id] = quizzes[id];
+if(!fs.existsSync(path.join(mainPath,"latest.txt"))){
+  console.log("Generating latest.txt...");
+  fs.writeFileSync(path.join(mainPath,"latest.txt"),String(Date.now()));
+}
+if(!fs.existsSync(path.join(mainPath,"kdb.json")) || Number(fs.readFileSync(path.join(mainPath,"latest.txt"))) + (1000*60*24) < Date.now()){
+  console.log("Fetching latest database from archive.org...");
+  request("https://archive.org/download/kahoot-win/full-export.json",{json:true},(e,r,b)=>{
+    if(e){
+      console.log("Error fetching database:");
+      console.log(e);
+      return;
     }
+    console.log("Saving database to kdb.json...");
+    Object.assign(KahootDatabase,b);
+    KahootDatabaseInitialized = true;
+    fs.writeFileSync(path.join(mainPath,"latest.txt"),String(Date.now()));
+    fs.writeFileSync(path.join(mainPath,"kdb.json"),JSON.stringify(b));
   });
-  KahootDatabaseInitialized = true;
-});
+}
 
 app.enable("trust proxy");
 app.use(compression({
@@ -101,8 +116,7 @@ server.once("error",()=>{
 });
 server.listen(port);
 console.log(ip.address() + ":" + port);
-console.log("Using version 2.18.2");
-const request = require("request");
+console.log("Using version " + require("./package.json").version);
 const ws = require("ws");
 const KH = require("kahoot.js-updated");
 const Search = require("kahoot-search");
@@ -328,9 +342,15 @@ class QuizFinder{
     }
     // these filters are to filter out quizzes based on new answers
     const filter = o=>{
+      if(o.questions.length != this.parent.kahoot.quiz.questionCount){
+        return false;
+      }
       let a = this.hax.answers;
       for(var i = 0;i < a.length;++i){
         try{
+          if(o.questions[a[i].i].type != a[i].t){
+            return false;
+          }
           if(!o.questions[a[i].i].choices){
             // if no choices ignore, unless a[i] actually was something
             if(a[i].n){
@@ -571,6 +591,9 @@ async function Searching(term,opts,finder){
         for(var i = 0;i < a.length;++i){
           if(!o.questions[a[i].i].choices){
             continue;
+          }
+          if(a[i].t != o.questions[a[i].i].type){
+            break;
           }
           // if correct answer matches or is a survey/jumble/info
           if(o.questions[a[i].i].choices.filter(
@@ -1219,34 +1242,72 @@ app.use((req,res)=>{
   res.type("txt").send("[404] I think you made a typo! Try going to https://kahoot-win.herokuapp.com/");
 });
 
-function createWindow () {
-  // Create the browser window.
-  let win = new electron.BrowserWindow({
-    width: 1000,
-    height: 700,
-    webPreferences: {
-      nodeIntegration: true
+if(!process.argv.includes("--disable-electron")){
+  function createWindow () {
+    // Create the browser window.
+    let win = new electron.BrowserWindow({
+      width: 1000,
+      height: 700,
+      webPreferences: {
+        nodeIntegration: true
+      }
+    });
+
+    // and load the index.html of the app.
+    win.loadURL("http://localhost:2000");
+
+    win.on("close",async evt=>{
+      const {response} = await electron.dialog.showMessageBox({
+        buttons: ["No","Yes"],
+        message: "Are you sure you want to close the app?",
+        title: "Exit app"
+      });
+      if(response === 1){
+        win.destroy();
+      }else{
+        evt.preventDefault();
+      }
+    });
+  }
+
+  // Check latest version with live site
+  request("https://kahoot-win.herokuapp.com/up",async (e,r,b)=>{
+    if(e){
+      return console.log("Error fetching latest version information");
+    }
+    if(b && typeof b === "string"){
+      if(b.includes(require("./package.json").version)){
+        console.log("Client is up to date.");
+      }else{
+        console.log("Client is not up to date.");
+        const {response} = await electron.dialog.showMessageBox({
+          buttons: ["Later","Update"],
+          message: "An update is available. Would you like to download it now?",
+          title: "New Version"
+        });
+        if(response === 1){
+          electron.shell.openExternal("https://kahoot-win.herokuapp.com/blog/download");
+          electron.app.exit(0);
+        }
+      }
     }
   });
 
-  // and load the index.html of the app.
-  win.loadURL("http://localhost:2000");
+  electron.app.whenReady().then(createWindow);
+
+  electron.app.on("window-all-closed", () => {
+    // On macOS it is common for applications and their menu bar
+    // to stay active until the user quits explicitly with Cmd + Q
+    if (process.platform !== "darwin") {
+      electron.app.quit();
+    }
+  });
+
+  electron.app.on("activate", () => {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (electron.BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
 }
-
-electron.app.whenReady().then(createWindow);
-
-electron.app.on("window-all-closed", () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== "darwin") {
-    electron.app.quit();
-  }
-});
-
-electron.app.on("activate", () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (electron.BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});

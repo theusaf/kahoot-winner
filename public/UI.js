@@ -64,7 +64,11 @@ class LoginPage{
       };
       div.append(logo,logoText,pin,rand,but);
       document.getElementsByClassName("grecaptcha-badge")[0].style.visibility = "hidden";
+      if(game.pin[0] != "0"){
+        document.getElementById("div_challenge_options").parentElement.className = "fadedm";
+      }
     }else{
+      document.getElementById("div_challenge_options").parentElement.className = "";
       const abt = document.createElement("label");
       abt.htmlFor = "about";
       abt.innerHTML = "About";
@@ -148,6 +152,9 @@ class ErrorHandler{
 }
 class LobbyPage{
   constructor(){
+    if(document.getElementById("handshake-fail-div")){
+      document.getElementById("handshake-fail-div").outerHTML = "";
+    }
     window.onbeforeunload = function(e){
       e.returnValue = "Are you sure you want to leave the page?";
     };
