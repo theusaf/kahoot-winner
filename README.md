@@ -10,12 +10,26 @@ When run, it will create an electron window and run the app at localhost:2000, o
 
 You may modify the code to remove the electron stuff.
 
+**Important: The latest version uses recaptcha v3**
+- You need to create a recaptcha account and add your site domain (unless you are just using it as localhost)
+- This means that you need to modify `index.html` and `index.js` to use your recaptcha public keys
+
 Remember to give credit to theusaf for this.
 
 ## Reformat for use in non-gui devices
-1. Comment out line 1.
+Simply append `--disable-electron` when starting the app:
+```bash
+node kahoot.js --disable-electron
+```
+
+**OR**
+
+1. Comment out lines 1-4.
   ```js
-  // const electron = require("electron");
+  /*let electron;
+  if(!process.argv.includes("--disable-electron")){
+    electron = require("electron");
+  }*/
   const compression = require("compression");
   ...
   ```
