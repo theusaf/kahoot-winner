@@ -14,6 +14,8 @@ You may modify the code to remove the electron stuff.
 - You need to create a recaptcha account and add your site domain (unless you are just using it as localhost)
 - This means that you need to modify `index.html` and `index.js` to use your recaptcha public keys
 
+The app doesn't actually verify the requests, so you can actually just remove all things related to recaptcha
+
 Remember to give credit to theusaf for this.
 
 ## Reformat for use in non-gui devices
