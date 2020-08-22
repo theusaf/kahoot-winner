@@ -26,6 +26,12 @@ Remember to give credit to theusaf for this.
   - json-stream (StreamObject - minimal memory usage to loop through the JSON database from archive.org)
   - Examples to come later.
 
+Alternatively, I have uploaded various versions of the files in archive.org
+- `full-export.json` (The full JSON object with all the kahoots.)
+- `full-export-sectioned.json` (The full JSON object, split into 255 parts ("00" - "ff").)
+- `full-export-keys` (The list of keys to use.)
+- `/json/<sub>.json` (Where `<sub>` is a 2 character number from "00" - "ff")
+
 ## Reformat for use in non-gui devices
 Simply append `--disable-electron` when starting the app:
 ```bash
