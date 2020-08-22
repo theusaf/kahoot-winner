@@ -18,6 +18,14 @@ The app doesn't actually verify the requests, so you can actually just remove al
 
 Remember to give credit to theusaf for this.
 
+## Requirements
+- At least 1GB RAM. If you only have 512 MB, you will need to make changes to store the database in disk instead of memory.
+- At least 200 MB. (This requirement may change in the future, ~500MB is recommended.)
+- Suggested packages:
+  - quick.db (storage in file system)
+  - json-stream (StreamObject - minimal memory usage to loop through the JSON database from archive.org)
+  - Examples to come later.
+
 ## Reformat for use in non-gui devices
 Simply append `--disable-electron` when starting the app:
 ```bash
