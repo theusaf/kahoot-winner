@@ -29,8 +29,8 @@ Remember to give credit to theusaf for this.
 Alternatively, I have uploaded various versions of the files in archive.org
 - `full-export.json` (The full JSON object with all the kahoots.)
 - `full-export-sectioned.json` (The full JSON object, split into 255 parts ("00" - "ff").)
-- `full-export-keys` (The list of keys to use.)
-- `/json/<sub>.json` (Where `<sub>` is a 2 character number from "00" - "ff")
+- `full-export-keys.json` (The list of keys to use.)
+- `full-export-zip.zip` A zip file with sub directories (00 - ff) containing json quiz objects.
 
 ## Reformat for use in non-gui devices
 Simply append `--disable-electron` when starting the app:
