@@ -26,11 +26,12 @@ Remember to give credit to theusaf for this.
   - json-stream (StreamObject - minimal memory usage to loop through the JSON database from archive.org)
   - Examples to come later.
 
-Alternatively, I have uploaded various versions of the files in archive.org
+Alternatively, I have uploaded various versions of the files in [archive.org](https://archive.org/download/kahoot-win)
 - `full-export.json` (The full JSON object with all the kahoots.)
 - `full-export-sectioned.json` (The full JSON object, split into 255 parts ("00" - "ff").)
 - `full-export-keys.json` (The list of keys to use.)
-- `json.zip` A zip file with sub directories (00 - ff) containing json quiz objects.
+- `json.zip` A zip file with sub files (00 - ff) containing json quiz objects. (Files stored in a folder named "json")
+- `json-full.zip` A zip file containing all items. (Stored in a folder named "json-full")
 
 ## Reformat for use in non-gui devices
 Simply append `--disable-electron` when starting the app:
