@@ -17,5 +17,6 @@
       "quotes": ["error", "double"],
       "no-control-regex": ["off"],
       "no-empty": ["warn"]
-    }
+    },
+    "root": true
 }

@@ -1328,3 +1328,65 @@ SettingSwitch.addEventListener("click",()=>{
   }
   pressTime = Date.now();
 });
+
+// Quiz Search
+const SearchInput = document.getElementById("sub-quiz-input");
+const SearchOutput = document.getElementById("sub-quiz-output");
+let SearchIndex = 0;
+function Search(term,index){
+  SearchOutput.innerHTML = "Loading...";
+  const x = new XMLHttpRequest();
+  x.open("GET",`/search?q=${encodeURIComponent(term)}&c=${Number(index)}`);
+  x.send();
+  x.onload = function(){
+    const data = JSON.parse(x.response);
+    if(data.length === 0){
+      SearchOutput.innerHTML = "No Results.";
+      return;
+    }
+    // format data
+    FormatSearch(data);
+    document.getElementById("sub-quiz-next").addEventListener("click",()=>{
+      Search(term,(index || 0) + 25);
+    });
+    const setters = Array.from(document.getElementsByClassName("sub-quiz-button"));
+    setters.forEach((item) => {
+      item.addEventListener("click",()=>{
+        const uuid = item.nextElementSibling.value;
+        document.getElementById("uuid").value = uuid;
+        document.getElementById("sub-uuid").checked = false;
+      });
+    });
+  };
+};
+function FormatSearch(quizzes){
+  SearchOutput.innerHTML = `
+  <span>
+    <span class="sub-quiz-img"><img src="/resource/red-konosuba.svg"/></span>
+    <span class="sub-quiz-title">Quiz Title</span>
+    <span class="sub-quiz-author">Quiz Creator</span>
+    <span class="sub-quiz-questions"># of Questions</span>
+    <button id="sub-quiz-next">Next</button>
+  </span>
+  <hr/>
+  `;
+  for(let i in quizzes){
+    const quiz = quizzes[i];
+    const template = document.createElement("template");
+    template.innerHTML = `<span>
+      <span class="sub-quiz-img"><img src="${quiz.cover}"/></span>
+      <span class="sub-quiz-title">${quiz.title}</span>
+      <span class="sub-quiz-author">${quiz.creator_username}</span>
+      <span class="sub-quiz-questions">${quiz.questions.length}</span>
+      <button class="sub-quiz-button">Use</button>
+      <input type="text" class="ch" value="${quiz.uuid}"/>
+    </span>`;
+    SearchOutput.append(template.content.cloneNode(true));
+  }
+}
+SearchInput.addEventListener("keydown",e=>{
+  if(e.code === "Enter"){
+    SearchIndex = 0;
+    Search(SearchInput.value,SearchIndex);
+  }
+});

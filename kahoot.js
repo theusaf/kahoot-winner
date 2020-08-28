@@ -15,7 +15,7 @@ const startupDate = Date.now();
 const {URL} = require("url");
 const {edit} = require("./regex.js");
 const request = require("request");
-const fs = require('fs');
+const fs = require("fs");
 
 let mainPath = __dirname;
 if(electron){
@@ -47,10 +47,39 @@ if(!fs.existsSync(path.join(mainPath,"kdb.json")) || Number(fs.readFileSync(path
       return;
     }
     console.log("Saving database to kdb.json...");
-    Object.assign(KahootDatabase,b);
+    for(let i in b){
+      const len = b[i].questions.length;
+      if(!KahootDatabase[len]){
+        KahootDatabase[len] = {
+          [i]: b[i]
+        };
+      }else{
+        Object.assign(KahootDatabase[len],{
+          [i]: b[i]
+        });
+      }
+    }
     KahootDatabaseInitialized = true;
-    fs.writeFileSync(path.join(mainPath,"latest.txt"),String(Date.now()));
-    fs.writeFileSync(path.join(mainPath,"kdb.json"),JSON.stringify(b));
+    fs.writeFile(path.join(mainPath,"latest.txt"),String(Date.now()),()=>{});
+    fs.writeFile(path.join(mainPath,"kdb.json"),JSON.stringify(b),()=>{});
+  });
+}else{
+  fs.readFile(path.join(mainPath,"kdb.json"),"utf8",(err,b)=>{
+    if(err){return;}
+    KahootDatabaseInitialized = true;
+    const data = JSON.parse(b);
+    for(let i in data){
+      const len = data[i].questions.length;
+      if(!KahootDatabase[len]){
+        KahootDatabase[len] = {
+          [i]: data[i]
+        };
+      }else{
+        Object.assign(KahootDatabase[len],{
+          [i]: data[i]
+        });
+      }
+    }
   });
 }
 
@@ -332,6 +361,7 @@ class QuizFinder{
     }
   }
   async searchKahoot(index){
+    if(!this.parent){return;}
     // no need to search for challenges
     if(this.parent.options.isChallenge){
       return;
@@ -504,11 +534,11 @@ function SearchDatabase(finder){
   if(!KahootDatabaseInitialized){
     return [];
   }
+  if(!finder.parent){
+    return [];
+  }
   const filt = k=>{
     if(!finder.parent){
-      return false;
-    }
-    if(k.questions.length != finder.parent.kahoot.quiz.questionCount){
       return false;
     }
     if(finder.parent.options.author){
@@ -569,7 +599,11 @@ function SearchDatabase(finder){
     }
     return true;
   };
-  return Object.values(KahootDatabase).filter(filt);
+  const len = finder.parent.kahoot.quiz.questionCount;
+  if(!KahootDatabase[len]){
+    return [];
+  }
+  return Object.values(KahootDatabase[len]).filter(filt);
 }
 async function Searching(term,opts,finder){
   const a = new Search(term,opts);

@@ -3,7 +3,7 @@
   <head>
     <link rel="preload" href="/ext/https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta name="version" content="2.18.4">
+    <meta name="version" content="2.19.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="Kahoot Winner">
     <meta name="description" content="A hack for winning public Kahoot quizzes and challenges. Enter your PIN or Challenge URL, enter the name of the quiz, and go! The server will try to find the answers for you! One of the best and actively maintained Kahoot bots online, working 2020!">
@@ -142,6 +142,25 @@
                 <p>For example, for the url <code>https://create.kahoot.it/details/movie-quotes/c2227e28-5cd0-41b6-a758-1d4aca486bda</code> you would input <code>c2227e28-5cd0-41b6-a758-1d4aca486bda</code></p>
               </div>
             </div>
+            <label for="sub-uuid">
+              <span class="shortcut2">
+                <div style="width: 1.5rem;background-size: cover;display:inline-block;background-repeat:no-repeat;background-image:url(/resource/icon-gear.svg)">
+                  &nbsp;
+                </div>
+              </span>
+            </label>
+            <input type="checkbox" class="ch info" id="sub-uuid">
+            <div class="info">
+              <div style="max-width: none;">
+                <label for="sub-uuid">X</label>
+                <h2>Quiz Search <span style="color: gold;">BETA</span></h2>
+                <p>Put your search below and press 'Enter' or 'Return'.</p>
+                <input placeholder="Search Term" id="sub-quiz-input">
+                <div id="sub-quiz-output">
+                  Enter Search Term and press 'Enter'
+                </div>
+              </div>
+            </div>
             <label for="searchTerm" class="block">Search Term</label>
             <input type="text" id="searchTerm" placeholder="Search"><label for="info-search"><p class="shortcut2">?</p></label>
             <input type="checkbox" class="ch info" id="info-search">
@@ -270,7 +289,7 @@
               </div>
             </div></label>
             <meta content="toggle" itemprop="result"/>
-            <input class="ch" type="checkbox" id="manual" checked>
+            <input class="ch" type="checkbox" id="manual">
             <label class="ch button" for="manual"><span>Manual Control</span><label for="info-man"><p class="shortcut2">?</p></label>
             <input type="checkbox" class="ch info" id="info-man">
             <div class="info">
@@ -384,10 +403,10 @@
                     <p>Fail <span class="red">OFF</span></p>
                     <p>Loose <span class="red">OFF</span></p>
                     <p>Brute <span class="red">OFF</span></p>
-                    <p>Manual <span class="green">ON</span></p>
+                    <p>Manual <span class="red">OFF</span></p>
                     <p>Preview <span class="red">OFF</span></p>
                   </div>
-                  <button class="block" onclick="loadSetting({theme:'Kahoot',fail:'0',brute:false,manual:true,searchLoosely:'0',teamMembers:'',timeout:'',previewQuestion:false},'Default');">Restore</button>
+                  <button class="block" onclick="loadSetting({theme:'Kahoot',fail:'0',brute:false,manual:false,searchLoosely:'0',teamMembers:'',timeout:'',previewQuestion:false},'Default');">Restore</button>
                 </div>
               </div>
               <div class="preset flex" id="preset_add_div">
@@ -431,7 +450,7 @@
         <h1>About this website</h1>
         <p itemprop="about">This website is a kahoot bot/"hack" made for the purpose of simply winning the game. It summons a single bot into your game, which uses complex "hacks" to find the game you are playing and answers for you. You can use the menu (esc) to set more options to help it find the quiz! I am also pretty sure that it is working currently as of August 2020.</p>
         <p>User theusaf created this website so that he could easily find the answers to quizzes and win.</p>
-        <p>As time went on, this site got a bunch of features, including random names, improved searching of quizzes and even answering for other players.</p>
+        <p>As time went on, this site got a bunch of features, including random names, improved searching of quizzes and even answering for other players (This feature has been patched by Kahoot).</p>
         <h2>Why use this website?</h2>
         <p>This website is great because you don't ruin a game by spamming it with hundreds of bots, but instead send a single, OP bot to claim victory. It also works on Kahoot challenges. The website is run by Heroku, so it is unlikely to go down as well. I also maintain my programs actively, so if there are issues, it can be solved quickly.</p>
         <p>This website also supports playing Kahoot Challenges. Just input the pin or url of the challenge and win!</p>
@@ -469,35 +488,9 @@
           <li><b>(any challenge url)</b> - to join the url, without knowing the pin.</li>
         </ul>
         <h2 itemscope itemtype="https://schema.org/HowToSection">List of options and usage</h2>
-        <h3 itemtype="https://schema.org/HowTo">Answer Timeout</h3>
-        <p>This tells the bot to wait a specified time (in seconds) before answering.</p>
-        <h3 itemtype="https://schema.org/HowTo">Quiz Author</h3>
-        <p>This helps the bot search for your quiz. If you know the author of the quiz, this greatly helps</p>
-        <h3 itemtype="https://schema.org/HowTo">Quiz ID</h3>
-        <p>If you know the exact link of the kahoot, copy the weird id and paste it here. The bot will use this quiz for the rest of the game.</p>
-        <h3 itemtype="https://schema.org/HowTo">Quiz Name</h3>
-        <p>This allows the bot to search for the quiz even if you joined in the middle of the game. Just make sure that you provide the EXACT name though.</p>
-        <h3 itemtype="https://schema.org/HowTo">Search Term</h3>
-        <p>Sometimes using the quiz name as the search term is not the best idea. Put the search term the host used to find the quiz.</p>
-        <h3 itemtype="https://schema.org/HowTo">Bypass 2FA</h3>
-        <p>If the host enables 2 Step Factors, you can enable this to skip entering the code yourself and just enter the game by sending all possible codes at once.</p>
-        <h3 itemtype="https://schema.org/HowTo">Fail Purposely</h3>
-        <p>Think you are toooooo suspicious? Enable this to fail every once in a while to seem less sus.</p>
-        <h3 itemtype="https://schema.org/HowTo">Preview Question</h3>
-        <p>Enable this options to see the question and answers before the question starts. This can also be used to know if the server found the correct quiz.</p>
-        <h3 itemtype="https://schema.org/HowTo">Manual Control</h3>
-        <p>Prevents the bot from answering the question for you. You get to press the button yourself. Press the button. I dare you.</p>
-        <h3 itemtype="https://schema.org/HowTo">Search Loosely</h3>
-        <p>Allows you to search quizzes if they are randomized. You need to provide input on the content of the question though.</p>
-        <h3 itemtype="https://schema.org/HowTo">Hide Correct</h3>
-        <p>Want to play without seeing the answers? Do this one. Though you might as well use the normal website...</p>
-        <p>This also will force 4 answer buttons to show.</p>
-        <h3 itemtype="https://schema.org/HowTo">Challenge Points</h3>
-        <p>Customize the amount of points per challenge question. From my testing, numbers lower than 1500 work, and big numbers get ignored by Kahoot!</p>
-        <h3 itemtype="https://schema.org/HowTo">Challenge Always Correct</h3>
-        <p>You can enable this option to get the question "correct," while answering incorrectly.</p>
-        <h3 itemtype="https://schema.org/HowTo">Challenge Disable Autoplay</h3>
-        <p>Enable this to allow you to wait before continuing to the next question.</p>
+        <p>This list has been removed in 2.19.0. Please use the (?) buttons next to each setting for detailed explanations.</p>
+        <h2 itemtype="https://scheme.org/Question">What is the small gear button next to some of the settings?</h2>
+        <p itemtype="https://schema.org/Answer">The small gears in the settings are the 'sub-settings' which allows more control over the option and unlocks extra features.</p>
         <button class="shortcut" type="button" name="button" onclick="activateTutorial()">Tutorial</button>
         <br>
         <div class="sm">
@@ -512,11 +505,12 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-2-19-0">2.19.0</a> - Bug fixes, improvements, added ability to search for kahoots under (quiz id)</p>
           <p>2.18.4 - Bug fixes, improvements, changes to fix misunderstanding about "Always Correct"</p>
           <p>2.18.3 - Bug fixes, improvements.</p>
           <p>2.18.2 - Various improvements and bug fixes. Moved sub settings to a seperate button.</p>
-          <p>2.18.1 - Added a custom score <label for="menu_toggle"><u>sub-setting</u></label> and fixed some bugs.</p>
-          <p>2.18.0 - Added an update detection for future updates. Also, jumble questions have a new UI, now you can drag things around!</p>
+          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-2-18-1">2.18.1</a> - Added a custom score <label for="menu_toggle"><u>sub-setting</u></label> and fixed some bugs.</p>
+          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-2-18-0">2.18.0</a> - Added an update detection for future updates. Also, jumble questions have a new UI, now you can drag things around!</p>
           <p>2.17.7 - Bug fixes</p>
           <p>2.17.6 - Bug fixes and improvements</p>
           <p>2.17.5 - Added recaptcha to attempt to prevent bots from crashing the server.</p>
