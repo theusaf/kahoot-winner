@@ -30,6 +30,7 @@ Alternatively, I have uploaded various versions of the files in [archive.org](ht
 - `full-export.json` (The full JSON object with all the kahoots.)
 - `full-export-sectioned.json` (The full JSON object, split into 255 parts ("00" - "ff").)
 - `full-export-keys.json` (The list of keys to use.)
+- `full-export-keys-sectioned.json` (The list of keys to use, grouped by question amount)
 - `json.zip` A zip file with sub files (00 - ff) containing json quiz objects. (Files stored in a folder named "json")
 - `json-full.zip` A zip file containing all items. (Stored in a folder named "json-full")
 

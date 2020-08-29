@@ -1316,7 +1316,7 @@ if(!process.argv.includes("--disable-electron")){
         console.log("Client is not up to date.");
         const {response} = await electron.dialog.showMessageBox({
           buttons: ["Later","Update"],
-          message: "An update is available. Would you like to download it now?",
+          message: `An update is available [v${b.match(/(?<=v)\d+\.\d+\.\d+/)[0]}]. Currently using v${require("./package.json").version} Would you like to download it now?`,
           title: "New Version"
         });
         if(response === 1){
