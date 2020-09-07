@@ -1,6 +1,6 @@
 {
   "name": "kahoot-win",
-  "version": "2.19.0",
+  "version": "3.0.0",
   "description": "A Kahoot Cheating Website",
   "main": "kahoot.js",
   "scripts": {
@@ -19,14 +19,14 @@
     "express": "^4.17.1",
     "ip": "^1.1.5",
     "kahoot-search": "^1.0.4",
-    "kahoot.js-updated": "^1.4.27",
+    "kahoot.js-updated": "^2.0.9",
     "request": "^2.88.2",
     "ws": "^7.3.1"
   },
   "devDependencies": {
-    "electron": "^10.1.0",
+    "electron": "^10.1.1",
     "electron-builder": "^22.8.0",
-    "eslint": "^7.7.0"
+    "eslint": "^7.8.1"
   },
   "build": {
     "appId": "io.github.theusaf.kahoot-win",

@@ -6,3 +6,4 @@ public/google*.html
 dist
 kdb.json
 latest.txt
+/src/out
