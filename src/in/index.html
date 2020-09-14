@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="index.css">
     <meta name="version" content="3.0.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="title" content="Kahoot Winner">
+    <meta name="title" content="§Title§">
     <meta name="description" content="§Description§">
     <meta name="keywords" content="kahoot, winner, cheat, hack, website, correct, challenge, answers, kahoot hack, kahoot winner, kahoot win, heroku, theusaf, kahoot bot, kahoot cheat">
     <meta name="language" content="EN">
@@ -107,6 +107,7 @@
                 <option value="Kahoot">Kahoot</option>
                 <option value="KonoSuba">KonoSuba</option>
                 <option value="Rainbow">Kahoot + RGB UI</option>
+                <option value="Music">Kahoot + 🎵</option>
               </select>
             </div>
           </div>
@@ -406,6 +407,21 @@
                 <p>§DisableAuto2§</p>
               </div>
             </div></label>
+
+            <meta content="toggle" itemprop="result"/>
+            <input type="checkbox" class="ch" id="ChallengeEnableStreaks">
+            <label for="ChallengeEnableStreaks" class="ch button"><span>§EnableStreak§</span><label for="info-streaks">
+              <p class="shortcut2">?</p>
+            </label></label>
+            <input type="checkbox" class="ch info" id="info-streaks">
+            <div class="info">
+              <div>
+                <label for="info-streaks">X</label>
+                <h4>§EnableStreak§</h4>
+                <p>§EnableStreak2§</p>
+                <p>§EnableStreak3§</p>
+              </div>
+            </div>
           </div>
         </div>
         <nav class="bottom mobishow">
@@ -534,6 +550,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-1-0">3.1.0</a> - Fixes bugs, adds music and another challenge option.</p><!-- If you speak Standard Galactic, you can now use Kahoot Winner in SGA! -->
           <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-0-0">3.0.0</a> - Major update. See below:</p>
           <ul>
             <li>Upgraded backend database and Kahoot api.</li>

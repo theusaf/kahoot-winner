@@ -1516,7 +1516,7 @@ div.info > div label{
   right: calc(30% - 1rem);
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 900px) {
   .form input,.form label.ch>span,.form button > span{
     max-width: 12rem;
     min-width: calc(100% - 10rem);

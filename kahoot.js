@@ -17,7 +17,7 @@ const {edit} = require("./regex.js");
 const request = require("request");
 const fs = require("fs");
 
-const DBAmount = 50;
+const DBAmount = 100;
 let mainPath = __dirname;
 if(electron){
   try{
@@ -537,6 +537,10 @@ class QuizFinder{
       }
       delete results.totalHits;
       this.hax.cursor += 25;
+      if(!this.parent){
+        this.hax.stop = true;
+        return;
+      }
       if(this.parent.kahoot.quiz.currentQuestion && index < this.parent.kahoot.quiz.currentQuestion.questionIndex + 1){
         this.hax.validOptions = results || results2 || [];
         return;
@@ -598,7 +602,7 @@ function SearchDatabase(finder,index){
       }
     }
     let ans = finder.hax.answers;
-    if(finder.parent.options.searchLoosely){
+    if(+finder.parent.options.searchLoosely){
       const a = k.answerMap.slice().sort();
       const b = finder.parent.kahoot.quiz.quizQuestionAnswers.slice().sort();
       if(JSON.stringify(a) !== JSON.stringify(b)){
@@ -633,7 +637,13 @@ function SearchDatabase(finder,index){
         for (let i = 0; i < ans.length; i++) {
           let ok = false;
           if(!k.questions[i].choices){
+            if(a[i].n){
+              return false;
+            }
             continue;
+          }
+          if(k.questions[i].type != a[i].t){
+            return false;
           }
           const ch = k.questions[ans[i].i].choices;
           for (let j = 0; j < ch.length; j++) {
@@ -798,6 +808,7 @@ const Messages = {
                   game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
                   game.options.pin = pin;
                   game.options.isChallenge = true;
+                  try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
                 }
               });
             }else{
@@ -824,6 +835,7 @@ const Messages = {
           game.send({message:`Connected to ${p}!`,type:"Message.PinGood"});
           game.options.pin = p;
           game.options.isChallenge = true;
+          try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
         }catch(err){
           game.send({message:"INVALID_PIN",type:"Error"});
         }
@@ -838,6 +850,7 @@ const Messages = {
           game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
           game.options.pin = pin;
           game.options.isChallenge = true;
+          try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
         }
       });
       return;
@@ -884,6 +897,11 @@ const Messages = {
         game.kahoot.defaults.options.ChallengeAlwaysCorrect = true;
       }else{
         game.kahoot.defaults.options.ChallengeAlwaysCorrect = false;
+      }
+      if(game.options.ChallengeEnableStreaks){
+        game.kahoot.defaults.options.ChallengeUseStreakBonus = true;
+      }else{
+        game.kahoot.defaults.options.ChallengeUseStreakBonus = false;
       }
       // remove default fail.
       if((game.options.fail == 2 && game.fails.length == 1) || game.options.fail != old.fail){
@@ -937,14 +955,14 @@ const Messages = {
     if((typeof (answer) == "undefined") || answer === ""){
       game.send({message:"INVALID_USER_INPUT",type:"Error"});
       game.kahoot.answer(game.finder.hax.correctAnswer).then(()=>{
-        QuestionSubmit(game);
+        QuestionSubmit(game.kahoot);
       }).catch(()=>{});
       return;
     }else if(answer === null){
       return QuestionAnswer(game.kahoot,game.kahoot.quiz.currentQuestion);
     }
     game.kahoot.answer(answer).then(()=>{
-      QuestionSubmit(game);
+      QuestionSubmit(game.kahoot);
     }).catch(()=>{});
   },
   CHOOSE_QUESTION_INDEX: (game,index)=>{
@@ -1054,7 +1072,8 @@ const Messages = {
     game.kahoot.cid = message.cid;
     game.kahoot.gameid = game.options.pin;
     game.kahoot.socket = {
-      readyState: 3
+      readyState: 3,
+      close: ()=>{}
     };
     game.kahoot.reconnect().catch(()=>{
       game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
@@ -1251,7 +1270,7 @@ const Listeners = {
     k.parent.security.joined = false;
     k.parent.finishedProcessing = true;
   },
-  TwoStepReset: k=>{
+  TwoFactorReset: k=>{
     if(k.parent.options.brute){
       clearInterval(k.bruter);
       let i = 0;
@@ -1265,11 +1284,11 @@ const Listeners = {
       k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
     }
   },
-  TwoStepCorrect: k=>{
+  TwoFactorCorrect: k=>{
     clearInterval(k.bruter);
     k.parent.send({message:"Two Step Auth Completed",type:"Message.TwoStepSuccess"});
   },
-  TwoStepWrong: k=>{
+  TwoFactorWrong: k=>{
     if(!k.parent.options.brute){
       k.parent.send({message:"Failed Two Step Auth",type:"Message.FailTwoStep"});
     }

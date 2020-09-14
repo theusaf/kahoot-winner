@@ -161,7 +161,8 @@ function tutorialSteps(n){
             time: 20000
           }
         ]
-      }]
+      }],
+      raw: {}
     };
     game.question.ans = [game.question.data.length];
     game.score = -Infinity;

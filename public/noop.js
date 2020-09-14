@@ -1,4 +1,4 @@
-const CACHE_NAME = "kahoot-win-cache-v3.0.0";
+const CACHE_NAME = "kahoot-win-cache-v3.1.0";
 const CONST_NAME = "kahoot-win-cache-consts-v3.0.0";
 const URLCONSTS = [
   "/resource/blue.svg",
@@ -73,7 +73,9 @@ self.addEventListener("fetch", function(event) {
         }
         return fetch(event.request);
       }
-      )
+    ).catch(function(err){
+      return fetch(event.request);
+    });
   );
 });
 

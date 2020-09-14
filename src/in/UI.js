@@ -23,6 +23,15 @@ const KahootThemes = {
     green: "green.svg",
     yellow: "yellow.svg",
     logo: "logo.svg"
+  },
+  // music doesn't actually change any images
+  // but will be detected to play music/sounds.
+  Music: {
+    red: "red.svg",
+    blue: "blue.svg",
+    green: "green.svg",
+    yellow: "yellow.svg",
+    logo: "logo.svg"
   }
 };
 
@@ -292,7 +301,9 @@ class GetReadyPage{
     activateLoading(true,false,"",true);
     if(game.question.type == "content"){
       objects.texts[0].innerHTML = "§Breather§";
+      objects.texts[0].setAttribute("text","§Breather§");
       objects.texts[1].innerHTML = "";
+      return objects;
     }
     if(no){
       return objects;
@@ -813,6 +824,27 @@ class QuestionAnswererPage{
         textDiv.append(text);
       }
     }
+    // music
+    try{
+      if(game.theme === "Music"){
+        if(question.raw.timeAvailable <= 5000){
+          const sounds = ["005","005-1"]
+          game.playSound(`/resource/music/${sounds[Math.floor(Math.random() * sounds.length)]}.m4a`);
+        }else if(question.raw.timeAvailable <= 10000){
+          game.playSound("/resource/music/010.m4a");
+        }else if(question.raw.timeAvailable <= 20000){
+          const sounds = ["020","020-1","020-2"];
+          game.playSound(`/resource/music/${sounds[Math.floor(Math.random() * sounds.length)]}.m4a`);
+        }else if(question.raw.timeAvailable <= 30000){
+          game.playSound("/resource/music/030.m4a");
+        }else if(question.raw.timeAvailable <= 60000){
+          game.playSound("/resource/music/060.m4a");
+        }else{ // currently missing 90s and 240s assets
+          const sounds = ["120","120-1"];
+          game.playSound(`/resource/music/${sounds[Math.floor(Math.random() * sounds.length)]}.m4a`);
+        }
+      }
+    }catch(e){}
     // challenge
     if(game.pin[0] == "0"){
       const chdiv = document.createElement("div");
@@ -822,7 +854,7 @@ class QuestionAnswererPage{
       chdiv.append(sp);
       div.append(chdiv);
       // create timer
-      let questionTime = game.rawData.timeAvailable / 1000;
+      let questionTime = question.raw.timeAvailable / 1000;
       const qdiv = document.createElement("p");
       qdiv.className = "chtimer";
       qdiv.innerHTML = questionTime;
@@ -1192,6 +1224,7 @@ function setSchema(element,type,scope,prop){
 function sleep(n){return new Promise((res)=>{setTimeout(res,n*1000);});}
 
 async function resetGame(recover){
+  try{game.music.pause();}catch(e){}
   const oldgame = game;
   if(socket){
     socket.onclose = null;

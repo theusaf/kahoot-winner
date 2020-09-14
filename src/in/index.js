@@ -87,6 +87,7 @@ const MessageHandler = {
       return new LoginPage(true);
     },
     JoinSuccess: data=>{
+      if(game.theme === "Music"){game.playSound("/resource/music/lobby.m4a");}
       data = JSON.parse(data);
       game.cid = data.cid;
       game.quizEnded = false;
@@ -96,6 +97,7 @@ const MessageHandler = {
       return new LobbyPage;
     },
     QuizStart: ()=>{
+      try{game.music.pause();}catch(e){}
       return new QuizStartPage;
     },
     QuestionGet: info=>{
@@ -111,6 +113,7 @@ const MessageHandler = {
       return new QuestionSnarkPage(message);
     },
     QuestionEnd: info=>{
+      try{game.music.pause();}catch(e){}
       return new QuestionEndPage(info);
     },
     QuizFinish: info=>{
@@ -119,6 +122,7 @@ const MessageHandler = {
       dataLayer.push(Object.assign({event:"quiz_finish"},JSON.parse(info)));
     },
     FinishText: text=>{
+      if(game.theme === "Music"){game.playSound("/resource/music/podium.m4a");}
       return new QuizEndPage(text);
     },
     QuizEnd: (r)=>{
@@ -336,6 +340,7 @@ class Game{
       div_challenge_options: opts.div_search_options
     });
     const oldOpts = game.opts;
+    game.theme = opts.theme;
     game.opts = opts;
     send({type:"SET_OPTS",message:JSON.stringify(opts)});
     if(game.questionStarted && !game.questionAnswered && oldOpts.manual && !game.opts.manual){
@@ -347,6 +352,7 @@ class Game{
     try{
       opts = JSON.parse(localStorage.options);
       game.opts = opts;
+      game.theme = opts.theme;
     }catch(err){
       return;
     }
@@ -413,6 +419,18 @@ class Game{
   updateName(){
     clearTimeout(this.saveTimeout);
     this.saveTimeout = setTimeout(this.saveOptions,500);
+  }
+  playSound(url){
+    if(!this.music){
+      this.music = new Audio();
+      this.music.addEventListener("ended",()=>{
+        this.music.currentTime = 0;
+        this.music.play();
+      });
+    }
+    this.music.pause();
+    this.music.src = url;
+    this.music.play();
   }
 }
 
@@ -504,7 +522,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v3.0.0";
+localStorage.KW_Version = "v3.1.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
