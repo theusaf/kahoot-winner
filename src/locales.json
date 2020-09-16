@@ -1,6 +1,7 @@
 {
   "en": {
     "//1": "index.html",
+    "FRANXX": "Darling in the FRANXX",
     "EnableStreak": "Enable Streak Points",
     "EnableStreak2": "The <code>Enable Streak Points</code> setting enables answer streak points for challenge games.",
     "EnableStreak3": "By default, it is disabled, meaning that you would get the normal 1000 points for a quick correct answer. When enabled, a second question correct adds an additional 100 points, and so on, capping at 500. This has <b>NO EFFECT</b> on live quizzes.",
@@ -264,6 +265,7 @@
   },
   "es": {
     "//1": "index.html",
+    "FRANXX": "Querido en el FRANXX",
     "EnableStreak": "Habilitar puntos de racha",
     "EnableStreak2": "La configuración <code>Habilitar puntos de racha</code> habilita puntos de racha de respuestas para juegos de desafío.",
     "EnableStreak3": "De forma predeterminada, está deshabilitado, lo que significa que obtendría los 1000 puntos normales por una respuesta rápida y correcta. Cuando se habilita, una segunda pregunta correcta agrega 100 puntos adicionales, y así sucesivamente, con un límite de 500. Esto <b> NO TIENE EFECTO </b> en los cuestionarios en vivo.",
@@ -527,6 +529,7 @@
   },
   "zh": {
     "//1": "index.html",
+    "FRANXX": "亲爱的FRANXX",
     "EnableStreak": "启用条纹点",
     "EnableStreak2": "<code>启用条纹点</code>设置可为挑战游戏启用答案连胜点。",
     "EnableStreak3": "默认情况下，它是禁用的，这意味着您将获得正常的1000分以获得快速正确的答案。 启用后，第二个问题更正会额外增加100分，依此类推，最高为500分。这对实时测验没有影响。",

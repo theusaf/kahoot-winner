@@ -32,11 +32,19 @@ const KahootThemes = {
     green: "green.svg",
     yellow: "yellow.svg",
     logo: "logo.svg"
+  },
+  FRANXX: {
+    red: "red-franxx.svg",
+    blue: "blue-franxx.svg",
+    green: "green-franxx.svg",
+    yellow: "yellow-franxx.svg",
+    logo: "logo.svg"
   }
 };
 
 class LoginPage{
   constructor(i){
+    Themer();
     QuizResult.className = "disabled button";
     QuizResult.removeAttribute("url");
     ChallengeContinueButton.style.display = "none";
@@ -1444,13 +1452,19 @@ SettingSwitch.onclick = ()=>{
   }
   closePage = 0;
 };
-ThemeChooser.addEventListener("change",()=>{
+function Themer(){
   game.theme = ThemeChooser.value;
-  if(game.theme == "Rainbow"){
+  if(game.theme === "Rainbow"){
     SettingDiv.className = "rainbow correct";
     document.querySelector(".About").className = "About rainbow";
+  }else if(game.theme === "FRANXX"){
+    SettingDiv.className = "franxx";
+  }else{
+    SettingDiv.className = "";
+    document.querySelector(".About").className = "About";
   }
-});
+}
+ThemeChooser.addEventListener("change",Themer);
 QuizResult.addEventListener("click",()=>{
   if(QuizResult.getAttribute("url")){
     window.open(QuizResult.getAttribute("url"),"_blank");

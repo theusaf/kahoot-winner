@@ -80,6 +80,9 @@
 .rainbow{
   animation: rainbow 14s infinite;
 }
+.franxx{
+  background-color: rgba(230,90,215,0.8) !important;
+}
 .correct{
   animation: rainbowBorder 7s infinite;
   border-width: 0.5rem !important;

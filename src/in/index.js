@@ -481,10 +481,6 @@ window.addEventListener("load",()=>{
   if(game.theme != "Kahoot"){
     new LoginPage;
   }
-  if(game.theme == "Rainbow"){
-    SettingDiv.className = "rainbow correct";
-    document.querySelector(".About").className = "About rainbow";
-  }
 });
 window.addEventListener("keydown",e=>{
   if(e.key == "Escape"){
@@ -498,7 +494,7 @@ window.addEventListener("keydown",e=>{
   }
   egg += e.key;
   try{
-    if("winner".search(egg) != 0){
+    if("winner".search(egg) != 0 && "return by death" != 0){
       egg = "";
       try{
         document.body.removeChild(eggstyle);
@@ -522,7 +518,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v3.1.0";
+localStorage.KW_Version = "v3.1.1";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

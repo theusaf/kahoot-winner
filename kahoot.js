@@ -949,7 +949,7 @@ const Messages = {
     });
   },
   ANSWER_QUESTION: (game,answer)=>{
-    if(!game.security.joined || !game.kahoot.quiz || !game.kahoot.quiz.currentQuestion){
+    if(!game.security.joined || !game.kahoot.quiz || (!game.options.isChallenge && !game.kahoot.quiz.currentQuestion)){
       return;
     }
     if((typeof (answer) == "undefined") || answer === ""){
@@ -967,7 +967,7 @@ const Messages = {
   },
   CHOOSE_QUESTION_INDEX: (game,index)=>{
     index = Number(index);
-    if(!game.security.joined || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
+    if(!game.security.joined || (!game.options.isChallenge && !game.kahoot.quiz.currentQuestion) || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
       return game.send({message:"INVALID_USER_INPUT",type:"Error"});
     }
     if(index != game.correctIndex){
