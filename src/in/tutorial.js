@@ -1,5 +1,23 @@
 /* global ErrorHandler,LoginPage,dataLayer,resetGame,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch */
-window.addEventListener("load",()=>{
+function TutWait(){
+  function sleep(n){
+    return new Promise(function(resolve) {
+      setTimeout(resolve,(n || 1) * 1000)
+    });
+  }
+  return new Promise( function(resolve) {
+    if(typeof AboutSwitch !== "undefined"){
+      resolve();
+    }else{
+      return sleep(1).then(()=>{
+        TutWait();
+      });
+    }
+  });
+}
+
+window.addEventListener("load",async ()=>{
+  await TutWait();
   if(!localStorage.seenNotice){
     showNotice();
   }

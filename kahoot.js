@@ -501,6 +501,10 @@ class QuizFinder{
         }
         let results = (!this.ignoreDB && SearchDatabase(this,this.DBIndex)) || [];
         this.DBIndex += DBAmount || 50;
+        if(!this.parent){
+          this.hax.stop = true;
+          return;
+        }
         if(this.parent.kahoot.quiz.currentQuestion && index < this.parent.kahoot.quiz.currentQuestion.questionIndex + 1){
           this.hax.validOptions = results;
           return;
@@ -765,7 +769,7 @@ async function Searching(term,opts,finder){
         }
         qc.sort();
         qc = JSON.stringify(qc);
-        const qca = JSON.stringify(finder.parent.kahoot.quiz.quizQuestionAnswers.slice().sort());
+        const qca = JSON.stringify(finder.parent.kahoot.quiz.quizQuestionAnswers.slice(0).sort());
         if(qc == qca){
           return true;
         }
@@ -773,7 +777,7 @@ async function Searching(term,opts,finder){
       };
       let filter = mainFilter;
       let filter2 = mainFilter2;
-      if(finder.parent.options.searchLoosely){
+      if(+finder.parent.options.searchLoosely){
         filter = looseFilter;
         filter2 = looseFilter2;
       }
@@ -874,6 +878,7 @@ const Messages = {
         game.finder.hax.cursor = 0;
         game.finder.hax.noQuiz = false;
         game.finder.hax.stop = false;
+        game.finder.ignoreKahoot = false;
       }
       // variable answer
       if(Number(game.options.timeout) < 0){
@@ -931,6 +936,20 @@ const Messages = {
           game.options.timeoutEnd = 0;
         }
       }
+
+      // changing timeout mid question.
+      if(old.timeout != game.options.timeout){
+        if(game.security.joined && game.security.gotQuestion && game.questionReady === true && !game.options.manual){
+          clearTimeout(game.waiter);
+          const start = game.options.timeout * 1000 + (Number(game.options.variableTimeout) * Math.random() * 1000);
+          const end = Math.random() * ((Number(game.options.timeoutEnd) - (start/1000) || 0)) * 1000;
+          const delayed = Date.now() - game.security.receivedTime;
+          game.waiter = setTimeout(()=>{
+            if(!game.kahoot){return;}
+            QuestionAnswer(game.kahoot,game.kahoot.quiz.currentQuestion);
+          },start+end-delayed);
+        }
+      }
     }catch(err){
       game.send({message:"INVALID_USER_INPUT",type:"Error"});
     }
@@ -945,11 +964,14 @@ const Messages = {
       game.kahoot.loggingMode = true;
     }
     game.kahoot.join(game.options.pin,(name||"") + "",game.options.teamMembers ? game.options.teamMembers.toString().split(",") : undefined).catch(err=>{
+      if(err && err.error && err.error.includes("handshake_denied")){
+        handshakeVotes.push(game.ip);
+      }
       game.send({message:"INVALID_NAME",type:"Error",data:err});
     });
   },
   ANSWER_QUESTION: (game,answer)=>{
-    if(!game.security.joined || !game.kahoot.quiz || (!game.options.isChallenge && !game.kahoot.quiz.currentQuestion)){
+    if(!game.security.joined || !game.kahoot.quiz || !game.kahoot.quiz.currentQuestion){
       return;
     }
     if((typeof (answer) == "undefined") || answer === ""){
@@ -967,13 +989,13 @@ const Messages = {
   },
   CHOOSE_QUESTION_INDEX: (game,index)=>{
     index = Number(index);
-    if(!game.security.joined || (!game.options.isChallenge && !game.kahoot.quiz.currentQuestion) || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
+    if(!game.security.joined || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
       return game.send({message:"INVALID_USER_INPUT",type:"Error"});
     }
     if(index != game.correctIndex){
       game.correctIndex = index;
       const type2 = game.kahoot.quiz.currentQuestion.type;
-      const type = game.finder.hax.validOptions[0].questions[index].type;
+      const type = game.finder.hax.validOptions[0].questions[index].gameBlockType;
       if(type != type2){ // hmm, wrong question.
         return;
       }
@@ -1189,6 +1211,7 @@ const Listeners = {
       return; // question already ended?
     }
     k.parent.security.gotQuestion = true;
+    k.parent.security.receivedTime = Date.now();
     if(k.parent.options.manual || k.parent.teamAnswered || Number(k.parent.options.searchLoosely) == 2){
       k.parent.send({message:JSON.stringify({
         data: k.parent.finder.getAnswers(q),
@@ -1238,6 +1261,7 @@ const Listeners = {
     if(!k.parent.security.gotQuestion){
       return;
     }
+    k.parent.security.gotQuestion = false;
     try{
       k.parent.finder.hax.answers.push({t:k.quiz.currentQuestion.gameBlockType,ns:q.correctAnswers,n:q.correctAnswers[0],c:q.isCorrect,i:k.quiz.currentQuestion.questionIndex});
       k.parent.finder.searchKahoot(k.quiz.currentQuestion.questionIndex + 1);

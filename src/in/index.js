@@ -469,13 +469,31 @@ function setCookie(val){
   }
 }
 
+function IndexWait(){
+  function sleep(n){
+    return new Promise(function(resolve) {
+      setTimeout(resolve,(n || 1) * 1000)
+    });
+  }
+  return new Promise(function(resolve) {
+    if(typeof ThemeChooser !== "undefined"){
+      resolve();
+    }else{
+      return sleep(1).then(()=>{
+        IndexWait();
+      });
+    }
+  });
+}
+
 let game = new Game;
 let egg = "";
 const eggstyle = document.createElement("style");
 eggstyle.innerHTML = `p,.sm span,img,h1,h2,.About h3,.tut_cont h3,h4{
   animation: infinite windance 1s;
 }`;
-window.addEventListener("load",()=>{
+window.addEventListener("load",async ()=>{
+  await IndexWait();
   game.loadOptions();
   game.theme = ThemeChooser.value;
   if(game.theme != "Kahoot"){
@@ -518,7 +536,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v3.1.1";
+localStorage.KW_Version = "v3.1.2";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

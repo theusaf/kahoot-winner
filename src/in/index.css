@@ -1002,6 +1002,16 @@ img[index="3"]{
   position: fixed;
   z-index: 30;
 }
+.ad-container-2{
+  width: 22rem;
+  max-width: 25rem;
+  height: calc(100% - 20rem);
+  max-height: calc(100% - 20rem);
+  top: 0;
+  left: 0;
+  position: fixed;
+  z-index: 30;
+}
 .mobile-ad{
   display: none;
 }
@@ -1573,6 +1583,12 @@ div.info > div label{
     overflow: hidden;
     width: 100%;
     max-width: 100%;
+  }
+  .ad-container-2{
+    display: none;
+  }
+  .ad-container-2 .main-ad{
+    display: none;
   }
   .ad-container .main-ad{
     display: none;

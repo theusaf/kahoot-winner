@@ -122,15 +122,12 @@ class LoginPage{
     social.innerHTML = `<div class="mobihide2 mobihide">
     <a href="/creator" target="_blank"><img src="/resource/icon-kahoot.svg" alt="create"><span>§Creator§</span></a>
     <a href="/api" target="_blank"><img src="/resource/icon-api.svg" alt="api"><span>§API§</span></a>
-    <a href="/how-it-works" target="_blank"><img src="/resource/icon-about.svg" alt="info mark"><span>§How§</span></a>
     <a href="/blog" target="_blank"><img src="/resource/icon-blog.svg" alt="Icon made from http://www.onlinewebfonts.com/icon is licensed by CC BY 3.0"><span>§Blog§</span></a>
     <a href="/blog/download" target="_blank" class="mobihide2 mobihide"><img src="/resource/icon192.png" alt="download mark"><span>§AppDownload§</span></a>
-    <hr/>
     </div>
     <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg" alt="discord"><span>Discord</span></a>
     <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
-    <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>
-    <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/logo-paypal.svg" alt="paypal"><span>§Donate§</span></a>`;
+    <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>`;
     if(!i){div.append(social);}
     UIDiv.append(div);
   }
@@ -612,7 +609,7 @@ class QuestionAnswererPage{
         });
       },(game.opts.timeout * 1000) - (Date.now() - game.recievedTime));
     }
-    const objects = new GetReadyPage(game.question || question,true);
+    const objects = new GetReadyPage(question || game.question,true);
     game.receivedQuestion = true;
     game.questionStarted = true;
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "";
@@ -1391,7 +1388,26 @@ const HideAnswers = document.getElementById("hideAnswers");
 const LoadingText = document.getElementById("loadingText");
 const ThemeChooser = document.getElementById("theme");
 const QuizResult = document.getElementById("quizresult");
-new LoginPage(false);
+(async ()=>{
+  function UIWait(){
+    function sleep(n){
+      return new Promise(function(resolve) {
+        setTimeout(resolve,(n || 1) * 1000)
+      });
+    }
+    return new Promise(function(resolve) {
+      if(typeof game !== "undefined"){
+        resolve();
+      }else{
+        return sleep(1).then(()=>{
+          UIWait();
+        });
+      }
+    });
+  }
+  await UIWait();
+  new LoginPage(false);
+})();
 loadPresets();
 let closePage = 0;
 
@@ -1459,6 +1475,7 @@ function Themer(){
     document.querySelector(".About").className = "About rainbow";
   }else if(game.theme === "FRANXX"){
     SettingDiv.className = "franxx";
+    document.querySelector(".About").className = "About";
   }else{
     SettingDiv.className = "";
     document.querySelector(".About").className = "About";
@@ -1524,10 +1541,11 @@ const shortcuts = e=>{
         document.getElementById("tutorial").style = "";
         document.querySelector(".misc").style = "";
         document.querySelector(".Error").style = "";
-        document.getElementById("logotext").style = "";
-        document.querySelector(".sm.sidebar").style = "";
-        document.getElementById("abtlnk").style = "";
-        document.getElementById("chnge").style = "";
+        try{document.getElementById("logotext").style = "";}catch(e){}
+        try{document.querySelector(".sm.sidebar").style = "";}catch(e){}
+        try{document.getElementById("abtlnk").style = "";}catch(e){}
+        try{document.getElementById("chnge").style = "";}catch(e){}
+        try{document.getElementById("lang").style = "";}catch(e){}
       }else{
         SettingDiv.style = "display: none";
         document.querySelector(".Changelog").style = "display: none";
@@ -1535,10 +1553,11 @@ const shortcuts = e=>{
         document.getElementById("tutorial").style = "display: none";
         document.querySelector(".misc").style = "opacity: 0";
         document.querySelector(".Error").style = "display: none";
-        document.getElementById("logotext").style = "display: none";
-        document.querySelector(".sm.sidebar").style = "display: none";
-        document.getElementById("abtlnk").style = "display: none";
-        document.getElementById("chnge").style = "display: none";
+        try{document.getElementById("logotext").style = "display: none";}catch(e){}
+        try{document.querySelector(".sm.sidebar").style = "display: none";}catch(e){}
+        try{document.getElementById("abtlnk").style = "display: none";}catch(e){}
+        try{document.getElementById("chnge").style = "display: none";}catch(e){}
+        try{document.getElementById("lang").style = "display: none";}catch(e){}
       }
     }catch(e){
       console.log(e);
