@@ -88,6 +88,7 @@ const MessageHandler = {
     },
     JoinSuccess: data=>{
       if(game.theme === "Music"){game.playSound("/resource/music/lobby.m4a");}
+      else if(game.theme === "Minecraft"){game.playSound("/resource/music/Minecraft.mp3");}
       data = JSON.parse(data);
       game.cid = data.cid;
       game.quizEnded = false;
@@ -123,6 +124,7 @@ const MessageHandler = {
     },
     FinishText: text=>{
       if(game.theme === "Music"){game.playSound("/resource/music/podium.m4a");}
+      else if(game.theme === "Minecraft"){game.playSound("/resource/music/Pigstep.m4a");}
       return new QuizEndPage(text);
     },
     QuizEnd: (r)=>{
@@ -423,9 +425,11 @@ class Game{
   playSound(url){
     if(!this.music){
       this.music = new Audio();
-      this.music.addEventListener("ended",()=>{
-        this.music.currentTime = 0;
-        this.music.play();
+      this.music.addEventListener("timeupdate",()=>{
+        if(this.music.currentTime > this.music.duration - 0.44){
+          this.music.currentTime = 0;
+          this.music.play();
+        }
       });
     }
     this.music.pause();
@@ -469,37 +473,13 @@ function setCookie(val){
   }
 }
 
-function IndexWait(){
-  function sleep(n){
-    return new Promise(function(resolve) {
-      setTimeout(resolve,(n || 1) * 1000)
-    });
-  }
-  return new Promise(function(resolve) {
-    if(typeof ThemeChooser !== "undefined"){
-      resolve();
-    }else{
-      return sleep(1).then(()=>{
-        IndexWait();
-      });
-    }
-  });
-}
-
 let game = new Game;
 let egg = "";
 const eggstyle = document.createElement("style");
 eggstyle.innerHTML = `p,.sm span,img,h1,h2,.About h3,.tut_cont h3,h4{
   animation: infinite windance 1s;
 }`;
-window.addEventListener("load",async ()=>{
-  await IndexWait();
-  game.loadOptions();
-  game.theme = ThemeChooser.value;
-  if(game.theme != "Kahoot"){
-    new LoginPage;
-  }
-});
+let shouldStop = false;
 window.addEventListener("keydown",e=>{
   if(e.key == "Escape"){
     if(closePage == 0){
@@ -512,8 +492,9 @@ window.addEventListener("keydown",e=>{
   }
   egg += e.key;
   try{
-    if("winner".search(egg) != 0 && "return by death" != 0){
+    if("winner".search(egg) != 0 && "return by death".search(egg) != 0 && "behold an unthinkable present".search(egg) != 0 && "explosion".search(egg) != 0){
       egg = "";
+      if(shouldStop){game.music.pause();shouldStop=false;}
       try{
         document.body.removeChild(eggstyle);
       }catch(err){
@@ -521,9 +502,56 @@ window.addEventListener("keydown",e=>{
       }
     }else if(egg == "winner"){
       document.body.append(eggstyle);
+    }else if(egg == "return by death"){
+      if(game.theme === "ReZero"){
+        game.playSound("/resource/music/return_by_death.mp3");
+        shouldStop=true;
+        document.body.style = "box-shadow:inset 0 0 10rem 5rem darkviolet;";
+        setTimeout(()=>{
+          game.music.pause();
+          document.body.style = "";
+        },Math.random() * 20000 + 10000);
+      }
+    }else if(egg == "behold an unthinkable present"){
+      if(game.theme === "ReZero"){
+        game.playSound("/resource/music/behold_unthinkable_present.m4a");
+        shouldStop=true;
+      }
+    }else if(egg == "explosion"){
+      // due to the amount of styles in this one, this can only be used during the login screen
+      if(game.theme === "KonoSuba" && game.pin === 0){
+        game.playSound("/resource/music/megumin_explosion.mp3");
+        // starting fire
+        document.body.style = "box-shadow:inset 0 0 0.7rem 0.7rem #451b0e,inset 0 0 1.4rem 1.4rem #973716,inset 0 0 1.8rem 1.8rem #cd4606,inset 0 0 2.1rem 2.1rem #ec760c,inset 0 0 2.4rem 2.4rem #ffae34,inset 0 0 2.7rem 2.7rem #fefcc9";
+        const megu = document.createElement("img");
+        megu.src = "/resource/red-konosuba.svg";
+        megu.style = "position:fixed;top:calc(50% - 5rem);left:100%;width:10rem;transition:left 4s;";
+        document.body.append(megu);
+        setTimeout(()=>{megu.style.left = "calc(75% - 5rem)"});
+        setTimeout(()=>{megu.style.left = "150%";},16e3);
+        setTimeout(()=>{
+          document.body.style = "";
+          const explosion = document.createElement("div");
+          document.body.append(explosion);
+          explosion.style = "position:fixed;top:0;left:0;width:100%;height:100%;z-index:5000;transition:background 2s";
+          explosion.style.background = "darkorange";
+          setTimeout(()=>{
+            explosion.style.background = "beige";
+            setTimeout(()=>{
+              megu.outerHTML = "";
+              explosion.style.background = "black";
+              game.music.pause();
+              setTimeout(()=>{
+                explosion.outerHTML = "";
+              },3e3);
+            },3e3);
+          },2e3);
+        },21e3);
+      }
     }
   }catch(err){
     egg = "";
+    if(shouldStop){game.music.pause();shouldStop=false;}
   }
 });
 
@@ -536,7 +564,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v3.1.2";
+localStorage.KW_Version = "v3.2.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

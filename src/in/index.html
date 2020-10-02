@@ -3,7 +3,7 @@
   <head>
     <link rel="preload" href="/ext/https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta name="version" content="3.1.2">
+    <meta name="version" content="3.2.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="§Title§">
     <meta name="description" content="§Description§">
@@ -109,6 +109,8 @@
                 <option value="FRANXX">§FRANXX§</option>
                 <option value="Rainbow">Kahoot + RGB UI</option>
                 <option value="Music">Kahoot + 🎵</option>
+                <option value="ReZero">§ReZero§</option>
+                <option value="Minecraft">Minecraft</option>
               </select>
             </div>
           </div>
@@ -551,6 +553,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-2-0">3.2.0</a> - New themes, secrets, bug fixes, and caching improvements.</p>
           <p>3.1.2 - Now hides language picker in panic mode. Added the ability to change timeout mid-question (improves timeout sub-option)</p>
           <p>3.1.1 - Added some more themes.</p>
           <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-1-0">3.1.0</a> - Fixes bugs, adds music and another challenge option.</p><!-- If you speak Standard Galactic, you can now use Kahoot Winner in SGA! -->
@@ -684,8 +687,6 @@
       </div>
     </div>
     <script type="text/javascript" src="index.js"></script>
-    <script type="text/javascript" src="UI.js"></script>
-    <script async type="text/javascript" src="tutorial.js"></script>
     <!-- Web App Script -->
     <script type="text/javascript">
       // disable service worker in local host programs, caching not really needed, also causes confusion for users using the app

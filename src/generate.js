@@ -35,20 +35,21 @@ async function run(){
     fs.mkdirSync(path.join(__dirname,"out"));
   }
   for(let lang in locales){
+    const js = {};
     // replace missing with english.
     if(lang === "en"){
       for(let item in locales.en){
         for(let l2 in locales){
           if(l2 === "en"){continue;}
           if(!locales[l2][item]){
-            console.log(`${c.y}Item ${item} does not exist in ${l2}. Using english default.`);
+            if(l2 !== "sga"){console.log(`${c.y}Item ${item} does not exist in ${l2}. Using english default.`);}
             locales[l2][item] = locales.en[item];
           }
         }
       }
     }
     for(let file of files){
-      if(!/\.(html|js|css)/gi.test(file)){
+      if(!/\.(html|js|css)$/gi.test(file)){
         console.log(`${c.y}Skipping ${file}.`);
         continue;
       }
@@ -66,7 +67,11 @@ async function run(){
       console.log(`${c.b}Minifying...`);
       try{
         const min = await minify(path.join(__dirname,"out",lang,file),options);
-        fs.writeFileSync(path.join(__dirname,"out",lang,file),min,"utf8");
+        if(/\.js$/gi.test(file)){ // javascript file
+          js[file.replace(/\.js$/gi,"")] = min;
+        }else{
+          fs.writeFileSync(path.join(__dirname,"out",lang,file),min,"utf8");
+        }
         console.log(`${c.g}Done.`);
         if(min.includes("§")){
           console.log(`${c.y}${file} (${lang}) has unfinished translations.`);
@@ -81,6 +86,12 @@ async function run(){
         console.log(e);
       }
     }
+    console.log(`${c.b}Combining scripts`);
+    const str = js.index + js.UI + js.tutorial;
+    fs.unlinkSync(path.join(__dirname,"out",lang,"UI.js"));
+    fs.unlinkSync(path.join(__dirname,"out",lang,"tutorial.js"));
+    fs.writeFileSync(path.join(__dirname,"out",lang,"index.js"),str,"utf8");
+    console.log(`${c.g}Done.`);
   }
   console.log(`${c.g}Process complete.`);
 }

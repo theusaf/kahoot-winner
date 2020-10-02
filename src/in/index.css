@@ -122,6 +122,7 @@ span.yellow{
 body{
   position: relative;
   height: 100%;
+  transition: box-shadow 15s;
 }
 body,html{
   touch-action: pinch-zoom pan-y;
@@ -1431,6 +1432,9 @@ div.info > div label{
 .tut_cont{
   z-index: 2000;
   pointer-events: all;
+}
+.tut_cont>div{
+  z-index: inherit;
 }
 .tutorial button{
   width: 100%;

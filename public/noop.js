@@ -1,6 +1,26 @@
-const CACHE_NAME = "kahoot-win-cache-v3.1.2";
-const CONST_NAME = "kahoot-win-cache-consts-v3.0.0";
+const CACHE_NAME = "kahoot-win-cache-v3.2.0";
+const CONST_NAME = "kahoot-win-cache-consts-v3.2.0";
 const URLCONSTS = [
+  "/resource/logo-halloween.svg",
+  // As of 3.2.0, theme objects are cached at the start as well.
+  // Reasoning: People like themes, it doesn't take too much space. (up to 20mb)
+  "/resource/logo-rezero.svg",
+  "/resource/red-konosuba.svg",
+  "/resource/blue-konosuba.svg",
+  "/resource/yellow-konosuba.svg",
+  "/resource/green-konosuba.svg",
+  "/resource/red-franxx.svg",
+  "/resource/blue-franxx.svg",
+  "/resource/yellow-franxx.svg",
+  "/resource/green-franxx.svg",
+  "/resource/red-rezero.svg",
+  "/resource/blue-rezero.svg",
+  "/resource/yellow-rezero.svg",
+  "/resource/green-rezero.svg",
+  "/resource/red-mc.svg",
+  "/resource/blue-mc.svg",
+  "/resource/yellow-mc.svg",
+  "/resource/green-mc.svg",
   "/resource/blue.svg",
   "/resource/red.svg",
   "/resource/green.svg",
@@ -10,7 +30,6 @@ const URLCONSTS = [
   "/resource/gold.svg",
   "/resource/silver.svg",
   "/resource/icon-gear.svg",
-  "/resource/load.gif",
   "/resource/load-hole.svg",
   "/resource/load-large.svg",
   "/resource/fire.svg",
@@ -75,7 +94,7 @@ self.addEventListener("fetch", function(event) {
       }
     ).catch(function(err){
       return fetch(event.request);
-    });
+    })
   );
 });
 

@@ -575,10 +575,12 @@ class QuizFinder{
         try{
           data = JSON.parse(b);
         }catch(e){
+          if(!this.parent){return;}
           this.parent.options.uuid = "";
           return this.searchKahoot(index);
         }
         if(data.error){
+          if(!this.parent){return;}
           this.parent.options.uuid = "";
           return this.searchKahoot(index);
         }
@@ -989,13 +991,13 @@ const Messages = {
   },
   CHOOSE_QUESTION_INDEX: (game,index)=>{
     index = Number(index);
-    if(!game.security.joined || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
+    if(!game.security.joined || !game.kahoot.quiz || !game.options.isChallenge || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
       return game.send({message:"INVALID_USER_INPUT",type:"Error"});
     }
     if(index != game.correctIndex){
       game.correctIndex = index;
-      const type2 = game.kahoot.quiz.currentQuestion.type;
-      const type = game.finder.hax.validOptions[0].questions[index].gameBlockType;
+      const type2 = game.kahoot.quiz.currentQuestion.gameBlockType;
+      const type = game.finder.hax.validOptions[0].questions[index].type;
       if(type != type2){ // hmm, wrong question.
         return;
       }

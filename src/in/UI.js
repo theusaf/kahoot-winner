@@ -6,7 +6,7 @@ const KahootThemes = {
     blue: "blue.svg",
     green: "green.svg",
     yellow: "yellow.svg",
-    logo: "logo.svg"
+    logo: "logo-halloween.svg"
   },
   KonoSuba: {
     red: "red-konosuba.svg",
@@ -22,7 +22,7 @@ const KahootThemes = {
     blue: "blue.svg",
     green: "green.svg",
     yellow: "yellow.svg",
-    logo: "logo.svg"
+    logo: "logo-halloween.svg"
   },
   // music doesn't actually change any images
   // but will be detected to play music/sounds.
@@ -31,14 +31,29 @@ const KahootThemes = {
     blue: "blue.svg",
     green: "green.svg",
     yellow: "yellow.svg",
-    logo: "logo.svg"
+    logo: "logo-halloween.svg"
   },
   FRANXX: {
     red: "red-franxx.svg",
     blue: "blue-franxx.svg",
     green: "green-franxx.svg",
     yellow: "yellow-franxx.svg",
-    logo: "logo.svg"
+    logo: "logo-halloween.svg"
+  },
+  ReZero: {
+    red: "red-rezero.svg",
+    blue: "blue-rezero.svg",
+    green: "green-rezero.svg",
+    yellow: "yellow-rezero.svg",
+    logo: "logo-rezero.svg"
+  },
+  // Also has music ("Minecraft", "Pigstep")
+  Minecraft: {
+    red: "red-mc.svg",
+    blue: "blue-mc.svg",
+    green: "green-mc.svg",
+    yellow: "yellow-mc.svg",
+    logo: "logo-mc.png"
   }
 };
 
@@ -189,6 +204,7 @@ class LobbyPage{
       e.returnValue = "§LeavePrompt§";
     };
     document.querySelector(".ad-container").style.display = "none";
+    document.querySelector(".ad-container-2").style.display = "none";
     if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
     }
@@ -1388,26 +1404,7 @@ const HideAnswers = document.getElementById("hideAnswers");
 const LoadingText = document.getElementById("loadingText");
 const ThemeChooser = document.getElementById("theme");
 const QuizResult = document.getElementById("quizresult");
-(async ()=>{
-  function UIWait(){
-    function sleep(n){
-      return new Promise(function(resolve) {
-        setTimeout(resolve,(n || 1) * 1000)
-      });
-    }
-    return new Promise(function(resolve) {
-      if(typeof game !== "undefined"){
-        resolve();
-      }else{
-        return sleep(1).then(()=>{
-          UIWait();
-        });
-      }
-    });
-  }
-  await UIWait();
-  new LoginPage(false);
-})();
+new LoginPage(false);
 loadPresets();
 let closePage = 0;
 
@@ -1558,6 +1555,7 @@ const shortcuts = e=>{
         try{document.getElementById("abtlnk").style = "display: none";}catch(e){}
         try{document.getElementById("chnge").style = "display: none";}catch(e){}
         try{document.getElementById("lang").style = "display: none";}catch(e){}
+        try{document.querySelector(".grecaptcha-badge").style.visibility = "hidden";}catch(e){}
       }
     }catch(e){
       console.log(e);
@@ -1681,3 +1679,9 @@ SearchInput.addEventListener("keydown",e=>{
     Search(SearchInput.value,SearchIndex);
   }
 });
+
+game.loadOptions();
+game.theme = ThemeChooser.value;
+if(game.theme != "Kahoot"){
+  new LoginPage;
+}

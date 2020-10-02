@@ -25,9 +25,84 @@
     <script async src="https://apis.google.com/js/platform.js"></script>
   </head>
   <body class="rainbow">
+    <style>
+      html,body{
+        overflow: auto;
+      }
+      #redir + img{
+        margin-left: 0.25rem;
+        margin-right: 0.25rem;
+        height: 2rem;
+      }
+      #lol{
+        display: flex;
+        align-items: center;
+        flex-flow: column;
+      }
+      #lol img{
+        width: 5rem;
+        height: 5rem;
+      }
+      #lol span{
+        margin: auto;
+        margin-bottom: 0.25rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        vertical-align: middle;
+      }
+      #lol span:nth-of-type(4n+1) > div{
+        background: #c60929;
+      }
+      #lol span:nth-of-type(4n+2) > div{
+        background: #0542b9;
+      }
+      #lol span:nth-of-type(4n+3) > div{
+        background: #ffa602;
+      }
+      #lol span:nth-of-type(4n) > div{
+        background: #26890c;
+      }
+      #lol a{
+        color: white;
+        word-break: break-word;
+      }
+      #lol div{
+        display: flex;
+        align-items: center;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+      }
+    </style>
     <h1>Kawhooops! That's an error!</h1>
     <h2>Perhaps you meant to visit:</h2>
-    <h4><a href="/" id="redir">https://kahoot-win.herokuapp.com</a></h4>
+    <div id="lol">
+      <span>
+        <div>
+          <a href="/" id="redir">https://kahoot-win.herokuapp.com</a>
+          <img src="/resource/red-rezero.svg">
+        </div>
+      </span>
+      <span>
+        <div>
+          <img src="/resource/blue-rezero.svg">
+          <a href="/" id="redir1">https://kahoot-win.herokuapp.com</a>
+        </div>
+      </span>
+      <span>
+        <div>
+          <a href="/" id="redir2">https://kahoot-win.herokuapp.com</a>
+          <img src="/resource/yellow-franxx.svg">
+        </div>
+      </span>
+      <span>
+        <div>
+          <img src="/resource/green-konosuba.svg">
+          <a href="/" id="redir3">https://kahoot-win.herokuapp.com</a>
+        </div>
+      </span>
+    </div>
     <style>
       body{
         text-align: center;
@@ -35,21 +110,27 @@
     </style>
     <script>
     const urls = [
-      "https://kahoot-win.herokuapp.com",
-      "https://kahoot-win.herokuapp.com/quiz/",
-      "https://kahoot-win.herokuapp.com/creator/",
-      "https://kahoot-win.herokuapp.com/how-it-works/",
-      "https://kahoot-win.herokuapp.com/api/",
-      "https://kahoot-win.herokuapp.com/privacy/",
-      "https://kahoot-win.herokuapp.com/terms/",
-      "https://kahoot-win.herokuapp.com/cookie%20policy/",
-      "https://kahoot-win.herokuapp.com/brew-me-a-coffee",
-      "https://kahoot-win.herokuapp.com/blog/"
-      "https://kahoot-win.herokuapp.com/blog/welcome",
-      "https://kahoot-win.herokuapp.com/blog/about",
-      "https://kahoot-win.herokuapp.com/blog/kahoot-is-not-a-testing-tool",
-      "https://kahoot-win.herokuapp.com/blog/quiz-not-found",
-      "https://kahoot-win.herokuapp.com/blog/download"
+      "/",
+      "/creator",
+      "/how-it-works",
+      "/api",
+      "/privacy",
+      "/terms",
+      "/cookie%20policy",
+      "/brew-me-a-coffee",
+      "/blog/welcome",
+      "/blog/about",
+      "/blog/kahoot-is-not-a-testing-tool",
+      "/blog/source-code-released",
+      "/blog/search",
+      "/blog/no-more-answer-streak-bonuses",
+      "/blog/kahoot-antibot",
+      "/blog/about",
+      "/blog/quiz-not-found",
+      "/blog/download",
+      "/amish",
+      "/xkcd/rand",
+      "/xkcd/now"
     ];
     function similarity(s1, s2) {
       var longer = s1;
@@ -91,11 +172,20 @@
       return costs[s2.length];
     }
     const a = urls.sort((a,b)=>{
-      return similarity(location.href,b) - similarity(location.href,a);
+      return similarity(location.pathname,b) - similarity(location.pathname,a);
     });
     const r = document.getElementById("redir");
-    r.href = a[0];
-    r.innerHTML = a[0];
+    const r1 = document.getElementById("redir1");
+    const r2 = document.getElementById("redir2");
+    const r3 = document.getElementById("redir3");
+    r.href = `${location.protocol}//${location.host}${a[0]}`;
+    r.innerHTML = r.href;
+    r1.href = `${location.protocol}//${location.host}${a[1]}`;
+    r1.innerHTML = r1.href;
+    r2.href = `${location.protocol}//${location.host}${a[2]}`;
+    r2.innerHTML = r2.href;
+    r3.href = `${location.protocol}//${location.host}${a[3]}`;
+    r3.innerHTML = r3.href;
     </script>
   </body>
 </html>
