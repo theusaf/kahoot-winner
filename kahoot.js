@@ -397,7 +397,7 @@ class QuizFinder{
     if(this.parent.options.isChallenge){
       return;
     }
-    if(this.parent.options.QuizLock && this.parent.validOptions.length){
+    if(this.parent.options.QuizLock && this.hax.validOptions.length){
       return; // Effectively locking the current valid option in place.
     }
     if(this.hax.stop){
