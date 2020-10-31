@@ -695,6 +695,12 @@ img[index="3"]{
   width: 10rem;
   left: calc((100vw - 10rem)/2);
 }
+#QuizLock+div label[for="QuizLock"]::after{
+  content: "🔓";
+}
+#QuizLock:checked+div label[for="QuizLock"]::after{
+  content: "🔐";
+}
 .textAnswer{
   position: absolute;
   display: flex;
@@ -1428,13 +1434,32 @@ div.info > div label{
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 5000;
 }
 .tut_cont{
-  z-index: 2000;
-  pointer-events: all;
+  z-index: inherit;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 .tut_cont>div{
+  opacity: 0.7;
+  pointer-events: all;
   z-index: inherit;
+  background: #29f;
+  border-radius: 3rem;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 20rem;
+  max-width: 25rem;
+  margin-top: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  left: calc(50% - 13.5rem);
+  bottom: 1rem;
+}
+.tut_cont>div:hover{
+  opacity: 1;
 }
 .tutorial button{
   width: 100%;
@@ -1442,98 +1467,14 @@ div.info > div label{
   border: 0px transparent;
   border-radius: 1rem;
 }
-#t_step0{
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  bottom: 2rem;
-  right: 2rem;
-  width: 30%;
-}
-#t_step0 h1{
-  font-size: 1.5rem;
-}
-#t_step1 {
-  width: 25%;
-  max-height: 75%;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  top: 20%;
-  left: 5%;
-  overflow: auto;
-}
-#t_step3 {
-  width: 25%;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  bottom: 5%;
-  right: 5%;
-}
-#t_step4 {
-  width: 25%;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  bottom: 20%;
-  left: 20%;
-}
-#t_step5 {
-  width: 20%;
-  max-height: calc(90% - 2rem);
-  overflow: auto;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  top: 5%;
-  right: 1%;
-}
-#t_step6 {
-  width: 20%;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  top: 15%;
-  right: 1%;
-}
-#t_step8 {
-  width: 20%;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  top: 15%;
-  right: 40%;
-}
-#t_step9 {
-  width: 20%;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  top: 55%;
-  right: 40%;
-}
-#t_step11 {
-  width: 40%;
-  background: #29f;
-  border-radius: 3rem;
-  padding: 1rem;
-  position: absolute;
-  top: 5%;
-  overflow: auto;
-  height: 90%;
-  right: calc(30% - 1rem);
-}
 
 @media screen and (max-width: 900px) {
+  .tut_cont>div{
+    left: calc(50% - 8.5rem);
+  }
+  .tut_cont>div{
+    max-width: 15rem;
+  }
   .form input,.form label.ch>span,.form button > span{
     max-width: 12rem;
     min-width: calc(100% - 10rem);
@@ -1605,9 +1546,6 @@ div.info > div label{
   }
   .looseDiv input, .looseDiv div{
     max-width: 15rem;
-  }
-  .tutorial{
-    display: none;
   }
   .openended{
     max-width: calc(90% - 1rem);

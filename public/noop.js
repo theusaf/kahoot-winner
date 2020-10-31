@@ -1,4 +1,4 @@
-const CACHE_NAME = "kahoot-win-cache-v3.2.0";
+const CACHE_NAME = "kahoot-win-cache-v3.3.0";
 const CONST_NAME = "kahoot-win-cache-consts-v3.2.0";
 const URLCONSTS = [
   "/resource/logo-halloween.svg",
@@ -60,9 +60,7 @@ const URLCONSTS = [
 const URLCACHE = [
   "/",
   "/index.js",
-  "/UI.js",
-  "/index.css",
-  "/tutorial.js"
+  "/index.css"
 ];
 self.addEventListener("install",evt=>{
   evt.waitUntil(

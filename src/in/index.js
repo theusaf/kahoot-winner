@@ -337,6 +337,7 @@ class Game{
       previewQuestion: opts.previewQuestion,
       searchLoosely: opts.searchLoosely,
       ChallengeDisableAutoplay: opts.ChallengeDisableAutoplay,
+      ChallengeDisableTimer: opts.ChallengeDisableTimer,
       div_game_options: opts.div_game_options,
       div_search_options: opts.div_search_options,
       div_challenge_options: opts.div_search_options
@@ -420,6 +421,10 @@ class Game{
   }
   updateName(){
     clearTimeout(this.saveTimeout);
+    const UUIDRegex = /[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i;
+    if(UUIDRegex.test(document.getElementById('searchTerm').value)){
+      document.getElementById("uuid").value = document.getElementById('searchTerm').value.match(UUIDRegex)[0];
+    }
     this.saveTimeout = setTimeout(this.saveOptions,500);
   }
   playSound(url){
@@ -564,7 +569,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v3.2.0";
+localStorage.KW_Version = "v3.3.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

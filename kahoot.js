@@ -397,6 +397,9 @@ class QuizFinder{
     if(this.parent.options.isChallenge){
       return;
     }
+    if(this.parent.options.QuizLock && this.parent.validOptions.length){
+      return; // Effectively locking the current valid option in place.
+    }
     if(this.hax.stop){
       this.parent.finishedProcessing = true;
       return; // stop searching! the quiz ended or the user is disconnected!
@@ -909,6 +912,11 @@ const Messages = {
         game.kahoot.defaults.options.ChallengeUseStreakBonus = true;
       }else{
         game.kahoot.defaults.options.ChallengeUseStreakBonus = false;
+      }
+      if(game.options.ChallengeDisableTimer){
+        game.kahoot.defaults.options.ChallengeWaitForInput = true;
+      }else{
+        game.kahoot.defaults.options.ChallengeWaitForInput = false;
       }
       // remove default fail.
       if((game.options.fail == 2 && game.fails.length == 1) || game.options.fail != old.fail){

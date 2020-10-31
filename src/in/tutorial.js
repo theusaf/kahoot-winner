@@ -4,7 +4,7 @@ window.addEventListener("load",()=>{
   if(!localStorage.seenNotice){
     showNotice();
   }
-  if(localStorage.returningUser){
+  if(localStorage.returningUser === "3.3.0"){
     return;
   }
   activateTutorial();
@@ -13,7 +13,7 @@ window.addEventListener("load",()=>{
 const TutorialDiv = document.getElementById("tutorial");
 
 function activateTutorial(){
-  localStorage.returningUser = true;
+  localStorage.returningUser = "3.3.0";
   if(TutorialDiv && TutorialDiv.innerHTML){
     return;
   }
@@ -23,10 +23,12 @@ function activateTutorial(){
   const template = document.createElement("template");
   template.innerHTML = `
     <div class="tut_cont">
-      <div id="t_step0">
-        <h1>§Tut1§</h1>
-        <button onclick="tutorialSteps(0)">§TutYes§</button>
-        <button onclick="dataLayer.push({event:'close_tutorial'});document.getElementById('tutorial').innerHTML = '';new ErrorHandler('§TutClose§',true);">§TutNo§</button>
+      <div id="tut_data">
+        <div id="tut_info">
+          <strong>§Tut1§</strong>
+        </div>
+        <button id="tut_next" tut-step="0" onclick="tutorialSteps(this.getAttribute('tut-step'))">§TutYes§</button>
+        <button onclick="dataLayer.push({event:'close_tutorial'});document.getElementById('tutorial').innerHTML = '';new ErrorHandler('§TutClose§',true);resetGame();">§TutNo§</button>
       </div>
     </div>
   `;
@@ -35,254 +37,188 @@ function activateTutorial(){
 
 function tutorialSteps(n){
   dataLayer.push({event:"do_tutorial",value:n});
-  switch (String(n)) {
-  case "0":{
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step1">
-                <h1>§Tut2a§</h1>
-                <p>§Tut2b§</p>
-                <button onclick="tutorialSteps(1);">§ChallengeNext§</button>
-                <button onclick="document.getElementById('tutorial').innerHTML = '';new ErrorHandler('§TutClose§',true);">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "1":{
-    new LoginPage(true);
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step1">
-                <h1>§Tut3§</h1>
-                <button onclick="tutorialSteps(2)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "2":{
-    SettingSwitch.click();
-    TutorialDiv.style.zIndex = 1000;
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step3">
-                <h1>§Tut4§</h1>
-                <button onclick="tutorialSteps(3)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "3":{
-    if (!SettingSwitch.checked) {SettingSwitch.click();}
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step4">
-                <p>§Tut5§</p>
-                <button onclick="tutorialSteps(4)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "4":{
-    if (!SettingSwitch.checked) {SettingSwitch.click();}
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step5">
-                <h1>§Tut6a§</h1>
-                <p>§Tut6b§</p>
-                <p>§Tut6c§</p>
-                <p>§Tut6d§</p>
-                <p>§Tut6e§</p>
-                <p>§Tut6f§</p>
-                <p>§Tut6g§</p>
-                <p>§Tut6h§</p>
-                <p>§Tut6i§</p>
-                <h3>§Tut6j§</h3>
-                <p>§Tut6k§</p>
-                <p>§Tut6l§</p>
-                <p>§Tut6m§</p>
-                <button onclick="tutorialSteps(5)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "5":{
-    if (SettingSwitch.checked) {SettingSwitch.click();}
-    game.question = {
-      type: "quiz",
-      index: 0,
-      data: [
-        {
-          answer: "§Correct§",
-          correct: true
-        },
-        {
-          answer: "§Incorrect§",
-          correct: false
-        },
-        {
-          answer: "§Tutorial§",
-          correct: false
-        },
-        {
-          answer: "",
-          correct: false,
-          image: {
-            id: "dfa9fc36-1122-4dc2-a00b-04d490c07765"
-          }
-        }
-      ],
-      total: "42.069",
-      currentGuesses: [{
-        questions: [
+  const data = document.getElementById("tut_data");
+  const [next,close] = Array.from(document.querySelectorAll("#tut_data>button"));
+  const info = document.getElementById("tut_info");
+  next.setAttribute("tut-step",+n + 1);
+  next.innerHTML = "§ChallengeNext§";
+  close.innerHTML = "§Done§";
+  switch(n + ""){
+    case "0":{
+      if (SettingSwitch.checked) {SettingSwitch.click();}
+      info.innerHTML = `<em>§Tut2§</em>
+      <p><strong>§Tut2a§</strong></p>
+      <p>§Tut2b§</p>
+      <p>§Tut2c§</p>
+      <ul>
+        <li>§Tut2d§ <code>12345</code></li>
+        <li>§Tut2e§ <code>012345</code></li>
+        <li>§Tut2f§ <code>https://kahoot.it/challenge/012345?challenge-id=really-long-string</code></li>
+        <li>§Tut2g§ <code>weekly</code>, <code>weekly-previous</code></li>
+      </ul>`;
+      break;
+    }
+    case "1":{
+      if (SettingSwitch.checked) {SettingSwitch.click();}
+      new LoginPage(true);
+      info.innerHTML = `<strong>§Tut3§</strong>
+      <p>§Tut3a§</p>
+      <p>§Tut3b§</p>`;
+      break;
+    }
+    case "2":{
+      if (SettingSwitch.checked) {SettingSwitch.click();}
+      game.name = "§Tutorial§";
+      game.pin = "12345-LUGGAGE";
+      new LobbyPage;
+      data.style.marginTop = "8rem";
+      info.innerHTML = `<p><strong>§Tut4§</strong></p>
+      <p>§Tut4a§</p>
+      <p>§Tut4b§</p>
+      <p><strong>§Tut4c§</strong></p>
+      <p>§Tut4d§</p>
+      <p>§Tut4e§ <code>quizId=</code></p>`;
+      break;
+    }
+    case "3":{
+      if (SettingSwitch.checked) {SettingSwitch.click();}
+      info.innerHTML = `<p><strong>§Tut5§</strong></p>
+      <p>§Tut5a§</p>
+      <p>§Tut5b§</p>`
+      break;
+    }
+    case "4":{
+      if (SettingSwitch.checked) {SettingSwitch.click();}
+      data.style.marginTop = "";
+      game.question = {
+        type: "quiz",
+        index: 0,
+        data: [
           {
-            time: 20000
+            answer: "§Correct§",
+            correct: true
+          },
+          {
+            answer: "§Incorrect§",
+            correct: false
+          },
+          {
+            answer: "§Tutorial§",
+            correct: false
+          },
+          {
+            answer: "",
+            correct: false,
+            image: {
+              id: "dfa9fc36-1122-4dc2-a00b-04d490c07765"
+            }
           }
-        ]
-      }],
-      raw: {}
-    };
-    game.question.ans = [game.question.data.length];
-    game.score = -Infinity;
-    game.name = "§Tutorial§";
-    game.pin = "12345-LUGGAGE";
-    new QuestionAnswererPage();
-    activateLoading(false);
-    TutorialDiv.innerHTML = "";
-    TutorialDiv.style.zIndex = 0;
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step6">
-                <h1>§Tut7§</h1>
-                <button onclick="tutorialSteps(6)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "6":{
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step6">
-                <h1>§Tut8§</h1>
-                <button onclick="tutorialSteps(7)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "7":{
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step8">
-                <h1>§Tut9§</h1>
-                <button onclick="tutorialSteps(8)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "8":{
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step9">
-                <h1>§Tut10§</h1>
-                <button onclick="tutorialSteps(9)">§ChallengeNext§</button>
-                <button onclick="tutorialSteps(10)">§Done§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "9":{
-    game.end = {
-      info: {
-        rank: 1
+        ],
+        total: "42.069",
+        currentGuesses: [{
+          questions: [
+            {
+              time: 20000
+            }
+          ]
+        }],
+        raw: {},
+        ans: [4]
+      };
+      game.score = -Infinity;
+      new QuestionAnswererPage();
+      activateLoading(false);
+      info.innerHTML = `<p><strong>§Tut6§</strong></p>
+      <p>§Tut6a§</p>
+      <p>§Tut6b§</p>`;
+      break;
+    }
+    case "5":{
+      if (SettingSwitch.checked) {SettingSwitch.click();}
+      info.innerHTML = `<p><strong>§Tut7§</strong></p>
+      <p>§Tut7a§</p>
+      <p>§Tut7b§</p>`;
+      break;
+    }
+    case "6":{
+      if (!SettingSwitch.checked) {SettingSwitch.click();}
+      document.querySelector("[for=\"div_search_options\"]").click();
+      data.style.position = "absolute";
+      info.innerHTML = `<p><strong>§Tut8§</strong></p>
+      <p>§Tut8a§</p>
+      <p>§Tut8b§</p>
+      <p>§Tut8c§</p>
+      <p>§Tut8d§</p>
+      <p>§Tut8e§</p>`;
+      break;
+    }
+    case "7":{
+      if (!SettingSwitch.checked) {SettingSwitch.click();}
+      document.querySelector("[for=\"div_game_options\"]").click();
+      info.innerHTML = `<p><strong>§Tut9§</strong></p>
+      <p>§Tut9a§</p>
+      <p>§Tut9b§</p>
+      <p>§Tut9c§</p>
+      <p>§Tut9d§</p>
+      <p>§Tut9e§</p>
+      <p>§Tut9f§</p>
+      <p>§Tut9g§</p>
+      <p>§Tut9h§</p>
+      <p>§Tut9i§</p>
+      <p>§Tut9j§</p>`;
+      break;
+    }
+    case "8":{
+      if (!SettingSwitch.checked) {SettingSwitch.click();}
+      document.querySelector("[for=\"div_challenge_options\"]").click();
+      info.innerHTML = `<p><strong>§Tut10§</strong></p>
+      <p>§Tut10a§</p>
+      <p>§Tut10b§</p>
+      <p>§Tut10c§</p>
+      <p>§Tut10d§</p>
+      <p>§Tut10e§</p>`;
+      break;
+    }
+    case "9":{
+      data.style.position = "";
+      info.innerHTML = `<p><strong>§Tut11§</strong></p>
+      <p>§Tut11a§</p>`;
+      break;
+    }
+    case "10":{
+      function a(){
+        dataLayer.push({event:"complete_tutorial"});
+        setTimeout(function(){
+          return new ErrorHandler("§TutComplete§",true);
+        },300);
+        try{close.removeEventListener(a);}catch(e){}
       }
-    };
-    new QuizEndPage(JSON.stringify({
-      metal: "gold"
-    }));
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-            <div class="tut_cont">
-              <div id="t_step9">
-                <h1>§Tut11§</h1>
-                <button onclick="tutorialSteps(11)">§Tut11a§</button>
-                <button onclick="tutorialSteps(10)">§Tut11b§</button>
-              </div>
-            </div>
-          `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "11":{
-    TutorialDiv.innerHTML = "";
-    let template = document.createElement("template");
-    template.innerHTML = `
-          <div class="tut_cont">
-            <div id="t_step11">
-              <h1>§Tut12§</h1>
-              <p>§Tut12a§</p>
-              <p>§Tut12b§</p>
-              <p>§Tut12c§</p>
-              <p>§Tut12d§</p>
-              <p>§Tut12e§</p>
-              <p>§Tut12f§</p>
-              <button onclick="tutorialSteps(10)">§GotIt§</button>
-            </div>
-          </div>
-        `;
-    TutorialDiv.append(template.content.cloneNode(true));
-    break;
-  }
-  case "10":{
-    TutorialDiv.innerHTML = "";
-    resetGame();
-    dataLayer.push({event:"complete_tutorial"});
-    setTimeout(function(){
-      return new ErrorHandler("§TutComplete§",true);
-    },300);
-    break;
-  }
+      close.addEventListener("click",a);
+      if (SettingSwitch.checked) {SettingSwitch.click();}
+      game.end = {
+        info: {
+          rank: 1
+        }
+      };
+      new QuizEndPage(JSON.stringify({
+        metal: "upvote-filled"
+      }));
+      next.outerHTML = "";
+      info.innerHTML = `<p><strong>§Tut12§</strong></p>
+      <p>§Tut12a§</p>
+      <ol>
+        <li>§Tut12b§</li>
+        <ul><li>§Tut12c§</li></ul>
+        <li>§Tut12d§</li>
+        <ul><li>§Tut12e§</li></ul>
+        <li>§Tut12f§</li>
+        <ul><li>§Tut12g§</li></ul>
+        <li>§Tut12h§</li>
+        <ul><li>§Tut12i§</li></ul>
+        <li>§Tut12j§</li>
+        <ul><li>§Tut12k§</li></ul>
+      </ol>`;
+    }
   }
 }
 

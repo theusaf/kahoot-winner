@@ -25,6 +25,7 @@
     <title>§Title§</title>
     <link rel="apple-touch-icon-precomposed" href="favicon.ico">
     <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6e1a6b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <!-- Scheme.org metadata -->
     <script type="application/ld+json">
@@ -180,7 +181,8 @@
             </div>
 
             <label class="block">§CurrentGuess§</label>
-            <div class="disabled button" id="quizresult"><span>§CurrentGuess§</span></div>
+            <input type="checkbox" class="ch" id="QuizLock">
+            <div class="disabled button" id="quizresult"><span>§CurrentGuess§</span><p class="shortcut2"><label style="font-style: normal;" for="QuizLock"></label></p></div>
           </div>
         </div>
         <div>
@@ -425,6 +427,22 @@
                 <p>§EnableStreak3§</p>
               </div>
             </div>
+
+            <meta content="toggle" itemprop="result"/>
+            <input type="checkbox" class="ch" id="ChallengeDisableTimer">
+            <label for="ChallengeDisableTimer" class="ch button"><span>§DisableTimer§</span><label for="info-timer">
+              <p class="shortcut2">?</p>
+            </label></label>
+            <input type="checkbox" class="ch info" id="info-timer">
+            <div class="info">
+              <div>
+                <label for="info-timer">X</label>
+                <h4>§DisableTimer§</h4>
+                <p>§DisableTimer2§</p>
+                <p>§DisableTimer3§</p>
+              </div>
+            </div>
+
           </div>
         </div>
         <nav class="bottom mobishow">
@@ -553,6 +571,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p><a href="https://kahoot-win.herokuapp.com/blog/update-3-3-0" target="_blank">3.3.0</a> - Bugs and new features! (Disable the question timer, better quiz id support, lock a quiz, and more!)</p>
           <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-2-0">3.2.0</a> - New themes, secrets, bug fixes, and caching improvements.</p>
           <p>3.1.2 - Now hides language picker in panic mode. Added the ability to change timeout mid-question (improves timeout sub-option)</p>
           <p>3.1.1 - Added some more themes.</p>
@@ -645,6 +664,8 @@
           <p>2.0.1 - added core css and scripts</p>
           <p>2.0.0 - begin work on new, website, recode entire project</p>
           <p>pre-2.0.0 / 1.0.0 - Essentially the same, but more ugly and had less features and was quite bad.</p>
+          <p id="cprt">&copy; 2019-2020 @</p>
+          <script>document.getElementById("cprt").innerHTML += atob("dGhldXNhZg==");</script>
         </div>
       </div>
       <div class="tutorial" id="tutorial"></div>

@@ -875,6 +875,9 @@ class QuestionAnswererPage{
       chdiv.append(sp);
       div.append(chdiv);
       // create timer
+      if(game.options.ChallengeDisableTimer){
+        return;
+      }
       let questionTime = question.raw.timeAvailable / 1000;
       const qdiv = document.createElement("p");
       qdiv.className = "chtimer";
@@ -1269,6 +1272,9 @@ async function resetGame(recover){
           },
           type: "RECOVER_DATA"
         });
+        if(oldgame.oldQuizUUID){
+          document.getElementById("uuid").value = oldgame.oldQuizUUID;
+        }
         game.saveOptions();
       }else{ // asumming that the first result should be "pingood" after sending the pin.
         resetGame();
@@ -1477,9 +1483,16 @@ function Themer(){
     SettingDiv.className = "";
     document.querySelector(".About").className = "About";
   }
+  const logo = document.querySelector(".Login>img[alt=\"Kahoot logo\"]");
+  if(logo){
+    logo.src = "/resource/" + KahootThemes[game.theme].logo;
+  }
 }
 ThemeChooser.addEventListener("change",Themer);
-QuizResult.addEventListener("click",()=>{
+QuizResult.addEventListener("click",(event)=>{
+  if(event.target.nodeName === "LABEL"){
+    return;
+  }
   if(QuizResult.getAttribute("url")){
     window.open(QuizResult.getAttribute("url"),"_blank");
   }
@@ -1556,6 +1569,10 @@ const shortcuts = e=>{
         try{document.getElementById("chnge").style = "display: none";}catch(e){}
         try{document.getElementById("lang").style = "display: none";}catch(e){}
         try{document.querySelector(".grecaptcha-badge").style.visibility = "hidden";}catch(e){}
+        try{
+          document.querySelector(".ad-container").style.display = "none";
+          document.querySelector(".ad-container-2").style.display = "none";
+        }catch(e){}
       }
     }catch(e){
       console.log(e);
@@ -1598,6 +1615,30 @@ const shortcuts = e=>{
   game.saveOptions();
 };
 window.addEventListener("keydown",shortcuts);
+window.addEventListener("keydown",(e)=>{
+  if(!(game.question && ["quiz","multiple_select_quiz","multiple_select_poll","survey"].includes(game.question.type) && document.querySelector('[alt="Red"]'))){
+    return;
+  }
+  if(+e.code.split("Digit")[1] <= 4){
+    switch (+e.code.split("Digit")[1]) {
+      case 0:
+        send({type:"ANSWER_QUESTION",message:null});
+        break;
+      case 1:
+        document.querySelector('[alt="Red"]').click();
+        break;
+      case 2:
+        document.querySelector('[alt="Blue"]').click();
+        break;
+      case 3:
+        document.querySelector('[alt="Yellow"]').click();
+        break;
+      case 4:
+        document.querySelector('[alt="Green"]').click();
+        break;
+    }
+  }
+});
 UIError.addEventListener("click",()=>{
   clearTimeout(game.errorTimeout);
   UIError.style.right = "";
