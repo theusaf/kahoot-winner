@@ -569,7 +569,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v3.3.0";
+localStorage.KW_Version = "v3.3.1";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
