@@ -21,7 +21,8 @@
     "kahoot-search": "^1.0.4",
     "kahoot.js-updated": "^2.1.1",
     "request": "^2.88.2",
-    "ws": "^7.4.0"
+    "ws": "^7.4.0",
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
     "electron": "^11.0.3",

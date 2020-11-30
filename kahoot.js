@@ -16,6 +16,7 @@ const {URL} = require("url");
 const {edit} = require("./regex.js");
 const request = require("request");
 const fs = require("fs");
+const yauzl = require("yauzl");
 
 const DBAmount = 100;
 let mainPath = __dirname;
@@ -40,55 +41,88 @@ function sleep(time){
 
 const KahootDatabase = {};
 let KahootDatabaseInitialized = false;
+
+// getting rid of old database files
+if(fs.existsSync(path.join(mainPath,"kdb.json"))){
+  fs.unlinkSync(path.join(mainPath,"kdb.json"));
+}
+if(fs.existsSync(path.join(mainPath,"kdb.zip"))){
+  fs.unlinkSync(path.join(mainPath,"kdb.zip"));
+}
+
 if(!fs.existsSync(path.join(mainPath,"latest.txt"))){
   console.log("Generating latest.txt...");
   fs.writeFileSync(path.join(mainPath,"latest.txt"),String(Date.now()));
 }
-if(!fs.existsSync(path.join(mainPath,"kdb.json")) || Number(fs.readFileSync(path.join(mainPath,"latest.txt"))) + (1000*60*24) < Date.now()){
+if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(path.join(mainPath,"latest.txt"))) + (1000*60*24) < Date.now()){
   console.log("Fetching latest database from archive.org...");
-  request("https://archive.org/download/kahoot-win/full-export.json",{json:true},(e,r,b)=>{
-    if(e){
-      console.log("Error fetching database:");
-      console.log(e);
-      return;
-    }
-    console.log("Saving database to kdb.json...");
-    for(let i in b){
-      const len = b[i].questions.length;
-      if(!KahootDatabase[len]){
-        KahootDatabase[len] = {
-          [i]: b[i]
-        };
-      }else{
-        Object.assign(KahootDatabase[len],{
-          [i]: b[i]
-        });
-      }
-    }
-    KahootDatabaseInitialized = true;
+  const p = request("https://archive.org/download/kahoot-win/json-full.zip").pipe(fs.createWriteStream(path.join(mainPath,"kdb.zip")));
+  p.on("error",(e)=>{
+    console.log("Failed to save database: " + e);
+  });
+  p.on("finish",()=>{
+    console.log("Saved database to kdb.zip... Extracting...");
     fs.writeFile(path.join(mainPath,"latest.txt"),String(Date.now()),()=>{});
-    fs.writeFile(path.join(mainPath,"kdb.json"),JSON.stringify(b),()=>{
-      console.log("Database loaded.");
+    yauzl.open(path.join(mainPath,"kdb.zip"),{lazyEntries: true},(err,zip)=>{
+      if(err){return console.log("Failed to extract: " + err);}
+      zip.readEntry();
+      zip.on("entry",entry=>{
+        if(/\/$/.test(entry.fileName)){
+          if(!fs.existsSync(path.join(mainPath,entry.fileName))){
+            fs.mkdirSync(path.join(mainPath,entry.fileName));
+          }
+          zip.readEntry();
+        }else{
+          zip.openReadStream(entry,(err,stream)=>{
+            if(err){return console.log("Failed to extract: " + err);}
+            stream.on("end",()=>{
+              zip.readEntry();
+            });
+            stream.pipe(fs.createWriteStream(path.join(mainPath,entry.fileName)));
+          });
+        }
+      });
+      zip.once("end",()=>{
+        console.log("Database successfully extracted. Removing unneeded files and downloading keys.");
+        fs.unlinkSync(path.join(mainPath,"kdb.zip"));
+        request("https://archive.org/download/kahoot-win/full-export-keys-sectioned.json",(e,r,b)=>{
+          if(e){return console.log("Failed: " + e);}
+          fs.writeFile(path.join(mainPath,"keys.json"),b,()=>{
+            loadDatabase();
+          });
+        });
+      });
     });
   });
 }else{
   console.log("Using loaded database");
-  fs.readFile(path.join(mainPath,"kdb.json"),"utf8",(err,b)=>{
+  loadDatabase();
+}
+
+function ReadItem(item){
+  return new Promise(function(resolve, reject) {
+    fs.readFile(path.join(mainPath,"json-full",item),(err,data)=>{
+      if(err){reject();}
+      resolve(JSON.parse(data));
+    });
+  });
+}
+
+function loadDatabase(){
+  fs.readFile(path.join(mainPath,"keys.json"),async (err,data)=>{
     if(err){return;}
-    KahootDatabaseInitialized = true;
-    const data = JSON.parse(b);
-    for(let i in data){
-      const len = data[i].questions.length;
-      if(!KahootDatabase[len]){
-        KahootDatabase[len] = {
-          [i]: data[i]
-        };
-      }else{
-        Object.assign(KahootDatabase[len],{
-          [i]: data[i]
-        });
+    const keys = JSON.parse(data);
+    for(let length in keys){
+      KahootDatabase[length] = [];
+      for(let i = 0;i<keys[length].length;i++){
+        try{
+          KahootDatabase[length].push(await ReadItem(keys[length][i] + ".json"));
+        }catch(e){
+          console.log("Error: " + e);
+        }
       }
     }
+    KahootDatabaseInitialized = true;
   });
 }
 
