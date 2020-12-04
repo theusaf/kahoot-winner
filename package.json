@@ -1,6 +1,6 @@
 {
   "name": "kahoot-win",
-  "version": "3.3.1",
+  "version": "4.0.0",
   "description": "A Kahoot Cheating Website",
   "main": "kahoot.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "express": "^4.17.1",
     "ip": "^1.1.5",
     "kahoot-search": "^1.0.4",
-    "kahoot.js-updated": "^2.1.1",
+    "kahoot.js-updated": "^2.2.1",
     "request": "^2.88.2",
     "ws": "^7.4.0",
     "yauzl": "^2.10.0"

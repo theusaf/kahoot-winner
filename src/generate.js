@@ -93,6 +93,28 @@ async function run(){
     fs.writeFileSync(path.join(__dirname,"out",lang,"index.js"),str,"utf8");
     console.log(`${c.g}Done.`);
   }
-  console.log(`${c.g}Process complete.`);
+  if(process.argv.includes("export")){
+    return;
+  }
+  console.log(`${c.g}Done. Copying files...`);
+  fs.readdir(path.join(__dirname,"out"),{withFileTypes:true},(err,files)=>{
+    if(err){return console.log(`${c.r}Failed: ${err}`);}
+    for(const dir of files){
+      if(dir.isDirectory()){
+        fs.readdir(path.join(__dirname,"out",dir.name),(err,files)=>{
+          for(const file of files){
+            // move
+            if(file[0] === "."){
+              continue;
+            }
+            let name = "locales/" + dir.name;
+            if(name === "locales/en"){name = "public"}
+            fs.renameSync(path.join(__dirname,"out",dir.name,file),path.join(__dirname,"..",name,file));
+          }
+        });
+      }
+    }
+    console.log(`${c.g}Process complete.`);
+  });
 }
 run();

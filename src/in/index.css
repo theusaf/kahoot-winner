@@ -76,6 +76,14 @@
     transform: translateX(-100%);
   }
 }
+@keyframes movein{
+  from{
+    margin-left: 100%;
+  }
+  to{
+    margin-left: 0%;
+  }
+}
 
 .rainbow{
   animation: rainbow 14s infinite;
@@ -109,6 +117,9 @@ body.purple{
 }
 body.purple2{
   background: #864cbf;
+}
+body.blue2{
+  background: #0542b9;
 }
 span.red{
   color: rgb(226,27,60);
@@ -158,7 +169,7 @@ body,html{
   width: 5rem;
   height: 5rem;
   position: fixed;
-  bottom: 1rem;
+  bottom: 4rem;
   right: 1rem;
   z-index: 5000;
 }
@@ -309,69 +320,84 @@ input.ch{
   z-index: 100;
   position: absolute;
   transition: 1s;
-  min-width: 10vw;
-  max-width: 80vw;
-  height: 15vh;
-  right: -100%;
-  background: rgb(200,0,0);
+  right: 1.5rem;
   text-align: center;
-  display: flex;
-  align-items: center;
-  color: white;
   top: 2vh;
-  font-size: 1.5em;
+  max-width: 25%;
+  min-width: 10rem;
+  width: 100%;
 }
-.Error::before{
-  content: "";
+.Error > div{
+  color: white;
+  background: rgba(198,9,41,0.8);
+  padding: 0.25rem;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem 0 0.5rem 0;
+  position: relative;
+  min-width: 100%;
+  animation: movein 1s ease;
+  animation-fill-mode: forwards;
+  transition: opacity 1s;
+}
+.Error > div::before{
+  content: "!";
+  display: block;
+  background: #333333;
+  width: 1rem;
+  margin: auto;
+  border-radius: 0.25rem;
+}
+.Error > div.NotError::before{
+  content: "?";
+}
+.Error > div.Clickable{
+  cursor: help;
+}
+.Error > div.NotError{
+  background: rgba(51,51,51,0.8);
+}
+.Error > div > .ErrorCloser{
   position: absolute;
-  left: -20px;
-  width: 0px;
-  height: 0px;
-  border-style: solid;
-  border-width: 0 0 15vh 20px;
-  border-color: transparent transparent rgb(200,0,0) transparent;
+  top: calc(50% - 0.7rem);
+  left: 0.1rem;
+  font-weight: 200;
+  padding: 0.1rem;
+  background: #333333;
+  border-radius: 0.25rem;
 }
-.Error::after{
-  top: 0px;
-  content: "";
-  position: absolute;
-  width: 0px;
-  height: 0px;
-  right: -20px;
-  border-style: solid;
-  border-width: 15vh 20px 0 0px;
-  border-color: rgb(200,0,0) transparent transparent transparent;
-}
-.Error *{
-  flex: 1;
-}
-.Error:hover ::before{
-  content: "X";
-  color: black;
-  font-size: 1.25rem;
-  margin-right: 0.5rem;
+.Error > div > .ErrorCloser:hover{
+  background: #33cccc;
+  cursor: pointer;
 }
 .openended{
   height: 4rem;
   text-align: center;
   font-size: 3rem;
-  max-width: 30rem;
-  margin-left: calc((50vw - 1rem) - 15rem);
-  background: skyblue;
-  margin-top: 25%;
+  max-width: 20rem;
+  background: #26890c;
+  border-radius: 0.5rem;
+  border: 0;
+  border-bottom: solid 0.25rem #106b03;
+  color: white;
 }
 .openended::placeholder{
-  font-size: 1.75rem;
+  font-size: 3rem;
+  opacity: 0.7;
+  font-weight: lighter;
+  color: #bbb;
 }
-.NotError{
-  background: rgb(0,200,0) !important;
+.openended+div{
+  margin: auto;
+  margin-top: 1rem;
+  background: #45a3e5;
+  width: 8rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border-bottom: solid 0.25rem #1368ce;
 }
-.NotError::before{
-  content: "";
-  border-color: transparent transparent rgb(0,200,0) transparent !important;
-}
-.NotError::after{
-  border-color: rgb(0,200,0) transparent transparent transparent !important;
+.openended+div:active{
+  background: #1368ce;
 }
 .Changelog{
   position: fixed;
@@ -523,21 +549,183 @@ input.ch{
   display: flex;
   flex-direction: column;
 }
-.lobby h1{
-  margin: 0;
-  margin-top: 50vh;
+
+.load_circle{
+  width: 5rem;
+}
+
+/* Lobby */
+[ui-event="Lobby"] #UIMid{
+  height: calc(100% - 6rem);
+  display: flex;
+}
+[ui-event="Lobby"] #UIMid>div,
+[ui-event="QuizStart"] #UIMid>div,
+[ui-event="GetReady"] #UIMid>div,
+[ui-event="TeamTalk"] #UIMid>div,
+[ui-event="Answered"] #UIMid>div,
+.blue2 [ui-event="QuestionAnswer"] #UIMid>div,
+[ui-event="QuestionEnd"] #UIMid>div,
+[ui-event="TimeUp"] #UIMid>div{
+  margin: auto;
+}
+[ui-event="Lobby"] h1,
+[ui-event="QuizStart"] h1,
+[ui-event="Answered"] h1,
+[ui-event="GetReady"] h1,
+[ui-event="TeamTalk"] h1,
+[ui-event="QuestionEnd"] h1{
   flex: 0;
   font-size: 2.75rem;
   position: relative;
   z-index: 0;
 }
-.lobby h2{
+[ui-event="Lobby"] h2{
   margin: 0;
   margin-top: 1.25rem;
   position: relative;
   z-index: 0;
-  /*flex: 1;*/
 }
+
+/* QuizStart */
+[ui-event="QuizStart"] > #L1,
+[ui-event="Lobby"] > #L1,
+[ui-event="TimeUp"] > #L1{
+  display: none;
+}
+[ui-event="QuizStart"] #UIMid{
+  display: flex;
+  height: calc(100% - 6rem);
+}
+
+/* Get Ready */
+[ui-event="GetReady"] #L2,
+[ui-event="TeamTalk"] #L2{
+  display: none;
+}
+[ui-event="GetReady"] #UIMid,
+[ui-event="TeamTalk"] #UIMid,
+[ui-event="Answered"] #UIMid{
+  display: flex;
+  height: 100%;
+  margin-top: 4rem;
+}
+[ui-event="QuestionEnd"] #UIMid{
+  height: calc(100% - 10rem);
+  display: flex;
+  margin-top: 4rem;
+}
+[ui-event="GetReady"] #UIMid>div>div,
+[ui-event="TeamTalk"] #UIMid>div>div{
+  position: relative;
+}
+[ui-event="GetReady"] #timer,
+[ui-event="TeamTalk"] #timer{
+  position: absolute;
+  left: 0;
+  margin: 0;
+  top: 0.75rem;
+  width: 100%;
+  font-size: 3rem;
+  font-weight: bolder;
+  color: #45a3e5;
+}
+[ui-event="TeamTalk"] #timer{
+  color: #33cccc;
+}
+[ui-event="GetReady"] #L1,
+[ui-event="TeamTalk"] #L1,
+[ui-event="QuestionAnswer"] #L1,
+[ui-event="Answered"] #L1,
+[ui-event="QuestionEnd"] #L1{
+  display: flex;
+  height: 3rem;
+  padding-left: 0;
+}
+[ui-event="GetReady"] #L1 p,
+[ui-event="TeamTalk"] #L1 p,
+[ui-event="QuestionAnswer"] #L1 p,
+[ui-event="Answered"] #L1 p,
+[ui-event="QuestionEnd"] #L1 p{
+  position: absolute;
+  margin-left: 1rem;
+  top: 0.5rem;
+}
+
+/* Quiz End */
+[ui-event="QuizEnd"] #L1{
+  display: none;
+}
+[ui-event="QuizEnd"] > h1{
+  margin-top: 13rem;
+  font-size: 2.5rem;
+  margin-bottom: 0;
+}
+[ui-event="QuizEnd"] > h1::after{
+  content: "";
+  width: 3.5rem;
+  height: 0.25rem;
+  background: #c2a5df;
+  position: absolute;
+  display: inline-block;
+  transform: translate(1.5rem,2.5rem);
+}
+[ui-event="QuizEnd"] > h1::before{
+  content: "";
+  width: 3.5rem;
+  height: 0.25rem;
+  display: inline-block;
+  background: #c2a5df;
+  position: absolute;
+  transform: translate(-5.5rem,2.5rem);
+}
+[ui-event="QuizEnd"] > h2{
+  margin: 0.5rem;
+  font-size: 1.75rem;
+}
+[ui-event="QuizEnd"] > p{
+  font-weight: normal;
+}
+
+/* Time Up */
+[ui-event="TimeUp"] #UIMid{
+  display: flex;
+  height: calc(100% - 6rem);
+}
+
+.blue2 [ui-event="GetReady"] #L1 p,
+.blue2 [ui-event="QuestionAnswer"] #L1 p{
+  display: none;
+}
+.blue2 [ui-event="GetReady"] #L2,
+.blue2 [ui-event="QuestionAnswer"] #L2{
+  display: block;
+}
+.blue2 [ui-event="GetReady"] #UIMid{
+  height: calc(100% - 8rem);
+}
+.blue2 [ui-event="QuestionAnswer"] #UIMid{
+  display: flex;
+  height: calc(100% - 12rem);
+  margin-top: 5rem;
+}
+#quizTypeImage{
+  margin: auto;
+  display: flex;
+  align-items: center;
+  background: #f2f2f2;
+  border-radius: 1.5rem;
+  padding: 0.5rem;
+  height: 1.5rem;
+}
+#quizTypeImage img{
+  height: 2rem;
+  margin-right: 0.5rem;
+}
+#ContentImage{
+  width: 16rem;
+}
+
 #L1{
   top: 0;
   padding-left: 1rem;
@@ -547,10 +735,14 @@ input.ch{
   border-bottom: solid 0.25rem rgb(204,204,204);
 }
 #L2{
-  padding-right: 1rem;
-  top: 0;
-  right: 1.5rem;
+  bottom: 0;
+  padding-left: 1rem;
   position: fixed;
+  top: auto;
+  right: auto;
+  background: #fff;
+  border-top: solid .25rem #ccc;
+  width: 100%;
 }
 #L1.gameOver{
   background: #333333;
@@ -577,11 +769,13 @@ input.ch{
   border-width: 0.0625rem;
   border-color: rgb(51,51,51);
   border-radius: 0.125rem;
+  right: 3rem;
+  position: absolute;
 }
 .Answers{
   width: calc(100vw - 2rem);
   padding: 1rem;
-  height: calc(100% - 8.25rem);
+  height: calc(100% - 15rem);
   display: flex;
   flex-flow: wrap;
   margin-top: 6rem;
@@ -645,7 +839,7 @@ img[index="3"]{
 }
 .Answers .AnswerOptions{
   position: absolute;
-  top: 50%;
+  top: calc(50% - 2rem);
   left: calc(50% - 4rem);
   width: 8rem;
   height: 4rem;
@@ -669,6 +863,9 @@ img[index="3"]{
 .Answers.jumble .textAnswer{
   flex-flow: row;
 }
+.Answers>div{
+  margin: auto;
+}
 .draggable{
   position: absolute;
   margin-top: 1.5rem !important;
@@ -691,9 +888,9 @@ img[index="3"]{
 }
 #resultMedal{
   position: absolute;
-  top: 6.25rem;
+  top: 0;
   width: 10rem;
-  left: calc((100vw - 10rem)/2);
+  left: calc((100% - 10rem)/2);
 }
 #QuizLock+div label[for="QuizLock"]::after{
   content: "🔓";
@@ -714,6 +911,9 @@ img[index="3"]{
   flex: 50%;
   text-align: center;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+.shadow{
+  position: relative;
 }
 .shadow::after{
   content: attr(text);
@@ -864,9 +1064,6 @@ img[index="3"]{
 [src="/resource/load-hole.svg"]{
   animation: spin2 0.75s infinite;
 }
-#snarkText{
-  margin-top: 30vh;
-}
 #correctMark{
   height: 4.5rem;
 }
@@ -880,18 +1077,6 @@ img[index="3"]{
   margin-left: calc(50% - 9.625rem);
   width: 18rem;
   border-radius: 0.25rem;
-}
-#bottomText{
-  margin-top: 14rem;
-}
-#timer{
-  position: fixed;
-  top: calc(50% - 3rem);
-  width: 100%;
-  font-size: 3rem;
-  font-weight: bolder;
-  color: #ddd;
-  z-index: 99;
 }
 .bottom{
   position: absolute;
@@ -1316,7 +1501,7 @@ div.info > div label{
 /* Language switch */
 #lang{
   position: fixed;
-  bottom: 7rem;
+  bottom: 10rem;
   right: 1.5rem;
   z-index: 50;
 }
@@ -1416,6 +1601,7 @@ div.info > div label{
   left: 0;
   color: white;
   text-align: center;
+  border-radius: 0.5rem;
 }
 #UpdateDiv button{
   border: 1px solid gray;
@@ -1469,6 +1655,26 @@ div.info > div label{
 }
 
 @media screen and (max-width: 900px) {
+  [ui-event="Lobby"] > #L2{
+    display: block;
+  }
+  [ui-event="Lobby"] #UIMid,
+  [ui-event="QuizStart"] #UIMid,
+  [ui-event="QuestionEnd"] #UIMid,
+  [ui-event="TimeUp"] #UIMid{
+    height: 100%;
+  }
+  [ui-event="GetReady"] #L1 p,
+  [ui-event="TeamTalk"] #L1 p,
+  [ui-event="QuestionAnswer"] #L1 p,
+  [ui-event="Answered"] #L1 p,
+  [ui-event="QuestionEnd"] #L1 p{
+    top: -0.5rem;
+  }
+  #L1.gameOver{
+    padding: 0;
+    text-align: center;
+  }
   .tut_cont>div{
     left: calc(50% - 8.5rem);
   }
@@ -1488,6 +1694,7 @@ div.info > div label{
   }
   #lang {
     right: 1.25rem;
+    bottom: 7rem;
   }
   #lang img{
     width: 2.5rem;
@@ -1520,9 +1727,6 @@ div.info > div label{
   .preset{
     min-width: 7rem;
   }
-  #resultMedal{
-    top: 4.25rem;
-  }
   .ad-container{
     max-height: 90px;
     overflow: hidden;
@@ -1547,22 +1751,8 @@ div.info > div label{
   .looseDiv input, .looseDiv div{
     max-width: 15rem;
   }
-  .openended{
-    max-width: calc(90% - 1rem);
-    margin-left: calc(5%);
-  }
   .form{
     display: block;
-  }
-  #L2{
-    bottom: 0;
-    padding-left: 1rem;
-    position: fixed;
-    top: auto;
-    right: auto;
-    background: white;
-    border-top: solid 0.25rem rgb(204,204,204);
-    width: 100%;
   }
   .floater{
     float: auto;
@@ -1600,14 +1790,8 @@ div.info > div label{
   .lobby{
     height: calc(100% - 4rem);
   }
-  .lobby h1{
-    margin-top: calc((100% - 4rem) / 2 + 2rem);
-  }
   .lobby h2{
     margin-top: 1rem;
-  }
-  #snarkText{
-    margin-top: 20vh;
   }
   .lobby h3{
     line-height: 2rem;
@@ -1690,12 +1874,6 @@ div.info > div label{
     max-height: 2.5rem;
     overflow: auto;
   }
-  #bottomText{
-    margin-top: 10rem;
-  }
-  #finalText{
-    margin-top: 2rem;
-  }
   .mobihide2{
     display: none !important;
   }
@@ -1716,12 +1894,6 @@ div.info > div label{
   }
   .shortcut{
     display: none !important;
-  }
-  .Error:hover ::before{
-    content: "" !important;
-    color: auto !important;
-    font-size: auto !important;
-    margin-right: auto !important;
   }
   .mobihide{
     display: none;

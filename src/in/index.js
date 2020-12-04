@@ -43,14 +43,14 @@ const MessageHandler = {
       }
       let url;
       switch (detectPlatform()) {
-      case "Windows":
-        url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
-        break;
-      case "MacOS":
-        url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
-        break;
-      default:
-        url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
+        case "Windows":
+          url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
+          break;
+        case "MacOS":
+          url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
+          break;
+        default:
+          url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
       }
       const div = document.createElement("div");
       div.innerHTML = `<span>§Handshake1§</span>
@@ -70,6 +70,9 @@ const MessageHandler = {
         border-radius: 5rem;
       `;
       document.body.append(div);
+    },
+    PRIVATE_ID: ()=>{
+      new ErrorHandler("§InvalidUUID§");
     }
   },
   Message: {
@@ -288,14 +291,14 @@ class Game{
       MessageHandler.Error.HANDSHAKE();
       let url;
       switch (detectPlatform()) {
-      case "Windows":
-        url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
-        break;
-      case "MacOS":
-        url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
-        break;
-      default:
-        url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
+        case "Windows":
+          url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
+          break;
+        case "MacOS":
+          url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
+          break;
+        default:
+          url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
       }
       const div = document.createElement("div");
       div.innerHTML = `<span>§Handshake1§</span>
@@ -373,7 +376,9 @@ class Game{
     if(socket && socket.readyState === 1){
       game.saveOptions();
       dataLayer.push(Object.assign({event:"load_options"},opts));
-      return new ErrorHandler("§Restored§",true);
+      return new ErrorHandler("§Restored§",{
+        isNotice: true
+      });
     }else{
       if(socket === null){
         return;
@@ -422,8 +427,8 @@ class Game{
   updateName(){
     clearTimeout(this.saveTimeout);
     const UUIDRegex = /[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}/i;
-    if(UUIDRegex.test(document.getElementById('searchTerm').value)){
-      document.getElementById("uuid").value = document.getElementById('searchTerm').value.match(UUIDRegex)[0];
+    if(UUIDRegex.test(document.getElementById("searchTerm").value)){
+      document.getElementById("uuid").value = document.getElementById("searchTerm").value.match(UUIDRegex)[0];
     }
     this.saveTimeout = setTimeout(this.saveOptions,500);
   }
@@ -532,7 +537,7 @@ window.addEventListener("keydown",e=>{
         megu.src = "/resource/red-konosuba.svg";
         megu.style = "position:fixed;top:calc(50% - 5rem);left:100%;width:10rem;transition:left 4s;";
         document.body.append(megu);
-        setTimeout(()=>{megu.style.left = "calc(75% - 5rem)"});
+        setTimeout(()=>{megu.style.left = "calc(75% - 5rem)";});
         setTimeout(()=>{megu.style.left = "150%";},16e3);
         setTimeout(()=>{
           document.body.style = "";
@@ -569,7 +574,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v3.3.1";
+localStorage.KW_Version = "v4.0.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
@@ -580,37 +585,43 @@ checkVersion.onload = function(){
     return;
   }
   if(version != locVersion){
-    const ask = document.createElement("div");
-    ask.id = "UpdateDiv";
-    ask.innerHTML = `<h2>§UpdateAvailable§</h2>
-    <h4>§UpdateAvailable2§</h4>
-    <p>§UpdateAvailable3§</p>
-    <button id="UpdateYes">§Yes§</button><button id="UpdateNo">§NotYet§</button><br>
-    <button onclick="localStorage.KW_Update = false;this.parentElement.outerHTML = '';">§UpdateAvailable4§</button>`;
-    document.body.append(ask);
-    document.getElementById("UpdateYes").onclick = function(){
-      if("serviceWorker" in navigator){
-        document.getElementById("UpdateYes").innerHTML = "§UpdateAvailable5§";
-        navigator.serviceWorker.getRegistrations().then(async function(registrations) {
-          for(let registration of registrations) {
-            await registration.unregister();
+    new ErrorHandler("§UpdateAvailable§",{
+      permanent: true,
+      onclick: (e,d)=>{
+        d.outerHTML = "";
+        const ask = document.createElement("div");
+        ask.id = "UpdateDiv";
+        ask.innerHTML = `<h2>§UpdateAvailable§</h2>
+        <h4>§UpdateAvailable2§</h4>
+        <p>§UpdateAvailable3§</p>
+        <button id="UpdateYes">§Yes§</button><button id="UpdateNo">§NotYet§</button><br>
+        <button onclick="localStorage.KW_Update = false;this.parentElement.outerHTML = '';">§UpdateAvailable4§</button>`;
+        document.body.append(ask);
+        document.getElementById("UpdateYes").onclick = function(){
+          if("serviceWorker" in navigator){
+            document.getElementById("UpdateYes").innerHTML = "§UpdateAvailable5§";
+            navigator.serviceWorker.getRegistrations().then(async function(registrations) {
+              for(let registration of registrations) {
+                await registration.unregister();
+              }
+              setTimeout(function(){
+                localStorage.KW_Version = version;
+                location.reload();
+              },3000);
+            }).catch(function() {
+              document.getElementById("UpdateDiv").outerHTML = "";
+              new ErrorHandler("§UpdateAvailable6§");
+            });
+          }else{
+            document.getElementById("UpdateDiv").outerHTML = "";
+            new ErrorHandler("§UpdateAvailable6§");
           }
-          setTimeout(function(){
-            localStorage.KW_Version = version;
-            location.reload();
-          },3000);
-        }).catch(function() {
+        };
+        document.getElementById("UpdateNo").onclick = function(){
           document.getElementById("UpdateDiv").outerHTML = "";
-          new ErrorHandler("§UpdateAvailable6§");
-        });
-      }else{
-        document.getElementById("UpdateDiv").outerHTML = "";
-        new ErrorHandler("§UpdateAvailable6§");
+        };
       }
-    };
-    document.getElementById("UpdateNo").onclick = function(){
-      document.getElementById("UpdateDiv").outerHTML = "";
-    };
+    });
   }
   if(!localStorage.KW_Version){
     localStorage.KW_Version = version;

@@ -1,7 +1,7 @@
-const CACHE_NAME = "kahoot-win-cache-v3.3.0";
-const CONST_NAME = "kahoot-win-cache-consts-v3.2.0";
+const CACHE_NAME = "kahoot-win-cache-v4.0.0";
+const CONST_NAME = "kahoot-win-cache-consts-v4.0.0";
 const URLCONSTS = [
-  "/resource/logo-halloween.svg",
+  "/resource/logo-xmas.svg",
   // As of 3.2.0, theme objects are cached at the start as well.
   // Reasoning: People like themes, it doesn't take too much space. (up to 20mb)
   "/resource/logo-rezero.svg",
@@ -55,7 +55,14 @@ const URLCONSTS = [
   "/resource/upvote.svg",
   "/resource/upvote-filled.svg",
   "/resource/downvote.svg",
-  "/resource/downvote-filled.svg"
+  "/resource/downvote-filled.svg",
+  "/resource/type/quiz.svg",
+  "/resource/type/content.svg",
+  "/resource/type/survey.svg",
+  "/resource/type/true_false.svg",
+  "/resource/type/jumble.svg",
+  "/resource/type/open_ended.svg",
+  "/resource/type/word_cloud.svg"
 ];
 const URLCACHE = [
   "/",

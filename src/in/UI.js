@@ -1,5 +1,4 @@
 /* global game, dataLayer, send, socket, Game */
-// TODO: finish schema.org markup
 const KahootThemes = {
   Kahoot: {
     red: "red.svg",
@@ -17,28 +16,22 @@ const KahootThemes = {
   },
   // rainbow doesn't actually change any images
   // but will be detected for to change css.
-  Rainbow: {
-    red: "red.svg",
-    blue: "blue.svg",
-    green: "green.svg",
-    yellow: "yellow.svg",
-    logo: "logo-xmas.svg"
+  get Rainbow(){
+    return KahootThemes.Kahoot;
   },
   // music doesn't actually change any images
   // but will be detected to play music/sounds.
-  Music: {
-    red: "red.svg",
-    blue: "blue.svg",
-    green: "green.svg",
-    yellow: "yellow.svg",
-    logo: "logo-xmas.svg"
+  get Music(){
+    return KahootThemes.Kahoot;
   },
   FRANXX: {
     red: "red-franxx.svg",
     blue: "blue-franxx.svg",
     green: "green-franxx.svg",
     yellow: "yellow-franxx.svg",
-    logo: "logo-xmas.svg"
+    get logo(){
+      return KahootThemes.Kahoot.logo;
+    }
   },
   ReZero: {
     red: "red-rezero.svg",
@@ -57,46 +50,87 @@ const KahootThemes = {
   }
 };
 
+// Parts
+function Element(name,options){
+  const element = document.createElement(name);
+  for(let i in (options || {})){
+    element[i] = options[i];
+  }
+  return element;
+}
+function RemoveHandshakeFail(){
+  if(document.getElementById("handshake-fail-div")){
+    document.getElementById("handshake-fail-div").outerHTML = "";
+  }
+}
+function NotFoundDiv(){
+  const div = Element("div",{
+      className: "ChallengeQuestion noQuiz"
+    }),
+    sp = Element("span");
+  sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
+  div.append(Element("br"),Element("br"),sp);
+  return div;
+}
+
+// Pages
 class LoginPage{
   constructor(i){
+    document.body.className = "rainbow";
     Themer();
     QuizResult.className = "disabled button";
     QuizResult.removeAttribute("url");
     ChallengeContinueButton.style.display = "none";
-    if(document.getElementById("handshake-fail-div")){
-      document.getElementById("handshake-fail-div").outerHTML = "";
-    }
+    RemoveHandshakeFail();
     if(new Date().toString().search("Apr 1") != -1 || new Date().toString().search("Mar 31") != -1){
       game.theme = "KonoSuba";
     }
     const div = clearUI();
-    const logo = document.createElement("img");
-    const logoText = document.createElement("p");
-    const pin = document.createElement("input");
-    const but = document.createElement("button");
     div.className = "Login";
-    logo.alt = "Kahoot logo";
-    logo.src = `/resource/${KahootThemes[game.theme].logo}`;
-    logoText.id = "logotext";
-    logoText.innerHTML = "WINNER";
-    pin.type = i ? "text" : "tel";
-    pin.id = "loginInput";
-    pin.placeholder = i ? "§Nickname§" : "§GamePIN§";
-    but.innerHTML = i ? "§OK§" : "§Enter§";
-    but.id = "loginButton";
-    but.onclick = i ? ()=>{return game.join(pin.value);} : ()=>{return game.sendPin(pin.value);};
-    pin.onkeydown = i ? e=>{if(e.key == "Enter"){return game.join(pin.value);}} : e=>{if(e.key == "Enter"){return game.sendPin(pin.value);}};
-    logoText.onclick = ()=>{
-      logoText.style.display = "none";
-    };
+    div.setAttribute("ui-event","Login");
+    const logo = Element("img",{
+        alt: "Kahoot logo",
+        src: `/resource/${KahootThemes[game.theme].logo}`
+      }),
+      logoText = Element("p",{
+        id: "logotext",
+        innerHTML: "WINNER",
+        onclick: ()=>{
+          logoText.style.display = "none";
+        }
+      }),
+      pin = Element("input",{
+        type: i ? "text" : "tel",
+        id: "loginInput",
+        placeholder: i ? "§Nickname§" : "§GamePIN§",
+        onkeydown: i ? (e)=>{
+          if(e.code === "Enter"){
+            return game.join(pin.value);
+          }
+        } : (e)=>{
+          if(e.code === "Enter"){
+            return game.sendPin(pin.value);
+          }
+        }
+      }),
+      but = Element("button",{
+        innerHTML: i ? "§OK§" : "§Enter§",
+        id: "loginButton",
+        onclick: i ? ()=>{
+          return game.join(pin.value);
+        } : ()=>{
+          return game.sendPin(pin.value);
+        }
+      });
     if(i){
-      try{document.getElementById("lang").outerHTML = "";}catch(e){}
-      const rand = document.createElement("button");
-      rand.innerHTML = "§GetRandom§";
+      try{document.getElementById("lang").outerHTML = "";}catch(e){/* Lang just doesn't exist. */}
+      const rand = Element("button",{
+        innerHTML: "§GetRandom§",
+        onclick: ()=>{
+          game.getRandom();
+        }
+      });
       rand.style.marginBottom = "0.5rem";
-      rand.onclick = ()=>{
-        game.getRandom();
-      };
       div.append(logo,logoText,pin,rand,but);
       document.getElementsByClassName("grecaptcha-badge")[0].style.visibility = "hidden";
       if(game.pin[0] != "0"){
@@ -104,21 +138,27 @@ class LoginPage{
       }
     }else{
       document.getElementById("div_challenge_options").parentElement.className = "";
-      const abt = document.createElement("label");
-      abt.htmlFor = "about";
-      abt.innerHTML = "About";
-      abt.id = "abtlnk";
-      const bottomDiv = document.createElement("div");
-      const changelog = document.createElement("label");
-      changelog.htmlFor = "changelog";
-      changelog.innerHTML = "Changelog";
-      bottomDiv.id = "chnge";
-      const trademark = document.createElement("span");
-      trademark.innerHTML = "§Trademark§";
-      const policy = document.createElement("span");
-      policy.innerHTML = "<a href=\"/privacy/\">§Privacy§</a> | <a href=\"/terms/\">§Terms§</a>";
-      const language = document.createElement("div");
-      language.id = "lang";
+      const abt = Element("label",{
+          htmlFor: "about",
+          innerHTML: "About",
+          id: "abtlnk"
+        }),
+        bottomDiv = Element("div",{
+          id: "chnge"
+        }),
+        changelog = Element("label",{
+          htmlFor: "changelog",
+          innerHTML: "Changelog"
+        }),
+        trademark = Element("span",{
+          innerHTML: "§Trademark§"
+        }),
+        policy = Element("span",{
+          innerHTML: "<a href=\"/privacy/\">§Privacy§</a> | <a href=\"/terms/\">§Terms§</a>"
+        }),
+        language = Element("div",{
+          id: "lang"
+        });
       language.innerHTML = `<label for="langToggle"><img src="/resource/language.svg"/></label>
       <input class="ch" id="langToggle" type="checkbox"/>
       <div class="lang">
@@ -132,8 +172,9 @@ class LoginPage{
       bottomDiv.append(changelog,trademark,policy);
       div.append(logo,logoText,pin,but,abt,bottomDiv);
     }
-    const social = document.createElement("div");
-    social.className = "sm sidebar correct";
+    const social = Element("div",{
+      className: "sm sidebar correct"
+    });
     social.innerHTML = `<div class="mobihide2 mobihide">
     <a href="/creator" target="_blank"><img src="/resource/icon-kahoot.svg" alt="create"><span>§Creator§</span></a>
     <a href="/api" target="_blank"><img src="/resource/icon-api.svg" alt="api"><span>§API§</span></a>
@@ -155,51 +196,94 @@ class TwoStepPage{
       new ErrorHandler("2 Step Auth Failed.");
     }
     const objects = new LobbyPage;
-    objects.main.removeChild(objects.texts[1]);
-    objects.main.removeChild(objects.texts[0]);
+    objects.mid.innerHTML = "";
+    objects.main.setAttribute("ui-event","TwoFactorAuth");
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "purple";
-    const div = document.createElement("div");
-    div.className = "Answers";
-    const r = document.createElement("img"); r.src = `/resource/${KahootThemes[game.theme].red}`; r.alt = "Red";
-    const b = document.createElement("img"); b.src = `/resource/${KahootThemes[game.theme].blue}`; b.alt = "Blue";
-    const g = document.createElement("img"); g.src = `/resource/${KahootThemes[game.theme].green}`; g.alt = "Green";
-    const y = document.createElement("img"); y.src = `/resource/${KahootThemes[game.theme].yellow}`; y.alt = "Yellow";
+    const pin = Element("p",{
+      innerHTML: "PIN: " + game.pin
+    });
+    objects.top.append(pin);
+    const div = Element("div",{
+        className: "Answers"
+      }),
+      r = Element("img",{
+        src: `/resource/${KahootThemes[game.theme].red}`,
+        alt: "Red",
+        onclick: ()=>{
+          game.answer2(0,r);
+        }
+      }),
+      b = Element("img",{
+        src: `/resource/${KahootThemes[game.theme].blue}`,
+        alt: "Blue",
+        onclick: ()=>{
+          game.answer2(1,b);
+        }
+      }),
+      g = Element("img",{
+        src: `/resource/${KahootThemes[game.theme].green}`,
+        alt: "Green",
+        onclick: ()=>{
+          game.answer2(2,g);
+        }
+      }),
+      y = Element("img",{
+        src: `/resource/${KahootThemes[game.theme].yellow}`,
+        alt: "Yellow",
+        onclick: ()=>{
+          game.answer2(3,y);
+        }
+      });
     div.append(r,b,y,g);
     objects.main.append(div);
-    r.onclick = ()=>{game.answer2(0,r);};
-    b.onclick = ()=>{game.answer2(1,b);};
-    y.onclick = ()=>{game.answer2(2,y);};
-    g.onclick = ()=>{game.answer2(3,g);};
     if(state){
       activateLoading(false,true);
     }
   }
 }
 class ErrorHandler{
-  constructor(error,isError){
-    if(isError){
-      UIError.className = "Error NotError";
-    }else{
-      UIError.className = "Error";
-      setSchema(UIError,"FailedActionStatus",true,null);
+  constructor(error,options){
+    options = options || {};
+    const ErrDiv = Element("div",{
+        className: options.isNotice ? "NotError" : "",
+        onclick: options.onclick ? (e)=>{
+          options.onclick(e,ErrDiv);
+        } : null
+      }),
+      notice = Element("span",{
+        innerHTML: error
+      }),
+      close = Element("span",{
+        innerHTML: "X",
+        onclick: (e)=>{
+          ErrDiv.outerHTML = "";
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        className: "ErrorCloser"
+      });
+    ErrDiv.append(notice,close);
+    UIError.insertBefore(ErrDiv,UIError.querySelector("div"));
+    let time = 7e3;
+    if(ErrDiv.onclick){
+      time = 30e3;
+      ErrDiv.className += " Clickable";
     }
-    UIError.innerHTML = "";
-    const notice = document.createElement("p");
-    notice.innerHTML = error;
-    UIError.append(notice);
-    UIError.style.right = "5%";
-    clearTimeout(game.errorTimeout);
-    game.errorTimeout = setTimeout(()=>{
-      UIError.style.right = "";
-    },4000);
+    if(options.permanent){
+      return;
+    }
+    setTimeout(()=>{
+      ErrDiv.style.opacity = 0;
+      setTimeout(()=>{
+        try{ErrDiv.outerHTML = "";}catch(e){/* gone */}
+      },1e3);
+    },time);
   }
 }
 class LobbyPage{
   constructor(){
-    try{document.getElementById("lang").outerHTML="";}catch(e){}
-    if(document.getElementById("handshake-fail-div")){
-      document.getElementById("handshake-fail-div").outerHTML = "";
-    }
+    try{document.getElementById("lang").outerHTML="";}catch(e){/* lang doesnt exist */}
+    RemoveHandshakeFail();
     window.onbeforeunload = function(e){
       e.returnValue = "§LeavePrompt§";
     };
@@ -210,42 +294,48 @@ class LobbyPage{
     }
     const div = clearUI();
     div.className = "lobby";
+    div.setAttribute("ui-event","Lobby");
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "green";
-    const pinDiv = document.createElement("div");
-    pinDiv.id = "L1"; pinDiv.className = "extra";
-    const nameDiv = document.createElement("div");
-    nameDiv.id = "L2"; nameDiv.className = "extra";
+    const pinDiv = Element("div",{
+        id: "L1",
+        className: "extra"
+      }),
+      nameDiv = Element("div",{
+        id: "L2",
+        className: "extra"
+      });
     if(game.theme == "Rainbow"){
       pinDiv.className = "extra rainbow";
     }
-    const pinText = document.createElement("p");
-    pinText.innerHTML = "PIN: " + String(game.pin);
-    const nameText = document.createElement("p");
-    nameText.innerHTML = game.name.replace(/"<"/gm,"&lt;");
-    const text = document.createElement("h1");
-    text.className = "shadow";
+    const nameText = Element("p",{
+        innerText: game.name
+      }),
+      text = Element("h1",{
+        className: "shadow",
+        innerHTML: "§YoureIn§"
+      }),
+      subtext = Element("h2",{
+        innerHTML: "§YoureIn2§",
+        className: "shadow"
+      }),
+      mid = Element("div",{
+        id: "UIMid"
+      }),
+      subcont = Element("div");
     text.setAttribute("text","§YoureIn§");
-    text.innerHTML = "§YoureIn§";
-    const subtext = document.createElement("h2");
-    subtext.innerHTML = "§YoureIn2§";
     subtext.setAttribute("text","§YoureIn2§");
-    subtext.className = "shadow";
-    pinDiv.append(pinText);
     nameDiv.append(nameText);
-    div.append(pinDiv,nameDiv,text,subtext);
+    subcont.append(text,subtext);
+    mid.append(subcont);
+    div.append(pinDiv,nameDiv,mid);
     if(typeof game.guesses == "undefined"){
-      const l = document.createElement("div");
-      l.className = "ChallengeQuestion noQuiz";
-      const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input>`;
-      l.append(document.createElement("br"),document.createElement("br"),sp);
-      div.append(l);
+      div.append(NotFoundDiv());
     }
     UIDiv.append(div);
     return {
       main: div,
-      texts: [text,subtext],
       top: pinDiv,
+      mid,
       bottom: nameDiv
     };
   }
@@ -259,13 +349,16 @@ class GetReadyPage{
     const objects = new LobbyPage;
     try {
       document.querySelector(".noQuiz").outerHTML = "";
-    } catch (e) {}
+    } catch (e) {/* nothing to remove */}
     ChallengeContinueButton.style.display = "none";
     document.body.className = "blue";
-    objects.texts[0].innerHTML = `§Question§ ${(question.index || 0) + 1}`;
-    objects.texts[0].setAttribute("text",objects.texts[0].innerHTML);
-    objects.texts[0].id = "snarkText";
-    objects.texts[1].id = "bottomText";
+    objects.main.setAttribute("ui-event","GetReady");
+    objects.mid.innerHTML = "";
+    const quest = Element("h1",{
+      innerHTML: `§Question§ ${(question.index || 0) + 1}`,
+      className: "shadow"
+    });
+    quest.setAttribute("text",quest.innerText);
     game.answers = question.data;
     game.got_answers = question.cans;
     game.guesses = question.currentGuesses;
@@ -309,30 +402,87 @@ class GetReadyPage{
         value: game.oldQuizUUID
       });
     }
-    objects.texts[1].innerHTML = "§Ready§";
-    objects.texts[1].setAttribute("text","§Ready§");
-    const score = document.createElement("p");
-    const qoft = document.createElement("p");
-    score.innerHTML = String(game.score);
-    qoft.innerHTML = `${game.index + 1} §Of§ ${game.total}`;
-    score.className = "dark";
-    qoft.className = "floater";
-    objects.top.append(qoft);
+    const readything = Element("h2",{
+      innerHTML: "§Ready§",
+      className: "shadow"
+    });
+    readything.setAttribute("text","§Ready§");
+    const score = Element("p",{
+        innerHTML: "" + game.score,
+        className: "dark"
+      }),
+      typedefs = {
+        quiz: "§TypeQuiz§",
+        open_ended: "§TypeOpenEnded§",
+        survey: "§TypeSurvey§",
+        jumble: "§TypeJumble§",
+        word_cloud: "§TypeWordCloud§",
+        content: "§TypeContent§",
+        multiple_select_poll: "§TypeSurvey§",
+        multiple_select_quiz: "§TypeQuiz§"
+      },
+      qoft = Element("p",{
+        innerHTML: `${game.index + 1} §Of§ ${game.total}`
+      }),
+      typeimg = Element("img",{
+        alt: "",
+        src: `/resource/type/${question.type}.svg`
+      }),
+      typetext = Element("span",{
+        innerHTML: typedefs[question.type]
+      }),
+      typediv = Element("div",{
+        id: "quizTypeImage"
+      });
+    if(question.type === "multiple_select_quiz"){
+      typeimg.src = "/resource/type/quiz.svg";
+    }else if(question.type === "multiple_select_poll"){
+      typeimg.src = "/resource/type/survey.svg";
+    }else if(question.type === "quiz" && game.rawData.gameBlockLayout === "TRUE_FALSE"){
+      typeimg.src = "/resource/type/true_false.svg";
+      typetext.innerHTML = "§TypeTrueFalse§";
+    }
+    typediv.append(typeimg,typetext);
+    objects.top.append(qoft,typediv);
     objects.bottom.append(score);
-    activateLoading(true,false,"",true);
     if(game.question.type == "content"){
-      objects.texts[0].innerHTML = "§Breather§";
-      objects.texts[0].setAttribute("text","§Breather§");
-      objects.texts[1].innerHTML = "";
+      document.body.className = "blue2";
+      const bdiv = Element("div");
+      const breather = Element("h1",{
+        innerHTML: "§Breather§",
+        className: "shadow"
+      });
+      breather.setAttribute("text","§Breather§");
+      const noanswer = Element("h2",{
+        innerHTML: "§Breather2§",
+        className: "shadow"
+      });
+      noanswer.setAttribute("text","§Breather2§");
+      const img = Element("img",{
+        src: "/resource/content-slide.svg",
+        id: "ContentImage"
+      });
+      bdiv.append(breather,img,noanswer);
+      objects.mid.append(bdiv);
       return objects;
     }
     if(no){
       return objects;
     }
-    const timer = document.createElement("h2");
-    timer.innerHTML = game.question.timeLeft || "5";
-    timer.id = "timer";
-    objects.main.append(timer);
+    const timer = Element("h2",{
+      id: "timer",
+      innerHTML: game.question.timeLeft || "5"
+    });
+    const mcont = Element("div");
+    const ncont = Element("div");
+    const spinimg = Element("img",{
+      src: "/resource/load-large.svg",
+      className: "load_circle",
+      alt: "load_circle"
+    });
+    ncont.append(spinimg,timer);
+    mcont.append(quest,ncont,readything);
+    objects.mid.append(mcont);
     let secs = game.question.timeLeft || 5;
     const int = setInterval(()=>{
       try{
@@ -340,18 +490,19 @@ class GetReadyPage{
           clearInterval(int);
         }else{
           timer.innerHTML = secs;
-          objects.texts[1].innerHTML = ["§Go§","§Set§","§Ready§"][secs >= 3 ? 2 : secs];
-          objects.texts[1].setAttribute("text",objects.texts[1].innerHTML);
+          readything.innerHTML = ["§Go§","§Set§","§Ready§"][secs >= 3 ? 2 : secs];
+          readything.setAttribute("text",readything.innerText);
         }
       }catch(err){
         clearInterval(int);
       }
     },1000);
-    if(Number(game.opts.searchLoosely)){
-      if(game.opts.searchLoosely == 2){
-        const next = document.createElement("div");
-        next.innerHTML = "<span>§Ready2§</span>";
-        next.className = "next";
+    if(+game.opts.searchLoosely){
+      if(+game.opts.searchLoosely === 2){
+        const next = Element("div",{
+          innerHTML: "<span>§Ready2§</span>",
+          className: "next"
+        });
         next.addEventListener("click",()=>{
           next.innerHTML = "<span>§Waiting§</span>";
           next.className = "faded next";
@@ -371,17 +522,9 @@ class GetReadyPage{
       activateLoading(false,false);
       clearInterval(int);
       timer.outerHTML = "";
-      objects.texts[0].innerHTML = "";
-      objects.texts[1].innerHTML = "";
-      objects.texts[0].setAttribute("text","");
-      objects.texts[1].setAttribute("text","");
+      mcont.outerHTML = "";
       if(game.guesses.length == 0){
-        const chdiv = document.createElement("div");
-        chdiv.className = "ChallengeQuestion noQuiz";
-        const sp = document.createElement("span");
-        sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
-        chdiv.append(document.createElement("br"),document.createElement("br"),sp);
-        objects.main.append(chdiv);
+        objects.main.append(NotFoundDiv());
       }else{
         const as = game.guesses[0].questions;
         const qs = [];
@@ -392,15 +535,42 @@ class GetReadyPage{
             let add2 = 0;
             const ca = game.got_answers.slice(0);
             for(let j = 0; j < ca.length; j++){
+              function chfilter(ch){
+                const {text,correct,type,choice} = ca[j];
+                switch(type){
+                  case "quiz":{
+                    if(choice === null){
+                      return false;
+                    }
+                    return text === ch.answer && ch.correct === correct;
+                  }
+                  case "open_ended":{
+                    if(!correct){
+                      return false;
+                    }
+                    return text === ch.answer && ch.correct;
+                  }
+                  case "jumble":
+                  case "multiple_select_poll":
+                  case "multiple_select_quiz":{
+                    const texts = text.split("|");
+                    if(texts.includes(choice.answer)){
+                      return true;
+                    }
+                    return false;
+                  }
+                  default:{
+                    return text === ch.answer && ch.correct === correct;
+                  }
+                }
+              }
               if(as[i].choices){
-                if(as[i].choices.filter(choice=>{
-                  return choice.answer == ca[j].n && choice.correct;
-                }).length){
+                // find all used options. true = there is a used
+                if(as[i].choices.filter(chfilter).length){
                   add = false;
+                  // find how many questions have duplicate answers
                   for(let k = 0;k < as.length;k++){
-                    if(as[k].choices.filter(choice=>{
-                      return choice.answer == ca[j].n && choice.correct;
-                    }).length){
+                    if(as[k].choices.filter(chfilter).length){
                       add2++;
                     }
                   }
@@ -417,13 +587,16 @@ class GetReadyPage{
             });
           }
         }
-        const inp = document.createElement("input");
-        inp.className = "looseInput";
-        inp.placeholder = "§Question§";
-        const cont = document.createElement("div");
-        cont.className = "looseDiv";
-        const qdiv = document.createElement("div");
-        qdiv.className = "looseOptions";
+        const inp = Element("input",{
+            className: "looseInput",
+            placeholder: "§Question§"
+          }),
+          cont = Element("div",{
+            className: "looseDiv"
+          }),
+          qdiv = Element("div",{
+            className: "looseOptions"
+          });
         const filter = (search)=>{
           qdiv.innerHTML = "";
           let f = false;
@@ -463,14 +636,13 @@ class GetReadyPage{
                   });
                   game.correctIndex = qs[i].i;
                   game.question.data = game.guesses[0].questions[qs[i].i].choices;
-                  // game.ans[game.index] = game.question.data ? game.question.data.length : 4; // removed because this shouldn't be needed
                   game.question.ans = game.ans;
                   f = true;
                 }
               }
               const m = match || match2 || match3;
               // add the element
-              const elem = document.createElement("p");
+              const elem = Element("p");
               let parsed = qtext;
               for(let j = 0;j<m.length;j++){
                 parsed = qtext.replace(m[j],"<b>" + m[j] + "</b>");
@@ -509,68 +681,67 @@ class GetReadyPage{
       activateLoading(false,false);
       clearInterval(int);
       timer.outerHTML = "";
-      objects.texts[0].innerHTML = "";
-      objects.texts[1].innerHTML = "";
-      objects.texts[0].setAttribute("text","");
-      objects.texts[1].setAttribute("text","");
-      const chdiv = document.createElement("div");
-      chdiv.className = "ChallengeQuestion";
-      const sp = document.createElement("span");
+      mcont.outerHTML = "";
+      const chdiv = Element("div",{
+          className: "ChallengeQuestion"
+        }),
+        sp = Element("span");
       if(game.guesses.length == 0){
         chdiv.className = "ChallengeQuestion noQuiz";
         sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
       }else{
         sp.innerHTML = "§Question§: " + (game.guesses[0].questions[game.index].question || game.guesses[0].questions[game.index].title);
       }
-      chdiv.append(document.createElement("br"),document.createElement("br"),sp);
-      if(!HideAnswers.checked){
-        const adiv = document.createElement("div");
-        adiv.className = "questionPreviewAnswers";
-        adiv.innerHTML = "<h4>§CorrectAnswers§</h4>";
-        let co = [];
-        for(let i in game.answers){
-          if(game.answers[i].correct){
-            co.push(i);
-          }
+      chdiv.append(Element("br"),Element("br"),sp);
+      const adiv = Element("div",{
+        className: "questionPreviewAnswers",
+        innerHTML: "<h4>§CorrectAnswers§</h4>"
+      });
+      let co = [];
+      for(let i in game.answers){
+        if(game.answers[i].correct){
+          co.push(i);
         }
-        for(let i in co){
-          const cols = ["red","blue","yellow","green"];
-          const template = document.createElement("template");
-          template.innerHTML = `<div class="${game.answers[co[i]].correct ? "correct" : ""}">
-            <img class="icon${cols[co[i]]}" src="/resource/${KahootThemes[game.theme][cols[co[i]]]}" alt="answer choice icon">
-            <span>${game.answers[co[i]].answer}</span>
-          </div>`;
-          adiv.append(template.content.cloneNode(true));
-        }
-        // insert correct answer items
-        objects.main.append(adiv);
       }
+      for(let i in co){
+        const cols = ["red","blue","yellow","green"];
+        const template = Element("template");
+        template.innerHTML = `<div class="${game.answers[co[i]].correct ? "correct" : ""}">
+          <img class="icon${cols[co[i]]}" src="/resource/${KahootThemes[game.theme][cols[co[i]]]}" alt="answer choice icon">
+          <span>${game.answers[co[i]].answer}</span>
+        </div>`;
+        adiv.append(template.content.cloneNode(true));
+      }
+      // insert correct answer items
+      objects.main.append(adiv);
       objects.main.append(chdiv);
     }else if(game.guesses.length == 0){
-      const chdiv = document.createElement("div");
-      chdiv.className = "ChallengeQuestion noQuiz";
-      const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
-      chdiv.append(document.createElement("br"),document.createElement("br"),sp);
-      objects.main.append(chdiv);
+      objects.main.append(NotFoundDiv());
     }
     if(game.opts.fail == 2){
       // add choice thingy
-      const choiceDiv = document.createElement("div");
-      choiceDiv.className = "failChoice";
-      const yes = document.createElement("input");
-      const no = document.createElement("input");
-      yes.type = no.type = "radio";
-      yes.name = no.name = "fail";
-      yes.id = "fail1";
-      no.id = "fail2";
-      no.checked = true; // don't fail
-      const yesl = document.createElement("label");
-      const nol = document.createElement("label");
-      yesl.htmlFor = "fail1";
-      nol.htmlFor = "fail2";
-      yesl.innerHTML = "&nbsp;§DoFail§&nbsp;";
-      nol.innerHTML = "§NoFail§";
+      const choiceDiv = Element("div",{
+          className: "failChoice"
+        }),
+        yes = Element("input",{
+          type: "radio",
+          name: "fail",
+          id: "fail1"
+        }),
+        no = Element("input",{
+          type: "radio",
+          name: "fail",
+          id: "fail2",
+          checked: true
+        }),
+        yesl = Element("label",{
+          htmlFor: "fail1",
+          innerHTML: "&nbsp;§DoFail§&nbsp;"
+        }),
+        nol = Element("label",{
+          htmlFor: "fail2",
+          innerHTML: "§NoFail§"
+        });
       choiceDiv.append(yes,yesl,no,nol);
       objects.main.append(choiceDiv);
       function sendFail(){
@@ -597,15 +768,27 @@ class QuizStartPage{
   constructor(){
     const objects = new LobbyPage;
     ChallengeContinueButton.style.display = "none";
-    objects.texts[0].innerHTML = "§GetReady§";
-    objects.texts[0].setAttribute("text","§GetReady§");
-    objects.texts[0].id = "snarkText";
-    objects.texts[1].innerHTML = "§Loading§";
-    objects.texts[1].setAttribute("text","§Loading§");
-    objects.texts[1].id = "bottomText";
+    objects.main.setAttribute("ui-event","QuizStart");
+    objects.mid.innerHTML = "";
+    const text1 = Element("h1",{
+      innerHTML: "§GetReady§",
+      className: "shadow"
+    });
+    text1.setAttribute("text","§GetReady§");
+    const text2 = Element("h2",{
+      innerHTML: "§Loading§",
+      className: "shadow"
+    });
+    text2.setAttribute("text","§Loading§");
+    const img = Element("img",{
+      src: "/resource/load-hole.svg",
+      alt: "loading...",
+      className: "load_circle"
+    });
+    const cont = Element("div");
+    cont.append(text1,img,text2);
+    objects.mid.append(cont);
     document.body.className = "purple2";
-    activateLoading(true,false,"",false);
-    return objects;
   }
 }
 class QuestionAnswererPage{
@@ -626,48 +809,86 @@ class QuestionAnswererPage{
       },(game.opts.timeout * 1000) - (Date.now() - game.recievedTime));
     }
     const objects = new GetReadyPage(question || game.question,true);
+    objects.main.setAttribute("ui-event","QuestionAnswer");
     game.receivedQuestion = true;
     game.questionStarted = true;
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "";
+    objects.mid.innerHTML = "";
     // content slides
     if(game.question.type == "content"){
-      document.body.className = "rainbow";
-      objects.texts[0].innerHTML = "§Breather§";
-      objects.texts[1].innerHTML = "";
+      document.body.className = "blue2";
+      const bdiv = Element("div");
+      const breather = Element("h1",{
+        innerHTML: "§Breather§",
+        className: "shadow"
+      });
+      breather.setAttribute("text","§Breather§");
+      const noanswer = Element("h2",{
+        innerHTML: "§Breather2§",
+        className: "shadow"
+      });
+      noanswer.setAttribute("text","§Breather2§");
+      const img = Element("img",{
+        src: "/resource/content-slide.svg",
+        id: "ContentImage"
+      });
+      bdiv.append(breather,img,noanswer);
+      objects.mid.append(bdiv);
       return;
     }
-    objects.main.removeChild(objects.texts[1]);
-    objects.main.removeChild(objects.texts[0]);
-    const div = document.createElement("div");
-    div.className = "Answers";
+    const div = Element("div",{
+      className: "Answers"
+    });
     // add open_ended support here
     if(game.question.type == "open_ended" || game.question.type == "word_cloud"){
-      document.body.className = "rainbow";
-      const input = document.createElement("input");
-      input.className = "openended";
       const answer = game.answers.filter(o=>{
-        return o.correct;
-      })[0];
-      input.placeholder = answer ? answer.answer : "";
+          return o.correct;
+        })[0],
+        input = Element("input",{
+          className: "openended",
+          placeholder: answer ? answer.answer : "",
+          onkeydown: (e)=>{
+            if(e.code === "Enter"){
+              game.answer(input.value);
+            }
+          }
+        }),
+        button = Element("div",{
+          onclick: ()=>{
+            game.answer(input.value);
+          },
+          innerHTML: "Submit"
+        }),
+        cont = Element("div",{
+          style: "margin: auto;"
+        });
       if(HideAnswers.checked){
         input.placeholder = "";
       }
-      input.onkeydown = e=>{
-        if(e.key == "Enter"){
-          game.answer(input.value);
-        }
-      };
-      div.append(input);
+      cont.append(input,button);
+      div.append(cont);
       objects.main.append(div);
       input.focus();
       activateLoading(false,!document.getElementById("manual").checked);
     }else{
-      const r = document.createElement("img"); r.src = `/resource/${KahootThemes[game.theme].red}`; r.alt = "Red";
-      const b = document.createElement("img"); b.src = `/resource/${KahootThemes[game.theme].blue}`; b.alt = "Blue";
-      const g = document.createElement("img"); g.src = `/resource/${KahootThemes[game.theme].green}`; g.alt = "Green";
-      const y = document.createElement("img"); y.src = `/resource/${KahootThemes[game.theme].yellow}`; y.alt = "Yellow";
-      const items = [r,b,y,g];
-      const repeats = game.ans[game.index];
+      const r = Element("img",{
+          src: `/resource/${KahootThemes[game.theme].red}`,
+          alt: "Red"
+        }),
+        b = Element("img",{
+          src: `/resource/${KahootThemes[game.theme].blue}`,
+          alt: "Blue"
+        }),
+        g = Element("img",{
+          src: `/resource/${KahootThemes[game.theme].green}`,
+          alt: "Green"
+        }),
+        y = Element("img",{
+          src: `/resource/${KahootThemes[game.theme].yellow}`,
+          alt: "Yellow"
+        }),
+        items = [r,b,y,g],
+        repeats = game.ans[game.index];
       for(let i = 0;i < repeats;i++){
         items[i].setAttribute("draggable","false");
         div.append(items[i]);
@@ -685,6 +906,7 @@ class QuestionAnswererPage{
       objects.main.append(div);
       activateLoading(false,!document.getElementById("manual").checked);
       // add jumble support here
+      // TODO: Update to match Kahoot's Jumble UI
       if(game.question.type == "jumble"){
         function rearrange(e,a){
           const info = [];
@@ -758,19 +980,22 @@ class QuestionAnswererPage{
           e.addEventListener("mousedown",prep);
         });
         div.className = "Answers jumble";
-        const submitter = document.createElement("div");
-        submitter.className = "AnswerOptions";
-        const ok = document.createElement("img");
-        const reset = document.createElement("img");
-        ok.src = "/resource/check.svg";
-        reset.src = "/resource/reset.svg";
-        ok.onclick = ()=>{
-          game.answerJ(div.querySelectorAll("img.jumble"));
-        };
-        reset.onclick = ()=>{
-          game.jumbleAnswer = [];
-          new QuestionAnswererPage;
-        };
+        const submitter = Element("div",{
+            className: "AnswerOptions"
+          }),
+          ok = Element("img",{
+            src: "/resource/check.svg",
+            onclick: ()=>{
+              game.answerJ(div.querySelectorAll("img.jumble"));
+            }
+          }),
+          reset = Element("img",{
+            src: "/resource/reset.svg",
+            onclick: ()=>{
+              game.jumbleAnswer = [];
+              new QuestionAnswererPage;
+            }
+          });
         submitter.append(ok,reset);
         div.append(submitter);
       }else if(game.question.type == "multiple_select_quiz" || game.question.type == "multiple_select_poll"){
@@ -784,30 +1009,33 @@ class QuestionAnswererPage{
         b.onclick = ()=>{game.answerM(1,b);};
         y.onclick = ()=>{game.answerM(2,y);};
         g.onclick = ()=>{game.answerM(3,g);};
-        const submitter = document.createElement("div");
-        submitter.className = "AnswerOptions";
-        const ok = document.createElement("img");
-        const reset = document.createElement("img");
-        ok.src = "/resource/check.svg";
-        reset.src = "/resource/reset.svg";
-        ok.onclick = ()=>{
-          let tmp = [];
-          for(let i in game.multiAnswer){
-            if(game.multiAnswer[i]){
-              tmp.push(Number(i));
+        const submitter = Element("div",{
+            className: "AnswerOptions"
+          }),
+          ok = Element("img",{
+            src: "/resource/check.svg",
+            onclick: ()=>{
+              let tmp = [];
+              for(let i in game.multiAnswer){
+                if(game.multiAnswer[i]){
+                  tmp.push(Number(i));
+                }
+              }
+              game.answer(tmp);
             }
-          }
-          game.answer(tmp);
-        };
-        reset.onclick = ()=>{
-          game.multiAnswer = {
-            0: false,
-            1: false,
-            2: false,
-            3: false
-          };
-          new QuestionAnswererPage;
-        };
+          }),
+          reset = Element("img",{
+            src: "/resource/reset.svg",
+            onclick: ()=>{
+              game.multiAnswer = {
+                0: false,
+                1: false,
+                2: false,
+                3: false
+              };
+              new QuestionAnswererPage;
+            }
+          });
         submitter.append(ok,reset);
         div.append(submitter);
       }else{
@@ -819,8 +1047,9 @@ class QuestionAnswererPage{
       if(HideAnswers.checked && game.pin[0] != "0"){
         return;
       }
-      const textDiv = document.createElement("div");
-      textDiv.className = "textAnswer";
+      const textDiv = Element("div",{
+        className: "textAnswer"
+      });
       div.append(textDiv);
       for(let i = 0;i < game.answers.length;i++){
         // image support
@@ -836,7 +1065,7 @@ class QuestionAnswererPage{
           items[i].className = (game.question.type === "jumble" ? "jumble " : "") + "correct";
         }
         // setting text
-        const text = document.createElement("p");
+        const text = Element("p");
         if(typeof(game.answers[i].answer) == "undefined"){
           text.innerHTML = "";
         }else{
@@ -849,7 +1078,7 @@ class QuestionAnswererPage{
     try{
       if(game.theme === "Music"){
         if(question.raw.timeAvailable <= 5000){
-          const sounds = ["005","005-1"]
+          const sounds = ["005","005-1"];
           game.playSound(`/resource/music/${sounds[Math.floor(Math.random() * sounds.length)]}.m4a`);
         }else if(question.raw.timeAvailable <= 10000){
           game.playSound("/resource/music/010.m4a");
@@ -865,13 +1094,17 @@ class QuestionAnswererPage{
           game.playSound(`/resource/music/${sounds[Math.floor(Math.random() * sounds.length)]}.m4a`);
         }
       }
-    }catch(e){}
+    }catch(e){
+      console.warn("[MUSIC] - Failed to play.\n" + e);
+    }
     // challenge
     if(game.pin[0] == "0"){
-      const chdiv = document.createElement("div");
-      chdiv.className = "ChallengeQuestion";
-      const sp = document.createElement("span");
-      sp.innerHTML = game.rawData.question || game.rawData.title;
+      const chdiv = Element("div",{
+          className: "ChallengeQuestion"
+        }),
+        sp = Element("span",{
+          innerHTML: game.rawData.question || game.rawData.title
+        });
       chdiv.append(sp);
       div.append(chdiv);
       // create timer
@@ -879,9 +1112,10 @@ class QuestionAnswererPage{
         return;
       }
       let questionTime = question.raw.timeAvailable / 1000;
-      const qdiv = document.createElement("p");
-      qdiv.className = "chtimer";
-      qdiv.innerHTML = questionTime;
+      const qdiv = Element("p",{
+        className: "chtimer",
+        innerHTML: questionTime
+      });
       const chtimer = setInterval(()=>{
         qdiv.innerHTML = --questionTime;
         if(!qdiv.isConnected){
@@ -890,35 +1124,32 @@ class QuestionAnswererPage{
       },1000);
       objects.bottom.prepend(qdiv);
     }else if(game.guesses.length === 0){
-      const l = document.createElement("div");
-      l.className = "ChallengeQuestion noQuiz";
-      const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
-      l.append(document.createElement("br"),document.createElement("br"),sp);
-      objects.main.append(l);
+      objects.main.append(NotFoundDiv());
     }
   }
 }
 class QuestionSnarkPage{
   constructor(text){
     const stuff = new GetReadyPage(game.question,true);
+    stuff.main.setAttribute("ui-event","Answered");
     document.body.className = "rainbow";
     ChallengeContinueButton.style.display = "none";
-    stuff.texts[1].innerHTML = text;
-    stuff.texts[1].setAttribute("text",text);
-    stuff.texts[0].innerHTML = "";
-    stuff.texts[0].setAttribute("text","");
-    stuff.texts[0].id = "snarkText";
-    stuff.texts[1].id = "bottomText";
+    stuff.top.querySelector("div").outerHTML = "";
+    const snark = Element("h2",{
+      innerHTML: text
+    });
+    snark.setAttribute("text",snark.innerText);
+    const div = Element("div"),
+      img = Element("img",{
+        src: "/resource/load-hole.svg",
+        className: "load_circle"
+      });
+    div.append(snark,img);
+    stuff.mid.append(div);
     if(game.guesses.length === 0){
-      const l = document.createElement("div");
-      l.className = "ChallengeQuestion noQuiz";
-      const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
-      l.append(document.createElement("br"),document.createElement("br"),sp);
-      stuff.main.append(l);
+      stuff.main.append(NotFoundDiv());
     }
-    activateLoading(true,false,"",false);
+    activateLoading(false,false,"",false);
   }
 }
 class QuestionEndPage{
@@ -931,49 +1162,58 @@ class QuestionEndPage{
     }
     game.score = info.totalScore;
     const objects = new GetReadyPage(game.question || info,true);
+    objects.main.setAttribute("ui-event","QuestionEnd");
     if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
     }else if(game.guesses.length === 0){
-      const l = document.createElement("div");
-      l.className = "ChallengeQuestion noQuiz";
-      const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
-      l.append(document.createElement("br"),document.createElement("br"),sp);
-      objects.main.append(l);
+      objects.main.append(NotFoundDiv());
     }
-    objects.texts[1].id = "";
+    objects.mid.innerHTML = "";
     document.body.className = info.isCorrect ? "green" : "red";
     objects.bottom.querySelector(".dark").innerHTML = info.totalScore;
-    objects.texts[0].innerHTML = info.isCorrect ? "§Correct§" : "§Incorrect§";
-    objects.texts[0].setAttribute("text",objects.texts[0].innerHTML);
-    objects.texts[1].innerHTML = `§YouIn§ ${(info.rank || 0)}${info.rank == 1 ? "st" : info.rank == 2 ? "nd" : info.rank == 3 ? "rd" : "th"} §Place§`;
-    objects.texts[1].setAttribute("text",objects.texts[1].innerHTML);
-    const nemesis = document.createElement("h2");
-    nemesis.className = "shadow";
+    const correct = Element("h1",{
+      innerHTML: info.isCorrect ? "§Correct§" : "§Incorrect§",
+      className: "shadow"
+    });
+    correct.setAttribute("text",correct.innerText);
+    const rank = Element("h2",{
+      innerHTML: `§YouIn§ ${(info.rank || 0)}${info.rank == 1 ? "st" : info.rank == 2 ? "nd" : info.rank == 3 ? "rd" : "th"} §Place§`,
+      className: "shadow"
+    });
+    rank.setAttribute("text",rank.innerText);
+    const nemesis = Element("h2",{
+      className: "shadow"
+    });
     try{
       nemesis.innerHTML = info.nemesis.name.replace(/</gm,"&lt;") ? `Just ${info.nemesis.totalScore - info.totalScore} from ${info.nemesis.name}` : "";
       nemesis.setAttribute("text",nemesis.innerHTML);
-    }catch(e){}
-    const correctMark = new Image;
-    correctMark.id = "correctMark";
-    correctMark.src = info.isCorrect ? "/resource/check.svg" : "/resource/cross.svg";
-    const pointsEarned = document.createElement("h3");
-    pointsEarned.innerHTML = info.isCorrect ? "+" + (info.points + info.pointsData.answerStreakPoints.streakBonus) : "§KeepTrying§";
-    pointsEarned.className = "shadow";
-    const streakImage = new Image;
-    const streakImageContainer = document.createElement("div");
-    const di = document.createElement("div");
-    const tx = document.createElement("h2");
-    tx.innerHTML = "§AnswerStreak§";
-    tx.className = "shadow";
+    }catch(e){/* No nemesis */}
+    const correctMark = Element("img",{
+        id: "correctMark",
+        src: info.isCorrect ? "/resource/check.svg" : "/resource/cross.svg"
+      }),
+      pointsEarned = Element("h3",{
+        innerHTML: info.isCorrect ? "+" + (info.points + info.pointsData.answerStreakPoints.streakBonus) : "§KeepTrying§",
+        className: "shadow"
+      }),
+      streakImage = Element("img",{
+        src: "/resource/fire.svg"
+      }),
+      streakImageContainer = Element("div",{
+        id: "streakImage"
+      }),
+      di = Element("div"),
+      tx = Element("h2",{
+        innerHTML: "§AnswerStreak§",
+        className: "shadow",
+        style: "display: inline-block; font-size: 1.5rem"
+      });
     tx.setAttribute("text","§AnswerStreak§");
-    tx.style = "display: inline-block; font-size: 1.5rem";
     di.style.position = "relative";
-    streakImageContainer.id = "streakImage";
     di.append(tx);
-    const st = document.createElement("p");
-    st.innerHTML = info.pointsData.answerStreakPoints.streakLevel;
-    streakImage.src = "/resource/fire.svg";
+    const st = Element("p",{
+      innerHTML: info.pointsData.answerStreakPoints.streakLevel
+    });
     streakImageContainer.append(streakImage);
     streakImageContainer.append(st);
     di.append(streakImageContainer);
@@ -990,10 +1230,9 @@ class QuestionEndPage{
       game.hadStreak = true;
       streakImageContainer.style.display = "inline-block";
     }
-    objects.main.insertBefore(correctMark,objects.texts[1]);
-    objects.main.insertBefore(di,objects.texts[1]);
-    objects.main.insertBefore(pointsEarned,objects.texts[1]);
-    objects.main.append(nemesis);
+    const cont = Element("div");
+    cont.append(correct,correctMark,di,pointsEarned,rank,nemesis);
+    objects.mid.append(cont);
     activateLoading(false,false);
   }
 }
@@ -1003,39 +1242,45 @@ class QuizEndPage{
     game.endData = text;
     let message;
     if(game.end.info.rank == 1){
-      message = "1<sup>st</sup>";
+      message = "1<sup>st</sup>place!";
     }else if(game.end.info.rank == 2){
-      message = "2<sup>nd</sup>";
+      message = "2<sup>nd</sup>place!";
     }else if (game.end.info.rank == 3) {
-      message = "3<sup>rd</sup>";
+      message = "3<sup>rd</sup>place!";
     }else if (game.end.info.rank <= 5) {
       message = "§Top5§";
     }else{
       message = "§Almost§";
     }
     const objects = new GetReadyPage(game.question,true);
+    objects.main.setAttribute("ui-event","QuizEnd");
+    objects.mid.innerHTML = "";
     if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
     }
     document.body.className = "purple";
-    objects.texts[0].innerHTML = message;
-    objects.texts[0].setAttribute("text","");
-    objects.texts[1].innerHTML = "§GG§";
-    objects.texts[1].setAttribute("text","§GG§");
-    objects.texts[0].id = "";
-    objects.texts[1].id = "finalText";
-    objects.top.className = "extra darker";
-    objects.bottom.className = "extra darker";
+    const place = Element("h1",{
+      innerHTML: message
+    });
+    const gg = Element("h2",{
+      innerHTML: "§GG§"
+    });
+    const blurb = Element("p",{
+      innerText: "§DidWellShareWithFriends§"
+    });
     if(game.endData.podiumMedalType){
-      const image = document.createElement("img");
-      image.src = `/resource/${game.endData.podiumMedalType}.svg`;
-      image.alt = "Victory Medal";
-      image.id = "resultMedal";
+      const image = Element("img",{
+        src: `/resource/${game.endData.podiumMedalType}.svg`,
+        alt: "Victory Medal",
+        id: "resultMedal"
+      });
       objects.main.append(image);
     }
+    objects.main.append(place,gg,blurb);
     if(!game.opts.hideAnswers){
-      const guessDiv = document.createElement("div");
-      guessDiv.id = "finalGuess";
+      const guessDiv = Element("div",{
+        id: "finalGuess"
+      });
       guessDiv.innerHTML = `<span id="closeend">X</span>
       <span id="kahootguess" class="out block" url="https://create.kahoot.it/details/${game.end.info.quizId}">§ActualGame§</span>
       ${game.guesses.length ? `<span id="outguess" class="out block" url="https://create.kahoot.it/details/${game.guesses[0].uuid}">§GuessGame§</span>` : "<span class=\"block disabled out\">§NoFind§</span>"}`;
@@ -1068,17 +1313,34 @@ class TeamTalkPage{
       game.isAnswerPage = true;
       return o;
     }
-    const {main,texts} = new GetReadyPage(this.question || question,true);
-    const [text1,text2] = texts;
+    const {main,mid} = new GetReadyPage(this.question || question,true);
+    main.setAttribute("ui-event","TeamTalk");
+    mid.innerHTML = "";
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "cyan";
-    const timer = document.createElement("h2");
-    timer.innerHTML = "5";
-    text1.innerHTML = "§TeamTalka§";
-    text1.setAttribute("text","§TeamTalka§");
-    text2.innerHTML = "§Discuss§";
-    text2.setAttribute("text","§Discuss§");
+    const timer = Element("h2",{
+      innerHTML: "5"
+    });
+    const title = Element("h1",{
+      innerHTML: "§TeamTalka§",
+      className: "shadow"
+    });
+    title.setAttribute("text","§TeamTalka§");
+    const subtitle = Element("h2",{
+      innerHTML: "§Discuss§",
+      className: "shadow"
+    });
+    subtitle.setAttribute("text","§Discuss§");
     timer.id = "timer";
-    main.append(timer);
+    const img = Element("img",{
+      src: "/resource/load-large.svg",
+      className: "load_circle",
+      alt: "load_circle"
+    });
+    const div = Element("div");
+    const div2 = Element("div");
+    div2.append(img,timer);
+    div.append(title,div2,subtitle);
+    mid.append(div);
     let secs = game.question.teamTalkDuration || 5;
     const int = setInterval(()=>{
       try{
@@ -1086,10 +1348,6 @@ class TeamTalkPage{
           clearInterval(int);
         }else{
           timer.innerHTML = secs;
-          text1.innerHTML = "§TeamTalka§";
-          text1.setAttribute("text","§TeamTalka§");
-          text2.innerHTML = "§Discuss§";
-          text2.setAttribute("text","§Discuss§");
         }
       }catch(err){
         clearInterval(int);
@@ -1100,46 +1358,49 @@ class TeamTalkPage{
 class TimeUpPage{
   constructor(){
     if(game.receivedQuestion){return;}
-    const {main,texts} = new LobbyPage;
-    try{document.querySelector(".noQuiz").outerHTML = "";}catch(e){}
+    const {main,mid} = new LobbyPage;
+    main.setAttribute("ui-event","TimeUp");
+    mid.innerHTML = "";
+    try{document.querySelector(".noQuiz").outerHTML = "";}catch(e){/* nothing to remove */}
     if(!game.guesses || game.guesses.length === 0){
-      const l = document.createElement("div");
-      l.className = "ChallengeQuestion noQuiz";
-      const sp = document.createElement("span");
-      sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
-      l.append(document.createElement("br"),document.createElement("br"),sp);
-      main.append(l);
+      main.append(NotFoundDiv());
     }
-    const [text1,text2] = texts;
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "red";
-    text1.innerHTML = "§TimeUp§";
-    text1.id = "snarkText";
-    text1.setAttribute("text","§TimeUp§");
-    text2.innerHTML = "§YouIn§ 0th §Place§";
-    text2.setAttribute("text","§YouIn§ 0th §Place§");
-    const message = document.createElement("h3");
-    message.innerHTML = "§WeBelieve§";
+    const title = Element("h1",{
+      innerHTML: "§TimeUp§",
+      className: "shadow"
+    });
+    title.setAttribute("text","§TimeUp§");
+    const subtitle = Element("h2",{
+      innerHTML: "§YouIn§ 0th §Place§",
+      className: "shadow"
+    });
+    subtitle.setAttribute("text","§YouIn§ 0th §Place§");
+    const message = Element("h3",{
+      innerHTML: "§WeBelieve§"
+    });
     message.setAttribute("text","§WeBelieve§");
-    message.className = "shadow";
-    main.insertBefore(message,text2);
+    const cont = Element("div");
+    cont.append(title,subtitle,message);
+    mid.append(cont);
   }
 }
 class FeedbackPage{
   constructor(){
-    const {main,texts,top,bottom} = new LobbyPage;
-    const [text1,text2] = texts;
-    try{document.querySelector(".noQuiz").outerHTML = "";}catch(e){}
+    const {main,mid,top,bottom} = new LobbyPage;
+    main.setAttribute("ui-event","Feedback");
+    mid.innerHTML = "";
+    try{document.querySelector(".noQuiz").outerHTML = "";}catch(e){/* Nothing to remove */}
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "";
     bottom.outerHTML = "";
     top.className = "gameOver";
     top.innerHTML = "<p>§GameOver§</p>";
-    try{document.querySelector("noQuiz").outerHTML = "";}catch(e){}
+    try{document.querySelector("noQuiz").outerHTML = "";}catch(e){/* Nothing to remove */}
     main.className = "Feedback";
     main.style.padding = "0";
-    text1.outerHTML = "";
-    text2.outerHTML = "";
-    const ranking = document.createElement("div");
-    ranking.className = "feedback";
+    const ranking = Element("div",{
+      className: "feedback"
+    });
     ranking.innerHTML = `
     <p>§HowRate§</p>
     <div class="star-container">
@@ -1248,7 +1509,7 @@ function setSchema(element,type,scope,prop){
 function sleep(n){return new Promise((res)=>{setTimeout(res,n*1000);});}
 
 async function resetGame(recover){
-  try{game.music.pause();}catch(e){}
+  try{game.music.pause();}catch(e){/* No music to pause */}
   const oldgame = game;
   if(socket){
     socket.onclose = null;
@@ -1263,8 +1524,12 @@ async function resetGame(recover){
       let data = JSON.parse(evt);
       if(data.type == "Message.PinGood"){
         new LobbyPage;
-        // wait 25 seconds to confirm client disconnect.
-        await sleep((25000 - (Date.now() - oldgame.disconnectTime))/1000);
+        // wait 30 seconds to confirm client disconnect.
+        let t = (30000 - (Date.now() - oldgame.disconnectTime))/1000;
+        if(t <= 2){
+          t = 2;
+        }
+        await sleep(t);
         send({
           message: {
             cid: oldgame.cid,
@@ -1297,7 +1562,7 @@ async function resetGame(recover){
 function clearUI(){
   activateLoading(false,false);
   UIDiv.innerHTML = "";
-  return document.createElement("div");
+  return Element("div");
 }
 
 let presetNumber = 0;
@@ -1311,7 +1576,9 @@ function loadSetting(setting,name){
     }
   }
   game.saveOptions();
-  new ErrorHandler("§RestoredPreset§ '" + name + "'",true);
+  new ErrorHandler("§RestoredPreset§ '" + name + "'",{
+    isNotice: true
+  });
 }
 function addPreset(name){
   game.saveOptions();
@@ -1322,7 +1589,7 @@ function addPreset(name){
   if(localStorage.presets){
     try {
       list = JSON.parse(localStorage.presets);
-    } catch (e) {}
+    } catch (e) {/* No local storage */}
   }
   list.push({
     name: name,
@@ -1350,7 +1617,7 @@ function loadPresets(){
     const after = document.getElementById("preset_add_div");
     for(let preset of presets){
       const info = preset.options;
-      const template = document.createElement("template");
+      const template = Element("template");
       template.innerHTML = `<div class="preset flex remove">
         <div class="center">
           <span class="presetTitle">${preset.name} <label for="preset_${presetNumber}">(?)</label></span>
@@ -1391,11 +1658,11 @@ function loadPresets(){
           });
           localStorage.presets = JSON.stringify(things);
           loadPresets();
-        } catch (e) {}
+        } catch (e) {/* No local storage yet */}
       };
       presetNumber++;
     }
-  } catch (e) {}
+  } catch (e) {/* No local storage yet */}
 }
 
 const ChallengeContinueButton = document.getElementById("ChallengeNext");
@@ -1422,21 +1689,21 @@ const dgo = document.getElementById("dgo");
 const dco = document.getElementById("dco");
 SearchDivSettings.onchange = GameDivSettings.onchange = ChallengeDivSettings.onchange = function(e){
   switch (e.target.id) {
-  case "div_search_options":
-    dso.className = "flex selected";
-    dgo.className = "flex";
-    dco.className = "flex";
-    break;
-  case "div_game_options":
-    dso.className = "flex";
-    dgo.className = "flex selected";
-    dco.className = "flex";
-    break;
-  case "div_challenge_options":
-    dso.className = "flex";
-    dgo.className = "flex";
-    dco.className = "flex selected";
-    break;
+    case "div_search_options":
+      dso.className = "flex selected";
+      dgo.className = "flex";
+      dco.className = "flex";
+      break;
+    case "div_game_options":
+      dso.className = "flex";
+      dgo.className = "flex selected";
+      dco.className = "flex";
+      break;
+    case "div_challenge_options":
+      dso.className = "flex";
+      dgo.className = "flex";
+      dco.className = "flex selected";
+      break;
   }
 };
 dgo.className = "flex selected";
@@ -1502,112 +1769,130 @@ const shortcuts = e=>{
     return;
   }
   switch (e.key) {
-  case "e":
+    case "e":
     // reconnect bot
-    send({type:"RECONNECT",message:"I think i lost connection"});
-    dataLayer.push({type:"reconnect",value:""});
-    break;
-  case "b":
+      send({type:"RECONNECT",message:"I think i lost connection"});
+      dataLayer.push({type:"reconnect",value:""});
+      break;
+    case "b":
     // brute force
-    document.getElementById("brute").click();
-    new ErrorHandler(`§Brute2FA§: ${document.getElementById("brute").checked ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"brute",value:document.getElementById("brute").checked});
-    break;
-  case "p":
+      document.getElementById("brute").click();
+      new ErrorHandler(`§Brute2FA§: ${document.getElementById("brute").checked ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"brute",value:document.getElementById("brute").checked});
+      break;
+    case "p":
     // fail on purpose
-    document.getElementById("fail").value = document.getElementById("fail").value == 0 ? 0.9 : 0;
-    new ErrorHandler(`§PurposelyFail§: ${document.getElementById("fail").value != 0 ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"fail",value:document.getElementById("fail").value});
-    break;
-  case "m":
+      document.getElementById("fail").value = document.getElementById("fail").value == 0 ? 0.9 : 0;
+      new ErrorHandler(`§PurposelyFail§: ${document.getElementById("fail").value != 0 ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"fail",value:document.getElementById("fail").value});
+      break;
+    case "m":
     // manual answering
-    document.getElementById("manual").click();
-    new ErrorHandler(`§ManualControl§: ${document.getElementById("manual").checked ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"manual",value:document.getElementById("manual").checked});
-    break;
-  case "h":
+      document.getElementById("manual").click();
+      new ErrorHandler(`§ManualControl§: ${document.getElementById("manual").checked ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"manual",value:document.getElementById("manual").checked});
+      break;
+    case "h":
     // hide correct
-    document.getElementById("hideAnswers").click();
-    new ErrorHandler(`§HideCorrect§: ${document.getElementById("hideAnswers").checked ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"hide",value:document.getElementById("hideAnswers").checked});
-    break;
-  case "o":
+      document.getElementById("hideAnswers").click();
+      new ErrorHandler(`§HideCorrect§: ${document.getElementById("hideAnswers").checked ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"hide",value:document.getElementById("hideAnswers").checked});
+      break;
+    case "o":
     // hide correct
-    document.getElementById("challengeCorrect").click();
-    new ErrorHandler(`§ChallengeCorrect§: ${document.getElementById("challengeCorrect").checked ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"correct",value:document.getElementById("challengeCorrect").checked});
-    break;
-  case "u":
-    document.getElementById("previewQuestion").click();
-    new ErrorHandler(`§PreviewQuestion§: ${document.getElementById("previewQuestion").checked ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"preview",value:document.getElementById("previewQuestion").checked});
-    break;
-  case "j":
-    try{
-      if(SettingDiv.style.display){
-        SettingDiv.style = "";
-        document.querySelector(".Changelog").style = "";
-        document.querySelector(".About").style = "";
-        document.getElementById("tutorial").style = "";
-        document.querySelector(".misc").style = "";
-        document.querySelector(".Error").style = "";
-        try{document.getElementById("logotext").style = "";}catch(e){}
-        try{document.querySelector(".sm.sidebar").style = "";}catch(e){}
-        try{document.getElementById("abtlnk").style = "";}catch(e){}
-        try{document.getElementById("chnge").style = "";}catch(e){}
-        try{document.getElementById("lang").style = "";}catch(e){}
-      }else{
-        SettingDiv.style = "display: none";
-        document.querySelector(".Changelog").style = "display: none";
-        document.querySelector(".About").style = "display: none";
-        document.getElementById("tutorial").style = "display: none";
-        document.querySelector(".misc").style = "opacity: 0";
-        document.querySelector(".Error").style = "display: none";
-        try{document.getElementById("logotext").style = "display: none";}catch(e){}
-        try{document.querySelector(".sm.sidebar").style = "display: none";}catch(e){}
-        try{document.getElementById("abtlnk").style = "display: none";}catch(e){}
-        try{document.getElementById("chnge").style = "display: none";}catch(e){}
-        try{document.getElementById("lang").style = "display: none";}catch(e){}
-        try{document.querySelector(".grecaptcha-badge").style.visibility = "hidden";}catch(e){}
-        try{
-          document.querySelector(".ad-container").style.display = "none";
-          document.querySelector(".ad-container-2").style.display = "none";
-        }catch(e){}
+      document.getElementById("challengeCorrect").click();
+      new ErrorHandler(`§ChallengeCorrect§: ${document.getElementById("challengeCorrect").checked ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"correct",value:document.getElementById("challengeCorrect").checked});
+      break;
+    case "u":
+      document.getElementById("previewQuestion").click();
+      new ErrorHandler(`§PreviewQuestion§: ${document.getElementById("previewQuestion").checked ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"preview",value:document.getElementById("previewQuestion").checked});
+      break;
+    case "j":
+      try{
+        if(SettingDiv.style.display){
+          SettingDiv.style = "";
+          document.querySelector(".Changelog").style = "";
+          document.querySelector(".About").style = "";
+          document.getElementById("tutorial").style = "";
+          document.querySelector(".misc").style = "";
+          document.querySelector(".Error").style = "";
+          try{document.getElementById("logotext").style = "";}catch(e){/* Nothing to remove */}
+          try{document.querySelector(".sm.sidebar").style = "";}catch(e){/* Nothing to remove */}
+          try{document.getElementById("abtlnk").style = "";}catch(e){/* Nothing to remove */}
+          try{document.getElementById("chnge").style = "";}catch(e){/* Nothing to remove */}
+          try{document.getElementById("lang").style = "";}catch(e){/* Nothing to remove */}
+        }else{
+          SettingDiv.style = "display: none";
+          document.querySelector(".Changelog").style = "display: none";
+          document.querySelector(".About").style = "display: none";
+          document.getElementById("tutorial").style = "display: none";
+          document.querySelector(".misc").style = "opacity: 0";
+          document.querySelector(".Error").style = "display: none";
+          try{document.getElementById("logotext").style = "display: none";}catch(e){/* Nothing to remove */}
+          try{document.querySelector(".sm.sidebar").style = "display: none";}catch(e){/* Nothing to remove */}
+          try{document.getElementById("abtlnk").style = "display: none";}catch(e){/* Nothing to remove */}
+          try{document.getElementById("chnge").style = "display: none";}catch(e){/* Nothing to remove */}
+          try{document.getElementById("lang").style = "display: none";}catch(e){/* Nothing to remove */}
+          try{document.querySelector(".grecaptcha-badge").style.visibility = "hidden";}catch(e){/* Nothing to remove */}
+          try{
+            document.querySelector(".ad-container").style.display = "none";
+            document.querySelector(".ad-container-2").style.display = "none";
+          }catch(e){/* Nothing to remove */}
+        }
+      }catch(e){
+        console.log(e);
+      }finally{
+        const icon = document.head.querySelector("[rel=\"shortcut icon\"]") || Element("link");
+        if(!icon.isConnected){
+          icon.rel = "shortcut icon";
+          icon.href = "https://kahoot.it/favicon.ico";
+          document.head.append(icon);
+          document.title = "Play Kahoot!";
+        }
+        document.getElementById("manual").checked = true;
+        document.getElementById("hideAnswers").checked = Boolean(SettingDiv.style.display);
+        game.saveOptions();
+        // yes, that is a typo
+        dataLayer.push({type:"panick",value:""});
       }
-    }catch(e){
-      console.log(e);
-    }finally{
-      const icon = document.head.querySelector("[rel=\"shortcut icon\"]") || document.createElement("link");
-      if(!icon.isConnected){
-        icon.rel = "shortcut icon";
-        icon.href = "https://kahoot.it/favicon.ico";
-        document.head.append(icon);
-        document.title = "Play Kahoot!";
-      }
-      document.getElementById("manual").checked = true;
-      document.getElementById("hideAnswers").checked = Boolean(SettingDiv.style.display);
-      game.saveOptions();
-      // yes, that is a typo
-      dataLayer.push({type:"panick",value:""});
-    }
-    break;
-  case "d":
-    document.getElementById("ChallengeDisableAutoplay").click();
-    new ErrorHandler(`§ChallengeAuto§: ${document.getElementById("ChallengeDisableAutoplay").checked ? "§OFF§" : "§ON§"}`,true);
-    dataLayer.push({type:"autoplay",value:document.getElementById("ChallengeDisableAutoplay").checked});
-    break;
-  case "k":
-    document.getElementById("searchLoosely").value = Number(document.getElementById("searchLoosely").value) ? 0 : 1;
-    new ErrorHandler(`§LooseSearch§: ${Number(document.getElementById("searchLoosely").value) ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"loose",value:document.getElementById("searchLoosely").value});
-    break;
-  case "t":
-    document.getElementById("teamtalk").click();
-    new ErrorHandler(`§TeamTalk§: ${Number(document.getElementById("teamtalk").checked) ? "§ON§" : "§OFF§"}`,true);
-    dataLayer.push({type:"teamtalk",value:document.getElementById("teamtalk").checked});
-    break;
-  default:
-    return;
+      break;
+    case "d":
+      document.getElementById("ChallengeDisableAutoplay").click();
+      new ErrorHandler(`§ChallengeAuto§: ${document.getElementById("ChallengeDisableAutoplay").checked ? "§OFF§" : "§ON§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"autoplay",value:document.getElementById("ChallengeDisableAutoplay").checked});
+      break;
+    case "k":
+      document.getElementById("searchLoosely").value = Number(document.getElementById("searchLoosely").value) ? 0 : 1;
+      new ErrorHandler(`§LooseSearch§: ${Number(document.getElementById("searchLoosely").value) ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"loose",value:document.getElementById("searchLoosely").value});
+      break;
+    case "t":
+      document.getElementById("teamtalk").click();
+      new ErrorHandler(`§TeamTalk§: ${Number(document.getElementById("teamtalk").checked) ? "§ON§" : "§OFF§"}`,{
+        isNotice: true
+      });
+      dataLayer.push({type:"teamtalk",value:document.getElementById("teamtalk").checked});
+      break;
+    default:
+      return;
   }
   dataLayer.push({event:"shortcut"});
   e.preventDefault();
@@ -1616,7 +1901,7 @@ const shortcuts = e=>{
 };
 window.addEventListener("keydown",shortcuts);
 window.addEventListener("keydown",(e)=>{
-  if(!(game.question && ["quiz","multiple_select_quiz","multiple_select_poll","survey"].includes(game.question.type) && document.querySelector('[alt="Red"]'))){
+  if(!(game.question && ["quiz","multiple_select_quiz","multiple_select_poll","survey"].includes(game.question.type) && document.querySelector("[alt=\"Red\"]"))){
     return;
   }
   if(+e.code.split("Digit")[1] <= 4){
@@ -1625,16 +1910,16 @@ window.addEventListener("keydown",(e)=>{
         send({type:"ANSWER_QUESTION",message:null});
         break;
       case 1:
-        document.querySelector('[alt="Red"]').click();
+        document.querySelector("[alt=\"Red\"]").click();
         break;
       case 2:
-        document.querySelector('[alt="Blue"]').click();
+        document.querySelector("[alt=\"Blue\"]").click();
         break;
       case 3:
-        document.querySelector('[alt="Yellow"]').click();
+        document.querySelector("[alt=\"Yellow\"]").click();
         break;
       case 4:
-        document.querySelector('[alt="Green"]').click();
+        document.querySelector("[alt=\"Green\"]").click();
         break;
     }
   }
@@ -1702,7 +1987,7 @@ function FormatSearch(quizzes){
   `;
   for(let i in quizzes){
     const quiz = quizzes[i];
-    const template = document.createElement("template");
+    const template = Element("template");
     template.innerHTML = `<span>
       <span class="sub-quiz-img"><img src="${quiz.cover}"/></span>
       <span class="sub-quiz-title">${quiz.title}</span>

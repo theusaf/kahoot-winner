@@ -1,8 +1,15 @@
 /* global ErrorHandler,LoginPage,dataLayer,resetGame,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch */
 
 window.addEventListener("load",()=>{
-  if(!localStorage.seenNotice){
-    showNotice();
+  if(!localStorage.seenNotice === "4.0.0"){
+    new ErrorHandler("Important Notice! Click to show",{
+      isNotice: true,
+      onclick: (e,div)=>{
+        div.outerHTML = "";
+        showNotice();
+      },
+      permanent: true
+    });
   }
   if(localStorage.returningUser === "3.3.0"){
     return;
@@ -28,7 +35,7 @@ function activateTutorial(){
           <strong>§Tut1§</strong>
         </div>
         <button id="tut_next" tut-step="0" onclick="tutorialSteps(this.getAttribute('tut-step'))">§TutYes§</button>
-        <button onclick="dataLayer.push({event:'close_tutorial'});document.getElementById('tutorial').innerHTML = '';new ErrorHandler('§TutClose§',true);resetGame();">§TutNo§</button>
+        <button onclick="dataLayer.push({event:'close_tutorial'});document.getElementById('tutorial').innerHTML = '';new ErrorHandler('§TutClose§',{isNotice:true});resetGame();">§TutNo§</button>
       </div>
     </div>
   `;
@@ -84,7 +91,7 @@ function tutorialSteps(n){
       if (SettingSwitch.checked) {SettingSwitch.click();}
       info.innerHTML = `<p><strong>§Tut5§</strong></p>
       <p>§Tut5a§</p>
-      <p>§Tut5b§</p>`
+      <p>§Tut5b§</p>`;
       break;
     }
     case "4":{
@@ -189,7 +196,9 @@ function tutorialSteps(n){
       function a(){
         dataLayer.push({event:"complete_tutorial"});
         setTimeout(function(){
-          return new ErrorHandler("§TutComplete§",true);
+          return new ErrorHandler("§TutComplete§",{
+            isNotice: true
+          });
         },300);
         try{close.removeEventListener(a);}catch(e){}
       }
@@ -223,7 +232,7 @@ function tutorialSteps(n){
 }
 
 function showNotice(){
-  localStorage.seenNotice = true;
+  localStorage.seenNotice = "4.0.0";
   const temp = document.createElement("template");
   temp.innerHTML = `<div class="notice">
     <button onclick="document.querySelector('.notice').outerHTML = '';">OK</button>

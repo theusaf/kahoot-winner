@@ -18,7 +18,7 @@ const request = require("request");
 const fs = require("fs");
 const yauzl = require("yauzl");
 
-const DBAmount = 100;
+const DBAmount = 500;
 let mainPath = __dirname;
 if(electron){
   try{
@@ -360,27 +360,30 @@ class QuizFinder{
       stop: false
     };
   }
-  getAnswers(q,log){
+  getAnswers(q,log,noset){
     var me = this;
     try{
       let ans;
       switch (q.gameBlockType) {
-      case "open_ended":
-      case "word_cloud":
-        ans = "honestly, i don't know";
-        break;
-      case "jumble":
-        ans = shuffle([0,1,2,3]);
-        break;
-      case "multiple_select_quiz":
-        ans = shuffle([0,1,2,3]).slice((q.quizQuestionAnswers || this.parent.kahoot.quiz.quizQuestionAnswers)[q.questionIndex] - Math.floor(Math.random() * (this.parent.kahoot.quiz.quizQuestionAnswers[q.questionIndex] + 1)));
-        break;
-      default:
-        ans = Math.floor(Math.random() * (q.quizQuestionAnswers || this.parent.kahoot.quiz.quizQuestionAnswers)[q.questionIndex]);
+        case "open_ended":
+        case "word_cloud":
+          ans = "honestly, i don't know";
+          break;
+        case "jumble":
+          ans = shuffle([0,1,2,3]);
+          break;
+        case "multiple_select_quiz":
+          ans = shuffle([0,1,2,3]).slice((q.quizQuestionAnswers || this.parent.kahoot.quiz.quizQuestionAnswers)[q.questionIndex] - Math.floor(Math.random() * (this.parent.kahoot.quiz.quizQuestionAnswers[q.questionIndex] + 1)));
+          break;
+        default:
+          ans = Math.floor(Math.random() * (q.quizQuestionAnswers || this.parent.kahoot.quiz.quizQuestionAnswers)[q.questionIndex]);
       } // default values
+      if(noset){
+        return this.hax.validOptions[0].questions[q.questionIndex].choices || [{correct: false,ans:""},{correct: false,ans:""},{correct: false,ans:""},{correct: false,ans:""}];
+      }
       this.hax.correctAnswer = ans;
       if(log){console.log(`Using quiz id ${me.hax.validOptions[0].uuid}`);}
-      const choices = me.hax.validOptions[0].questions[q.questionIndex].choices;
+      const choices = this.hax.validOptions[0].questions[q.questionIndex].choices;
       if(!choices){
         return [{correct: false,ans:""},{correct: false,ans:""},{correct: false,ans:""},{correct: false,ans:""}];
       }
@@ -446,29 +449,57 @@ class QuizFinder{
       let a = this.hax.answers;
       for(var i = 0;i < a.length;++i){
         try{
-          if(o.questions[a[i].i].type != a[i].t){
+          if(o.questions[a[i].index].type !== a[i].type){
             return false;
           }
-          if(!o.questions[a[i].i].choices){
+          if(!o.questions[a[i].index].choices){
             // if no choices ignore, unless a[i] actually was something
-            if(a[i].n){
+            if(a[i].choice !== null || (typeof a[i].choice === "object" && a[i].choice.length !== 0)){
               return false;
             }
             continue;
           }
-          if(o.questions[a[i].i].type == "jumble" || o.questions[a[i].i].choices.filter(
-            k=>{
-              if(typeof k.answer == "undefined"){
-                return k.correct && (a[i].n == "");
+          const {index,type,choice,text,correct} = a[i];
+          switch(type){
+            case "quiz":{
+              if(choice !== null){
+                if(o.questions[index].choices.filter((choice)=>{
+                  return text === choice.answer && choice.correct === correct;
+                }).length !== 0){
+                  continue;
+                }
               }
-              return k.correct && (k.answer == a[i].n);
-            }).length
-          ){
-            continue;
-          }else{
-            // an answer did not match!
-            return false;
+              break;
+            }
+            case "open_ended":{
+              if(correct === false){
+                continue;
+              }
+              if(o.questions[index].choices.filter((choice)=>{
+                return text === choice.answer && choice.correct === true;
+              }).length !== 0){
+                continue;
+              }
+              break;
+            }
+            case "jumble":
+            case "multiple_select_quiz":{
+              if(choice && choice.length === 0){
+                continue;
+              }
+              const texts = text.split("|");
+              if(o.questions[index].choices.every((choice)=>{
+                return texts.includes(choice.answer) || choice.answer === "";
+              })){
+                continue;
+              }
+              break;
+            }
+            default:{
+              continue;
+            }
           }
+          return false;
         }catch(err){
           // we log stuff, but assume the worst, so we continue looping.
           // UPDATE: no longer logging stuff, we just return false.
@@ -482,20 +513,53 @@ class QuizFinder{
       for(var i = 0;i < a.length;++i){
         try{
           for(let question of o.questions){
-            // TODO: Add jumble and multi select support
             if(!question.choices){
               continue;
             }
-            if(question.type == "jumble"){
-              return true;
+            const {index,type,choice,text,correct} = a[i];
+            if(question.type !== type){
+              continue;
             }
-            if(question.choices.filter(c=>{
-              if(typeof c.answer == "undefined"){
-                return c.correct && (a[i].n == "");
+            switch(type){
+              case "quiz":{
+                if(choice !== null){
+                  if(question.choices.filter((choice)=>{
+                    return text === choice.answer && choice.correct === correct;
+                  }).length !== 0){
+                    return true;
+                  }
+                }else{
+                  return true;
+                }
+                break;
               }
-              return c.correct && a[i].n == c.answer;
-            }).length){
-              return true;
+              case "open_ended":{
+                if(correct === false){
+                  return true;
+                }
+                if(question.choices.filter((choice)=>{
+                  return text === choice.answer && choice.correct === true;
+                }).length !== 0){
+                  return true;
+                }
+                break;
+              }
+              case "jumble":
+              case "multiple_select_quiz":{
+                if(choice && choice.length === 0){
+                  return true;
+                }
+                const texts = text.split("|");
+                if(question.choices.every((choice)=>{
+                  return texts.includes(choice.answer) || choice.answer === "";
+                })){
+                  return true;
+                }
+                break;
+              }
+              default:{
+                return true;
+              }
             }
           }
           return false;
@@ -613,11 +677,27 @@ class QuizFinder{
           data = JSON.parse(b);
         }catch(e){
           if(!this.parent){return;}
+          this.parent.privateUUIDs = this.parent.privateUUIDs || new Set();
+          if(!this.parent.privateUUIDs.has(this.parent.options.uuid)){
+            this.parent.send({
+              type: "Error",
+              message: "PRIVATE_ID"
+            });
+            this.parent.privateUUIDs.add(this.parent.options.uuid);
+          }
           this.parent.options.uuid = "";
           return this.searchKahoot(index);
         }
         if(data.error){
           if(!this.parent){return;}
+          this.parent.privateUUIDs = this.parent.privateUUIDs || new Set();
+          if(!this.parent.privateUUIDs.has(this.parent.options.uuid)){
+            this.parent.send({
+              type: "Error",
+              message: "PRIVATE_ID"
+            });
+            this.parent.privateUUIDs.add(this.parent.options.uuid);
+          }
           this.parent.options.uuid = "";
           return this.searchKahoot(index);
         }
@@ -658,8 +738,53 @@ function SearchDatabase(finder,index){
             if(!k.questions[j].choices){
               continue;
             }
-            if(k.questions[j].choices.filter(choice=>{
-              return choice.answer == ans[i].n;
+            if(k.questions[j].type !== ans[i].type){
+              continue;
+            }
+            if(k.questions[j].choices.filter(ch=>{
+              const {type,correct,choice,text} = ans[i];
+              let ok = false;
+              switch(type){
+                case "jumble":
+                case "multiple_select_quiz":{
+                  if(choice && choice.length === 0){
+                    ok = true;
+                    break;
+                  }
+                  const texts = text.split("|");
+                  if(texts.includes(ch.answer)){
+                    ok = true;
+                    break;
+                  }
+                  break;
+                }
+                case "quiz":{
+                  if(choice === null){
+                    ok = true;
+                    break;
+                  }
+                  if(ch.answer === text && ch.correct === correct){
+                    ok = true;
+                    break;
+                  }
+                  break;
+                }
+                case "open_ended":{
+                  if(!correct){
+                    ok = true;
+                    break;
+                  }
+                  if(ch.answer === text){
+                    ok = true;
+                    break;
+                  }
+                  break;
+                }
+                default:{
+                  ok = true;
+                }
+              }
+              return ok;
             }).length){
               ok = true;
               break;
@@ -678,22 +803,61 @@ function SearchDatabase(finder,index){
       }
       if(ans.length){
         for (let i = 0; i < ans.length; i++) {
+          const {index} = ans[i];
           let ok = false;
-          if(!k.questions[i].choices){
-            if(a[i].n){
+          if(!k.questions[index].choices){
+            if(a[i].choice){
               return false;
             }
             continue;
           }
-          if(k.questions[i].type != a[i].t){
+          if(k.questions[index].type !== ans[i].type){
             return false;
           }
-          const ch = k.questions[ans[i].i].choices;
+          const ch = k.questions[index].choices;
           for (let j = 0; j < ch.length; j++) {
-            if(ch[j].answer == ans[i].n){
-              ok = true;
-              break;
+            const {type,correct,choice,text} = ans[i];
+            switch(type){
+              case "jumble":
+              case "multiple_select_quiz":{
+                if(choice && choice.length === 0){
+                  ok = true;
+                  break;
+                }
+                const texts = text.split("|");
+                if(texts.includes(ch[j].answer)){
+                  ok = true;
+                  break;
+                }
+                break;
+              }
+              case "quiz":{
+                if(choice === null){
+                  ok = true;
+                  break;
+                }
+                if(ch[j].answer === text && ch[j].correct === correct){
+                  ok = true;
+                  break;
+                }
+                break;
+              }
+              case "open_ended":{
+                if(!correct){
+                  ok = true;
+                  break;
+                }
+                if(ch[j].answer === text){
+                  ok = true;
+                  break;
+                }
+                break;
+              }
+              default:{
+                ok = true;
+              }
             }
+            if(ok){break;}
           }
           if(!ok){
             return false;
@@ -737,18 +901,59 @@ async function Searching(term,opts,finder){
           b = true;
         }
         for(var i = 0;i < a.length;++i){
-          if(!o.questions[a[i].i].choices){
+          if(!o.questions[a[i].index].choices){
             continue;
           }
-          if(a[i].t != o.questions[a[i].i].type){
+          if(a[i].type !== o.questions[a[i].index].type){
             break;
           }
           // if correct answer matches or is a survey/jumble/info
-          if(o.questions[a[i].i].choices.filter(
+          if(o.questions[a[i].index].choices.filter(
             k=>{
-              return (
-                (k.correct && (k.answer == a[i].n)) || (k.correct && (((typeof k.answer == "undefined") ? "" : k.answer) == a[i].n))
-              ) || o.type == "survey" || o.type == "multiple_select_poll" || o.type == "word_cloud" || o.type == "content" || (o.type == "jumble" /* TODO: Add Extra checks for JUMBLES and multi select*/ );
+              const {
+                correct,
+                text,
+                type,
+                choice
+              } = a[i];
+              switch(type){
+                case "quiz":{
+                // didn't answer, have to assume its good
+                  if(choice == null){
+                    return true;
+                  }
+                  return k.correct === correct && k.answer === text;
+                }
+                case "open_ended":{
+                // we don't know the correct answer
+                  if(correct === false){
+                    return true;
+                  }
+                  return k.correct === true && k.answer === text;
+                }
+                case "multiple_select_quiz":
+                case "jumble":{
+                  if(choice && choice.length && text){
+                    const texts = text.split("|");
+                    let c = false;
+                    for(let j = 0;j<texts.length;j++){
+                      const str = texts[i];
+                      if(k.answer === str){
+                        c = true;
+                        break;
+                      }
+                    }
+                    return c;
+                  }else{
+                  // no answers!
+                    return true;
+                  }
+                }
+                // survey, multiple_select_poll, content, word_cloud
+                default:{
+                  return true;
+                }
+              }
             }
           ).length){
             b = true;
@@ -782,9 +987,50 @@ async function Searching(term,opts,finder){
                 continue;
               }
               if(question.choices.filter(k=>{
-                return (
-                  (k.correct && (k.answer == a[i].n)) || (k.correct && (((typeof k.answer == "undefined") ? "" : k.answer) == a[i].n))
-                ) || o.type == "survey" || o.type == "multiple_select_poll" || o.type == "word_cloud" || o.type == "content" || (o.type == "jumble" /* TODO: Add Extra checks for JUMBLES*/ );
+                const {
+                  correct,
+                  text,
+                  type,
+                  choice
+                } = a[i];
+                switch(type){
+                  case "quiz":{
+                  // didn't answer, have to assume its good
+                    if(choice == null){
+                      return true;
+                    }
+                    return k.correct === correct && k.answer === text;
+                  }
+                  case "open_ended":{
+                  // we don't know the correct answer
+                    if(correct === false){
+                      return true;
+                    }
+                    return k.correct === true && k.answer === text;
+                  }
+                  case "multiple_select_quiz":
+                  case "jumble":{
+                    if(choice && choice.length && text){
+                      const texts = text.split("|");
+                      let c = false;
+                      for(let j = 0;j<texts.length;j++){
+                        const str = texts[i];
+                        if(k.answer === str){
+                          c = true;
+                          break;
+                        }
+                      }
+                      return c;
+                    }else{
+                    // no answers!
+                      return true;
+                    }
+                  }
+                  // survey, multiple_select_poll, content, word_cloud
+                  default:{
+                    return true;
+                  }
+                }
               }).length){
                 b = true;
               }
@@ -1033,7 +1279,7 @@ const Messages = {
   },
   CHOOSE_QUESTION_INDEX: (game,index)=>{
     index = Number(index);
-    if(!game.security.joined || !game.kahoot.quiz || !game.options.isChallenge || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
+    if(!game.security.joined || !game.kahoot.quiz || game.options.isChallenge || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
       return game.send({message:"INVALID_USER_INPUT",type:"Error"});
     }
     if(index != game.correctIndex){
@@ -1115,6 +1361,7 @@ const Messages = {
     // message should be an object containing quiz name, answers, etc.
     // base validation. Does not work on challenges
     if(game.security.joined || !game.options.pin || game.options.pin[0] == "0" || !message || !message.cid){
+      game.send({message:"Reconnect Failed.",type:"Message.QuizEnd"});
       return game.send({message:"INVALID_USER_INPUT",type:"Error"});
     }
     // answers validation
@@ -1258,7 +1505,7 @@ const Listeners = {
     k.parent.security.receivedTime = Date.now();
     if(k.parent.options.manual || k.parent.teamAnswered || Number(k.parent.options.searchLoosely) == 2){
       k.parent.send({message:JSON.stringify({
-        data: k.parent.finder.getAnswers(q),
+        data: k.parent.finder.getAnswers(q,false,true),
         index: q.questionIndex,
         total: k.quiz.quizQuestionAnswers.length,
         ans: q.quizQuestionAnswers,
@@ -1269,7 +1516,7 @@ const Listeners = {
       }),type:"Message.QuestionBegin"});
     }else{
       k.parent.send({message:JSON.stringify({
-        data: k.parent.finder.getAnswers(q),
+        data: k.parent.finder.getAnswers(q,false,true),
         index: q.questionIndex,
         total: k.quiz.quizQuestionAnswers.length,
         ans: q.quizQuestionAnswers,
@@ -1287,6 +1534,7 @@ const Listeners = {
   },
   QuestionEnd: (k,q)=>{
     k.parent.questionReady = false;
+    delete k.parent.correctIndex;
     clearTimeout(k.parent.waiter);
     k.parent.teamAnswered = false;
     k.parent.send({message:JSON.stringify(Object.assign({
@@ -1307,7 +1555,7 @@ const Listeners = {
     }
     k.parent.security.gotQuestion = false;
     try{
-      k.parent.finder.hax.answers.push({t:k.quiz.currentQuestion.gameBlockType,ns:q.correctAnswers,n:q.correctAnswers[0],c:q.isCorrect,i:k.quiz.currentQuestion.questionIndex});
+      k.parent.finder.hax.answers.push({choice:q.choice,type:q.type,text:q.text,correct:q.isCorrect,index:k.quiz.currentQuestion.questionIndex});
       k.parent.finder.searchKahoot(k.quiz.currentQuestion.questionIndex + 1);
     }catch(err){
       // likely due to joining in the middle of the game
@@ -1400,6 +1648,13 @@ const Listeners = {
   },
   GameReset: k=>{
     k.parent.send({message:"The Game Reset.",type:"Message.GameReset"});
+    k.parent.pings = 0;
+    k.parent.fails = [true];
+    k.parent.security.gotQuestion = false;
+    const valid = k.parent.finder.hax.validOptions;
+    k.parent.finder = new QuizFinder;
+    k.parent.finder.parent = k.parent;
+    k.parent.finder.hax.validOptions = valid;
   }
 };
 function applyListeners(kahoot){
