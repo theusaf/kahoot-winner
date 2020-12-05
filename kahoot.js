@@ -1,4 +1,5 @@
 let electron;
+let ebar = ()=>{};
 if(!process.argv.includes("--disable-electron")){
   electron = require("electron");
 }
@@ -56,26 +57,34 @@ if(!fs.existsSync(path.join(mainPath,"latest.txt"))){
 }
 if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(path.join(mainPath,"latest.txt"))) + (1000*60*24) < Date.now()){
   console.log("Fetching latest database from archive.org...");
+  ebar(0);
   const p = request("https://archive.org/download/kahoot-win/json-full.zip").pipe(fs.createWriteStream(path.join(mainPath,"kdb.zip")));
   p.on("error",(e)=>{
+    ebar(-1);
     console.log("Failed to save database: " + e);
   });
   p.on("finish",()=>{
+    ebar(0.3);
     console.log("Saved database to kdb.zip... Extracting...");
     fs.writeFile(path.join(mainPath,"latest.txt"),String(Date.now()),()=>{});
     yauzl.open(path.join(mainPath,"kdb.zip"),{lazyEntries: true},(err,zip)=>{
-      if(err){return console.log("Failed to extract: " + err);}
+      if(err){ebar(-1);return console.log("Failed to extract: " + err);}
+      const {entryCount} = zip;
+      let i = 0;
       zip.readEntry();
       zip.on("entry",entry=>{
         if(/\/$/.test(entry.fileName)){
           if(!fs.existsSync(path.join(mainPath,entry.fileName))){
             fs.mkdirSync(path.join(mainPath,entry.fileName));
           }
+          i++;
           zip.readEntry();
         }else{
           zip.openReadStream(entry,(err,stream)=>{
-            if(err){return console.log("Failed to extract: " + err);}
+            if(err){ebar(-1);return console.log("Failed to extract: " + err);}
             stream.on("end",()=>{
+              i++;
+              ebar(0.3 + 0.3*(i/entryCount));
               zip.readEntry();
             });
             stream.pipe(fs.createWriteStream(path.join(mainPath,entry.fileName)));
@@ -83,11 +92,14 @@ if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(pat
         }
       });
       zip.once("end",()=>{
+        ebar(0.66);
         console.log("Database successfully extracted. Removing unneeded files and downloading keys.");
         fs.unlinkSync(path.join(mainPath,"kdb.zip"));
         request("https://archive.org/download/kahoot-win/full-export-keys-sectioned.json",(e,r,b)=>{
-          if(e){return console.log("Failed: " + e);}
-          fs.writeFile(path.join(mainPath,"keys.json"),b,()=>{
+          if(e){ebar(-1);return console.log("Failed: " + e);}
+          fs.writeFile(path.join(mainPath,"keys.json"),b,(e)=>{
+            if(e){ebar(-1);console.log("err writing keys");}
+            ebar(0.9);
             loadDatabase();
           });
         });
@@ -96,7 +108,7 @@ if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(pat
   });
 }else{
   console.log("Using loaded database");
-  loadDatabase();
+  loadDatabase(true);
 }
 
 function ReadItem(item){
@@ -108,10 +120,12 @@ function ReadItem(item){
   });
 }
 
-function loadDatabase(){
+function loadDatabase(a){
   fs.readFile(path.join(mainPath,"keys.json"),async (err,data)=>{
     if(err){return;}
     const keys = JSON.parse(data);
+    const total = Object.keys(keys).length;
+    let i = 0;
     for(let length in keys){
       KahootDatabase[length] = [];
       for(let i = 0;i<keys[length].length;i++){
@@ -121,8 +135,15 @@ function loadDatabase(){
           console.log("Error: " + e);
         }
       }
+      i++;
+      if(a){
+        ebar(i/total);
+      }else{
+        ebar(0.9 + 0.1*(i/total));
+      }
     }
     KahootDatabaseInitialized = true;
+    ebar(-1);
   });
 }
 
@@ -162,6 +183,7 @@ app.use((req,res,next)=>{
   res.setHeader("X-XSS-Protection","0");
   next();
 });
+// cors
 app.use((req,res,next)=>{
   const origins = ["theusaf.github.io","kahoot.it","play.kahoot.it","create.kahoot.it","code.org","studio.code.org"];
   if(req.get("origin") && origins.includes(req.get("origin").split("://")[1])){
@@ -425,7 +447,6 @@ class QuizFinder{
       return [{correct: false,ans:""},{correct: false,ans:""},{correct: false,ans:""},{correct: false,ans:""}];
     }
   }
-  // todo: improve loose search to include question type when searching
   async searchKahoot(index){
     // no need to search for challenges
     if(!this.parent){
@@ -468,6 +489,8 @@ class QuizFinder{
                 }).length !== 0){
                   continue;
                 }
+              }else{
+                continue;
               }
               break;
             }
@@ -516,7 +539,7 @@ class QuizFinder{
             if(!question.choices){
               continue;
             }
-            const {index,type,choice,text,correct} = a[i];
+            const {type,choice,text,correct} = a[i];
             if(question.type !== type){
               continue;
             }
@@ -1109,7 +1132,7 @@ const Messages = {
         });
         return;
       }
-    }catch(err){}
+    }catch(err){/* ignore - likely invalid input / non challenge input */}
     // weekly kahoot support
     if(["weekly","weekly-previous","https://kahoot.com/kahoot-of-the-week-previous","https://kahoot.com/kahoot-of-the-week","https://kahoot.com/kahoot-of-the-week-previous/","https://kahoot.com/kahoot-of-the-week-previous","kahoot-of-the-week","kahoot-of-the-week-previous"].includes(pin)){
       let url;
@@ -1164,6 +1187,8 @@ const Messages = {
         game.finder.hax.noQuiz = false;
         game.finder.hax.stop = false;
         game.finder.ignoreKahoot = false;
+        game.finder.ignoreDB = false;
+        game.finder.DBIndex = 0;
       }
       // variable answer
       if(Number(game.options.timeout) < 0){
@@ -1324,7 +1349,7 @@ const Messages = {
           }
           game.finder.hax.correctAnswer = ok;
         }
-      }catch(e){}
+      }catch(e){/* ignore */}
     }
   },
   DO_TWO_STEP: async (game,steps)=>{
@@ -1433,19 +1458,19 @@ const QuestionAnswer = async (k,q)=>{
   let answer = k.parent.finder.hax.correctAnswer;
   if(Number(k.parent.options.fail) && k.parent.fails[q.questionIndex]){
     switch (q.gameBlockType) {
-    case "open_ended":
-    case "word_cloud":
-      answer = "fgwadsfihwksdxfs";
-      break;
-    case "jumble":
-      answer = [-1,0,1,2];
-      break;
-    case "multiple_select_poll":
-    case "multiple_select_quiz":
-      answer = [-1];
-      break;
-    default:
-      answer = -1;
+      case "open_ended":
+      case "word_cloud":
+        answer = "fgwadsfihwksdxfs";
+        break;
+      case "jumble":
+        answer = [-1,0,1,2];
+        break;
+      case "multiple_select_poll":
+      case "multiple_select_quiz":
+        answer = [-1];
+        break;
+      default:
+        answer = -1;
     }
   }
   k.parent.teamAnswered = true;
@@ -1732,7 +1757,7 @@ app.use((req,res)=>{
   res.type("txt").send("[404] I think you made a typo! Try going to https://kahoot-win.herokuapp.com/");
 });
 
-if(!process.argv.includes("--disable-electron")){
+if(electron){
   function createWindow () {
     // Create the browser window.
     let win = new electron.BrowserWindow({
@@ -1742,6 +1767,20 @@ if(!process.argv.includes("--disable-electron")){
         nodeIntegration: true
       }
     });
+
+    ebar(-1);
+
+    ebar = (p)=>{
+      try{
+        win.setProgressBar(p);
+      }catch(e){
+        ebar = ()=>{};
+      }
+    };
+
+    if(!KahootDatabaseInitialized){
+      ebar(0);
+    }
 
     // and load the index.html of the app.
     win.loadURL("http://localhost:2000");

@@ -269,6 +269,9 @@ class ErrorHandler{
       time = 30e3;
       ErrDiv.className += " Clickable";
     }
+    if(options.time){
+      time = options.time;
+    }
     if(options.permanent){
       return;
     }
@@ -1206,7 +1209,7 @@ class QuestionEndPage{
       tx = Element("h2",{
         innerHTML: "§AnswerStreak§",
         className: "shadow",
-        style: "display: inline-block; font-size: 1.5rem"
+        style: "display: inline-block; font-size: 1.5rem; margin: 0"
       });
     tx.setAttribute("text","§AnswerStreak§");
     di.style.position = "relative";
@@ -1524,11 +1527,14 @@ async function resetGame(recover){
       let data = JSON.parse(evt);
       if(data.type == "Message.PinGood"){
         new LobbyPage;
-        // wait 30 seconds to confirm client disconnect.
-        let t = (30000 - (Date.now() - oldgame.disconnectTime))/1000;
+        // wait 25 seconds to confirm client disconnect.
+        let t = (25000 - (Date.now() - oldgame.disconnectTime))/1000;
         if(t <= 2){
           t = 2;
         }
+        new ErrorHandler("Reconnecting... Please wait. You should be reconnected when this message dissappears.",{
+          time: t * 1000
+        });
         await sleep(t);
         send({
           message: {

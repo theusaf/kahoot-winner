@@ -275,6 +275,10 @@ class Game{
               }
             },500);
           };
+        }).catch((err)=>{
+          new ErrorHandler("Captcha failed: " + err);
+          new LoginPage();
+          activateLoading(false);
         });
       });
       activateLoading(true,true);
@@ -574,7 +578,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v4.0.0";
+localStorage.KW_Version = "v4.0.1";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

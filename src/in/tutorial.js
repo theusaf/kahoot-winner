@@ -1,7 +1,7 @@
 /* global ErrorHandler,LoginPage,dataLayer,resetGame,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch */
 
 window.addEventListener("load",()=>{
-  if(!localStorage.seenNotice === "4.0.0"){
+  if(localStorage.seenNotice !== "4.0.0"){
     new ErrorHandler("Important Notice! Click to show",{
       isNotice: true,
       onclick: (e,div)=>{
@@ -79,6 +79,7 @@ function tutorialSteps(n){
       game.pin = "12345-LUGGAGE";
       new LobbyPage;
       data.style.marginTop = "8rem";
+      data.style.height = "calc(100% - 10rem)";
       info.innerHTML = `<p><strong>§Tut4§</strong></p>
       <p>§Tut4a§</p>
       <p>§Tut4b§</p>

@@ -374,7 +374,8 @@ input.ch{
   height: 4rem;
   text-align: center;
   font-size: 3rem;
-  max-width: 20rem;
+  width: 20rem;
+  max-width: 80%;
   background: #26890c;
   border-radius: 0.5rem;
   border: 0;
@@ -382,7 +383,7 @@ input.ch{
   color: white;
 }
 .openended::placeholder{
-  font-size: 3rem;
+  font-size: 1.75rem;
   opacity: 0.7;
   font-weight: lighter;
   color: #bbb;
@@ -613,7 +614,7 @@ input.ch{
 [ui-event="QuestionEnd"] #UIMid{
   height: calc(100% - 10rem);
   display: flex;
-  margin-top: 4rem;
+  margin-top: 3rem;
 }
 [ui-event="GetReady"] #UIMid>div>div,
 [ui-event="TeamTalk"] #UIMid>div>div{
@@ -652,14 +653,22 @@ input.ch{
   top: 0.5rem;
 }
 
+/* Question End */
+[ui-event="QuestionEnd"] h1{
+  margin: 0;
+}
+
 /* Quiz End */
 [ui-event="QuizEnd"] #L1{
   display: none;
 }
 [ui-event="QuizEnd"] > h1{
-  margin-top: 13rem;
+  margin-top: 6rem;
   font-size: 2.5rem;
   margin-bottom: 0;
+}
+[ui-event="QuizEnd"] > img + h1{
+  margin-top: 0;
 }
 [ui-event="QuizEnd"] > h1::after{
   content: "";
@@ -717,6 +726,7 @@ input.ch{
   border-radius: 1.5rem;
   padding: 0.5rem;
   height: 1.5rem;
+  font-size: 1rem;
 }
 #quizTypeImage img{
   height: 2rem;
@@ -887,10 +897,9 @@ img[index="3"]{
   border-color: white;
 }
 #resultMedal{
-  position: absolute;
-  top: 0;
+  margin-left: auto;
+  margin-right: auto;
   width: 10rem;
-  left: calc((100% - 10rem)/2);
 }
 #QuizLock+div label[for="QuizLock"]::after{
   content: "🔓";
@@ -1394,12 +1403,13 @@ div.info > div label{
   background-image: url(/resource/sad.svg);
 }
 #finalGuess{
-  margin: auto;
   background-color: #0aa3a3;
   width: 15rem;
   border-radius: 0.5rem;
-  position: relative;
+  position: absolute;
   padding: 1.5rem;
+  bottom: 1rem;
+  left: calc(50% - 9rem);
 }
 #finalGuess .out:not(.disabled){
   cursor: pointer;
@@ -1671,6 +1681,9 @@ div.info > div label{
   [ui-event="QuestionEnd"] #L1 p{
     top: -0.5rem;
   }
+  #ContentImage{
+    width: 10rem;
+  }
   #L1.gameOver{
     padding: 0;
     text-align: center;
@@ -1773,6 +1786,9 @@ div.info > div label{
     height: calc(100% - 4.75rem);
     margin-top: 3.5rem;
   }
+  .Answers>div:not(.textAnswer):not(.AnswerOptions){
+    width: 100%;
+  }
   #L2.darker{
     background-color: rgb(51,51,51);
     border-top: solid 0.25rem black;
@@ -1789,9 +1805,6 @@ div.info > div label{
   }
   .lobby{
     height: calc(100% - 4rem);
-  }
-  .lobby h2{
-    margin-top: 1rem;
   }
   .lobby h3{
     line-height: 2rem;
@@ -1886,6 +1899,14 @@ div.info > div label{
   .form select{
     max-width: 13rem;
     min-width: 13rem;
+  }
+}
+@media screen and (max-height: 500px){
+  #ContentImage{
+    width: 6rem;
+  }
+  [ui-event="QuestionEnd"] h2{
+    margin: 0;
   }
 }
 @media (pointer: coarse) {
