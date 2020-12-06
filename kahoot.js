@@ -1,23 +1,26 @@
-let electron;
-let ebar = ()=>{};
+let electron,
+  ebar = ()=>{};
 if(!process.argv.includes("--disable-electron")){
   electron = require("electron");
 }
-const compression = require("compression");
-const appInformation = require("./package.json");
-const express = require("express");
-const path = require("path");
-const bodyParser = require("body-parser");
-const app = express();
-const ip = require("ip");
-const http = require("http");
-const cookieParser = require("cookie-parser");
-const startupDate = Date.now();
-const {URL} = require("url");
-const {edit} = require("./regex.js");
-const request = require("request");
-const fs = require("fs");
-const yauzl = require("yauzl");
+const compression = require("compression"),
+  appInformation = require("./package.json"),
+  express = require("express"),
+  path = require("path"),
+  bodyParser = require("body-parser"),
+  ip = require("ip"),
+  http = require("http"),
+  cookieParser = require("cookie-parser"),
+  {URL} = require("url"),
+  {edit} = require("./regex.js"),
+  request = require("request"),
+  fs = require("fs"),
+  yauzl = require("yauzl"),
+  ws = require("ws"),
+  KH = require("kahoot.js-updated"),
+  Search = require("kahoot-search"),
+  app = express(),
+  startupDate = Date.now();
 
 const DBAmount = 500;
 let mainPath = __dirname;
@@ -32,7 +35,7 @@ if(electron){
 if(mainPath != __dirname){
   try{
     fs.mkdirSync(mainPath);
-  }catch(e){} // probably already created
+  }catch(e){/* probably already created */}
 }
 function sleep(time){
   return new Promise(res=>{
@@ -123,10 +126,10 @@ function ReadItem(item){
 function loadDatabase(a){
   fs.readFile(path.join(mainPath,"keys.json"),async (err,data)=>{
     if(err){return;}
-    const keys = JSON.parse(data);
-    const total = Object.keys(keys).length;
+    const keys = JSON.parse(data),
+      total = Object.keys(keys).length;
     let i = 0;
-    for(let length in keys){
+    for(const length in keys){
       KahootDatabase[length] = [];
       for(let i = 0;i<keys[length].length;i++){
         try{
@@ -151,15 +154,15 @@ app.enable("trust proxy");
 app.use(compression({
   filter: (req,res)=>{
     const types = {
-      svg: "image/svg+xml",
-      js: "text/javascript",
-      css: "text/css",
-      json: "application/json",
-      txt: "text/plain",
-      html: "text/html"
-    };
-    const t = req.url.split(".")[1];
-    const a = types[t];
+        svg: "image/svg+xml",
+        js: "text/javascript",
+        css: "text/css",
+        json: "application/json",
+        txt: "text/plain",
+        html: "text/html"
+      },
+      t = req.url.split(".")[1],
+      a = types[t];
     if(res.statusCode == 404){
       return compression.filter(req,res);
     }
@@ -192,9 +195,9 @@ app.use((req,res,next)=>{
   next();
 });
 app.get("/",(req,res,next)=>{
-  const cookies = req.cookies;
-  const lang = cookies["lang"];
-  const langs = ["en","es","zh"];
+  const cookies = req.cookies,
+    lang = cookies["lang"],
+    langs = ["en","es","zh"];
   if(lang && lang !== "en" && langs.includes(lang)){
     res.redirect("/" + lang);
   }else{
@@ -204,7 +207,7 @@ app.get("/",(req,res,next)=>{
 app.use(express.static(path.join(__dirname,"public"),{
   maxAge:"1y",
   setHeaders: (res)=>{
-    let d = new Date;
+    const d = new Date;
     d.setYear(d.getFullYear() + 1);
     res.setHeader("Expires", d.toUTCString());
   }
@@ -212,16 +215,16 @@ app.use(express.static(path.join(__dirname,"public"),{
 app.use(express.static(path.join(__dirname,"locales"),{
   maxAge:"1y",
   setHeaders: (res)=>{
-    let d = new Date;
+    const d = new Date;
     d.setYear(d.getFullYear() + 1);
     res.setHeader("Expires", d.toUTCString());
   }
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-const port = process.env.PORT || 2000;
-const server = http.createServer(app);
-let handshakeVotes = [];
+const port = process.env.PORT || 2000,
+  server = http.createServer(app),
+  handshakeVotes = [];
 server.once("error",()=>{
   // probably port already in use
   console.log("Port used, assuming kahoot-win already active");
@@ -229,13 +232,10 @@ server.once("error",()=>{
 server.listen(port);
 console.log(ip.address() + ":" + port);
 console.log("Using version " + require("./package.json").version);
-const ws = require("ws");
-const KH = require("kahoot.js-updated");
-const Search = require("kahoot-search");
 const wss = new ws.Server({server: server});
 wss.on("connection",(c,request)=>{
-  const a = new Cheater(c,request);
-  const msgl = m=>{a.message(m);};
+  const a = new Cheater(c,request),
+    msgl = m=>{a.message(m);};
   c.on("message",msgl);
   const cl = ()=>{
     c.removeListener("message",msgl);
@@ -261,7 +261,7 @@ function clearMemory(c){ // attempt to remove references to reduce memory leaks
     },1000);
     return;
   }
-  for(let i in Listeners){
+  for(const i in Listeners){
     c.kahoot.removeListener(i,c.kahoot.list[i]);
   }
   c.finder.parent = null;
@@ -273,7 +273,7 @@ function clearMemory(c){ // attempt to remove references to reduce memory leaks
 }
 function shuffle(array) {
   array = Array.from(array);
-  var currentIndex = array.length, temporaryValue, randomIndex;
+  let currentIndex = array.length, temporaryValue, randomIndex;
   // While there remain elements to shuffle...
   while (0 !== currentIndex) {
     // Pick a remaining element...
@@ -343,7 +343,7 @@ class Cheater{
       return;
     }
     if(typeof(message) != "string"){
-      try{message = JSON.stringify(message);}catch(err){message=message + "";}
+      try{message = JSON.stringify(message);}catch(err){message+= "";}
     }
     this.wsocket.send(message);
   }
@@ -383,7 +383,7 @@ class QuizFinder{
     };
   }
   getAnswers(q,log,noset){
-    var me = this;
+    const me = this;
     try{
       let ans;
       switch (q.gameBlockType) {
@@ -433,8 +433,8 @@ class QuizFinder{
       }
       // multiple_select_quiz support
       if(this.hax.validOptions[0].questions[q.questionIndex].type == "multiple_select_quiz"){
-        const choices = this.hax.validOptions[0].questions[q.questionIndex].choices || [];
-        let ok = [];
+        const choices = this.hax.validOptions[0].questions[q.questionIndex].choices || [],
+          ok = [];
         for(let i = 0;i<choices.length;i++){
           if(choices[i].correct){
             ok.push(i);
@@ -464,137 +464,137 @@ class QuizFinder{
     }
     // these filters are to filter out quizzes based on new answers
     const filter = o=>{
-      if(o.questions.length != this.parent.kahoot.quiz.quizQuestionAnswers.length){
-        return false;
-      }
-      let a = this.hax.answers;
-      for(var i = 0;i < a.length;++i){
-        try{
-          if(o.questions[a[i].index].type !== a[i].type){
-            return false;
-          }
-          if(!o.questions[a[i].index].choices){
-            // if no choices ignore, unless a[i] actually was something
-            if(a[i].choice !== null || (typeof a[i].choice === "object" && a[i].choice.length !== 0)){
-              return false;
-            }
-            continue;
-          }
-          const {index,type,choice,text,correct} = a[i];
-          switch(type){
-            case "quiz":{
-              if(choice !== null){
-                if(o.questions[index].choices.filter((choice)=>{
-                  return text === choice.answer && choice.correct === correct;
-                }).length !== 0){
-                  continue;
-                }
-              }else{
-                continue;
-              }
-              break;
-            }
-            case "open_ended":{
-              if(correct === false){
-                continue;
-              }
-              if(o.questions[index].choices.filter((choice)=>{
-                return text === choice.answer && choice.correct === true;
-              }).length !== 0){
-                continue;
-              }
-              break;
-            }
-            case "jumble":
-            case "multiple_select_quiz":{
-              if(choice && choice.length === 0){
-                continue;
-              }
-              const texts = text.split("|");
-              if(o.questions[index].choices.every((choice)=>{
-                return texts.includes(choice.answer) || choice.answer === "";
-              })){
-                continue;
-              }
-              break;
-            }
-            default:{
-              continue;
-            }
-          }
-          return false;
-        }catch(err){
-          // we log stuff, but assume the worst, so we continue looping.
-          // UPDATE: no longer logging stuff, we just return false.
+        if(o.questions.length != this.parent.kahoot.quiz.quizQuestionAnswers.length){
           return false;
         }
-      }
-      return true;
-    };
-    const filter2 = o=>{
-      let a = this.hax.answers;
-      for(var i = 0;i < a.length;++i){
-        try{
-          for(let question of o.questions){
-            if(!question.choices){
+        const a = this.hax.answers;
+        for(let i = 0;i < a.length;++i){
+          try{
+            if(o.questions[a[i].index].type !== a[i].type){
+              return false;
+            }
+            if(!o.questions[a[i].index].choices){
+            // if no choices ignore, unless a[i] actually was something
+              if(a[i].choice !== null || (typeof a[i].choice === "object" && a[i].choice.length !== 0)){
+                return false;
+              }
               continue;
             }
-            const {type,choice,text,correct} = a[i];
-            if(question.type !== type){
-              continue;
-            }
+            const {index,type,choice,text,correct} = a[i];
             switch(type){
               case "quiz":{
                 if(choice !== null){
-                  if(question.choices.filter((choice)=>{
+                  if(o.questions[index].choices.filter((choice)=>{
                     return text === choice.answer && choice.correct === correct;
                   }).length !== 0){
-                    return true;
+                    continue;
                   }
                 }else{
-                  return true;
+                  continue;
                 }
                 break;
               }
               case "open_ended":{
                 if(correct === false){
-                  return true;
+                  continue;
                 }
-                if(question.choices.filter((choice)=>{
+                if(o.questions[index].choices.filter((choice)=>{
                   return text === choice.answer && choice.correct === true;
                 }).length !== 0){
-                  return true;
+                  continue;
                 }
                 break;
               }
               case "jumble":
               case "multiple_select_quiz":{
                 if(choice && choice.length === 0){
-                  return true;
+                  continue;
                 }
                 const texts = text.split("|");
-                if(question.choices.every((choice)=>{
+                if(o.questions[index].choices.every((choice)=>{
                   return texts.includes(choice.answer) || choice.answer === "";
                 })){
-                  return true;
+                  continue;
                 }
                 break;
               }
               default:{
-                return true;
+                continue;
               }
             }
-          }
-          return false;
-        }catch(err){
+            return false;
+          }catch(err){
           // we log stuff, but assume the worst, so we continue looping.
           // UPDATE: no longer logging stuff, we just return false.
-          return false;
+            return false;
+          }
         }
-      }
-      return true;
-    };
-    let use = +this.parent.options.searchLoosely ? filter2 : filter;
+        return true;
+      },
+      filter2 = o=>{
+        const a = this.hax.answers;
+        for(let i = 0;i < a.length;++i){
+          try{
+            for(const question of o.questions){
+              if(!question.choices){
+                continue;
+              }
+              const {type,choice,text,correct} = a[i];
+              if(question.type !== type){
+                continue;
+              }
+              switch(type){
+                case "quiz":{
+                  if(choice !== null){
+                    if(question.choices.filter((choice)=>{
+                      return text === choice.answer && choice.correct === correct;
+                    }).length !== 0){
+                      return true;
+                    }
+                  }else{
+                    return true;
+                  }
+                  break;
+                }
+                case "open_ended":{
+                  if(correct === false){
+                    return true;
+                  }
+                  if(question.choices.filter((choice)=>{
+                    return text === choice.answer && choice.correct === true;
+                  }).length !== 0){
+                    return true;
+                  }
+                  break;
+                }
+                case "jumble":
+                case "multiple_select_quiz":{
+                  if(choice && choice.length === 0){
+                    return true;
+                  }
+                  const texts = text.split("|");
+                  if(question.choices.every((choice)=>{
+                    return texts.includes(choice.answer) || choice.answer === "";
+                  })){
+                    return true;
+                  }
+                  break;
+                }
+                default:{
+                  return true;
+                }
+              }
+            }
+            return false;
+          }catch(err){
+          // we log stuff, but assume the worst, so we continue looping.
+          // UPDATE: no longer logging stuff, we just return false.
+            return false;
+          }
+        }
+        return true;
+      },
+      use = +this.parent.options.searchLoosely ? filter2 : filter;
     if(this.hax.validOptions.filter(use).length){
       this.hax.validOptions = this.hax.validOptions.filter(use);
       console.log("Possible quiz found");
@@ -602,7 +602,7 @@ class QuizFinder{
     }else{
       this.hax.validOptions = [];
     }
-    let options = {
+    const options = {
       cursor: this.hax.cursor,
       limit: 25,
       type: ["quiz"],
@@ -613,8 +613,8 @@ class QuizFinder{
       options.author = this.parent.options.author;
     }
     if(!this.parent.options.uuid){
-      const searchText = (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : "");
-      const len = this.parent.kahoot.quiz.quizQuestionAnswers.length;
+      const searchText = (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : ""),
+        len = this.parent.kahoot.quiz.quizQuestionAnswers.length;
       if((searchText.replace(/\s\*/g,"")) == ""){
         if(!this.hax.noQuiz){
           this.hax.noQuiz = true;
@@ -623,7 +623,7 @@ class QuizFinder{
             message: "EMPTY_NAME"
           });
         }
-        let results = (!this.ignoreDB && SearchDatabase(this,this.DBIndex)) || [];
+        const results = (!this.ignoreDB && SearchDatabase(this,this.DBIndex)) || [];
         this.DBIndex += DBAmount || 50;
         if(!this.parent){
           this.hax.stop = true;
@@ -647,8 +647,8 @@ class QuizFinder{
         return console.log("No quiz specified.");
       }
       console.log(searchText);
-      let results = (!this.ignoreKahoot && await Searching(searchText,options,this)) || [];
-      let results2 = (!this.ignoreDB && SearchDatabase(this,this.DBIndex)) || [];
+      const results = (!this.ignoreKahoot && await Searching(searchText,options,this)) || [],
+        results2 = (!this.ignoreDB && SearchDatabase(this,this.DBIndex)) || [];
       if(!this.parent){
         this.hax.stop = true;
         return;
@@ -739,34 +739,107 @@ function SearchDatabase(finder,index){
     return [];
   }
   const filt = k=>{
-    if(!finder.parent){
-      return false;
-    }
-    if(finder.parent.options.author){
-      if(finder.parent.options.author != k.author){
+      if(!finder.parent){
         return false;
       }
-    }
-    let ans = finder.hax.answers;
-    if(+finder.parent.options.searchLoosely){
-      const a = k.answerMap.slice().sort();
-      const b = finder.parent.kahoot.quiz.quizQuestionAnswers.slice().sort();
-      if(JSON.stringify(a) !== JSON.stringify(b)){
-        return false;
+      if(finder.parent.options.author){
+        if(finder.parent.options.author != k.author){
+          return false;
+        }
       }
-      if(ans.length){
-        for (let i = 0; i < ans.length; i++) {
-          let ok = false;
-          for (let j = 0; j<k.questions.length;j++) {
-            if(!k.questions[j].choices){
+      const ans = finder.hax.answers;
+      if(+finder.parent.options.searchLoosely){
+        const a = k.answerMap.slice().sort(),
+          b = finder.parent.kahoot.quiz.quizQuestionAnswers.slice().sort();
+        if(JSON.stringify(a) !== JSON.stringify(b)){
+          return false;
+        }
+        if(ans.length){
+          for (let i = 0; i < ans.length; i++) {
+            let ok = false;
+            for (let j = 0; j<k.questions.length;j++) {
+              if(!k.questions[j].choices){
+                continue;
+              }
+              if(k.questions[j].type !== ans[i].type){
+                continue;
+              }
+              if(k.questions[j].choices.filter(ch=>{
+                const {type,correct,choice,text} = ans[i];
+                let ok = false;
+                switch(type){
+                  case "jumble":
+                  case "multiple_select_quiz":{
+                    if(choice && choice.length === 0){
+                      ok = true;
+                      break;
+                    }
+                    const texts = text.split("|");
+                    if(texts.includes(ch.answer)){
+                      ok = true;
+                      break;
+                    }
+                    break;
+                  }
+                  case "quiz":{
+                    if(choice === null){
+                      ok = true;
+                      break;
+                    }
+                    if(ch.answer === text && ch.correct === correct){
+                      ok = true;
+                      break;
+                    }
+                    break;
+                  }
+                  case "open_ended":{
+                    if(!correct){
+                      ok = true;
+                      break;
+                    }
+                    if(ch.answer === text){
+                      ok = true;
+                      break;
+                    }
+                    break;
+                  }
+                  default:{
+                    ok = true;
+                  }
+                }
+                return ok;
+              }).length){
+                ok = true;
+                break;
+              }
+            }
+            if(!ok){
+              return false;
+            }
+          }
+        }
+      }else{
+        const a = k.answerMap,
+          b = finder.parent.kahoot.quiz.quizQuestionAnswers;
+        if(JSON.stringify(a) !== JSON.stringify(b)){
+          return false;
+        }
+        if(ans.length){
+          for (let i = 0; i < ans.length; i++) {
+            const {index} = ans[i];
+            let ok = false;
+            if(!k.questions[index].choices){
+              if(a[i].choice){
+                return false;
+              }
               continue;
             }
-            if(k.questions[j].type !== ans[i].type){
-              continue;
+            if(k.questions[index].type !== ans[i].type){
+              return false;
             }
-            if(k.questions[j].choices.filter(ch=>{
+            const ch = k.questions[index].choices;
+            for (let j = 0; j < ch.length; j++) {
               const {type,correct,choice,text} = ans[i];
-              let ok = false;
               switch(type){
                 case "jumble":
                 case "multiple_select_quiz":{
@@ -775,7 +848,7 @@ function SearchDatabase(finder,index){
                     break;
                   }
                   const texts = text.split("|");
-                  if(texts.includes(ch.answer)){
+                  if(texts.includes(ch[j].answer)){
                     ok = true;
                     break;
                   }
@@ -786,7 +859,7 @@ function SearchDatabase(finder,index){
                     ok = true;
                     break;
                   }
-                  if(ch.answer === text && ch.correct === correct){
+                  if(ch[j].answer === text && ch[j].correct === correct){
                     ok = true;
                     break;
                   }
@@ -797,7 +870,7 @@ function SearchDatabase(finder,index){
                     ok = true;
                     break;
                   }
-                  if(ch.answer === text){
+                  if(ch[j].answer === text){
                     ok = true;
                     break;
                   }
@@ -807,95 +880,22 @@ function SearchDatabase(finder,index){
                   ok = true;
                 }
               }
-              return ok;
-            }).length){
-              ok = true;
-              break;
+              if(ok){break;}
             }
-          }
-          if(!ok){
-            return false;
-          }
-        }
-      }
-    }else{
-      const a = k.answerMap;
-      const b = finder.parent.kahoot.quiz.quizQuestionAnswers;
-      if(JSON.stringify(a) !== JSON.stringify(b)){
-        return false;
-      }
-      if(ans.length){
-        for (let i = 0; i < ans.length; i++) {
-          const {index} = ans[i];
-          let ok = false;
-          if(!k.questions[index].choices){
-            if(a[i].choice){
+            if(!ok){
               return false;
             }
-            continue;
-          }
-          if(k.questions[index].type !== ans[i].type){
-            return false;
-          }
-          const ch = k.questions[index].choices;
-          for (let j = 0; j < ch.length; j++) {
-            const {type,correct,choice,text} = ans[i];
-            switch(type){
-              case "jumble":
-              case "multiple_select_quiz":{
-                if(choice && choice.length === 0){
-                  ok = true;
-                  break;
-                }
-                const texts = text.split("|");
-                if(texts.includes(ch[j].answer)){
-                  ok = true;
-                  break;
-                }
-                break;
-              }
-              case "quiz":{
-                if(choice === null){
-                  ok = true;
-                  break;
-                }
-                if(ch[j].answer === text && ch[j].correct === correct){
-                  ok = true;
-                  break;
-                }
-                break;
-              }
-              case "open_ended":{
-                if(!correct){
-                  ok = true;
-                  break;
-                }
-                if(ch[j].answer === text){
-                  ok = true;
-                  break;
-                }
-                break;
-              }
-              default:{
-                ok = true;
-              }
-            }
-            if(ok){break;}
-          }
-          if(!ok){
-            return false;
           }
         }
       }
-    }
-    return true;
-  };
-  const len = finder.parent.kahoot.quiz.quizQuestionAnswers.length;
+      return true;
+    },
+    len = finder.parent.kahoot.quiz.quizQuestionAnswers.length;
   if(!KahootDatabase[len]){
     return [];
   }
-  let res = [];
-  const keys = Object.keys(KahootDatabase[len]);
+  const res = [],
+    keys = Object.keys(KahootDatabase[len]);
   try{
     for(let i = index || 0;i< index + (DBAmount || 50);i++){
       const item = KahootDatabase[len][keys[i]];
@@ -918,98 +918,21 @@ async function Searching(term,opts,finder){
         return true;
       }
       const mainFilter = ()=>{
-        let a = finder.hax.answers;
-        let b = false;
-        if(!finder.hax.answers.length){
-          b = true;
-        }
-        for(var i = 0;i < a.length;++i){
-          if(!o.questions[a[i].index].choices){
-            continue;
-          }
-          if(a[i].type !== o.questions[a[i].index].type){
-            break;
-          }
-          // if correct answer matches or is a survey/jumble/info
-          if(o.questions[a[i].index].choices.filter(
-            k=>{
-              const {
-                correct,
-                text,
-                type,
-                choice
-              } = a[i];
-              switch(type){
-                case "quiz":{
-                // didn't answer, have to assume its good
-                  if(choice == null){
-                    return true;
-                  }
-                  return k.correct === correct && k.answer === text;
-                }
-                case "open_ended":{
-                // we don't know the correct answer
-                  if(correct === false){
-                    return true;
-                  }
-                  return k.correct === true && k.answer === text;
-                }
-                case "multiple_select_quiz":
-                case "jumble":{
-                  if(choice && choice.length && text){
-                    const texts = text.split("|");
-                    let c = false;
-                    for(let j = 0;j<texts.length;j++){
-                      const str = texts[i];
-                      if(k.answer === str){
-                        c = true;
-                        break;
-                      }
-                    }
-                    return c;
-                  }else{
-                  // no answers!
-                    return true;
-                  }
-                }
-                // survey, multiple_select_poll, content, word_cloud
-                default:{
-                  return true;
-                }
-              }
-            }
-          ).length){
+          const a = finder.hax.answers;
+          let b = false;
+          if(!finder.hax.answers.length){
             b = true;
           }
-        }
-        return b;
-      };
-      const mainFilter2 = ()=>{
-        let correct = true;
-        for(let i = 0;i<o.questions.length;++i){
-          // "content" support
-          if(!o.questions[i].choices){
-            continue;
-          }
-          if(o.questions[i].choices.length != finder.parent.kahoot.quiz.quizQuestionAnswers[i]){
-            correct = false;
-          }
-        }
-        return correct;
-      };
-      const looseFilter = ()=>{
-        let a = finder.hax.answers;
-        let b = false;
-        if(!finder.hax.answers.length){
-          b = true;
-        }
-        for(var i = 0;i < a.length;++i){
-          try{
-            for(let question of o.questions){
-              if(!question.choices){
-                continue;
-              }
-              if(question.choices.filter(k=>{
+          for(let i = 0;i < a.length;++i){
+            if(!o.questions[a[i].index].choices){
+              continue;
+            }
+            if(a[i].type !== o.questions[a[i].index].type){
+              break;
+            }
+            // if correct answer matches or is a survey/jumble/info
+            if(o.questions[a[i].index].choices.filter(
+              k=>{
                 const {
                   correct,
                   text,
@@ -1018,14 +941,14 @@ async function Searching(term,opts,finder){
                 } = a[i];
                 switch(type){
                   case "quiz":{
-                  // didn't answer, have to assume its good
+                    // didn't answer, have to assume its good
                     if(choice == null){
                       return true;
                     }
                     return k.correct === correct && k.answer === text;
                   }
                   case "open_ended":{
-                  // we don't know the correct answer
+                    // we don't know the correct answer
                     if(correct === false){
                       return true;
                     }
@@ -1045,7 +968,7 @@ async function Searching(term,opts,finder){
                       }
                       return c;
                     }else{
-                    // no answers!
+                      // no answers!
                       return true;
                     }
                   }
@@ -1054,37 +977,114 @@ async function Searching(term,opts,finder){
                     return true;
                   }
                 }
-              }).length){
-                b = true;
               }
+            ).length){
+              b = true;
             }
-          }catch(e){
-            b = false;
-            break;
           }
-        }
-        return b;
-      };
-      const looseFilter2 = ()=>{
-        let qc = [];
-        for(let i = 0;i<o.questions.length;++i){
+          return b;
+        },
+        mainFilter2 = ()=>{
+          let correct = true;
+          for(let i = 0;i<o.questions.length;++i){
           // "content" support
-          if(!o.questions[i].choices){
-            qc.push(null);
-            continue;
+            if(!o.questions[i].choices){
+              continue;
+            }
+            if(o.questions[i].choices.length != finder.parent.kahoot.quiz.quizQuestionAnswers[i]){
+              correct = false;
+            }
           }
-          qc.push(o.questions[i].choices.length);
-        }
-        qc.sort();
-        qc = JSON.stringify(qc);
-        const qca = JSON.stringify(finder.parent.kahoot.quiz.quizQuestionAnswers.slice(0).sort());
-        if(qc == qca){
-          return true;
-        }
-        return false;
-      };
-      let filter = mainFilter;
-      let filter2 = mainFilter2;
+          return correct;
+        },
+        looseFilter = ()=>{
+          const a = finder.hax.answers;
+          let b = false;
+          if(!finder.hax.answers.length){
+            b = true;
+          }
+          for(let i = 0;i < a.length;++i){
+            try{
+              for(const question of o.questions){
+                if(!question.choices){
+                  continue;
+                }
+                if(question.choices.filter(k=>{
+                  const {
+                    correct,
+                    text,
+                    type,
+                    choice
+                  } = a[i];
+                  switch(type){
+                    case "quiz":{
+                      // didn't answer, have to assume its good
+                      if(choice == null){
+                        return true;
+                      }
+                      return k.correct === correct && k.answer === text;
+                    }
+                    case "open_ended":{
+                      // we don't know the correct answer
+                      if(correct === false){
+                        return true;
+                      }
+                      return k.correct === true && k.answer === text;
+                    }
+                    case "multiple_select_quiz":
+                    case "jumble":{
+                      if(choice && choice.length && text){
+                        const texts = text.split("|");
+                        let c = false;
+                        for(let j = 0;j<texts.length;j++){
+                          const str = texts[i];
+                          if(k.answer === str){
+                            c = true;
+                            break;
+                          }
+                        }
+                        return c;
+                      }else{
+                        // no answers!
+                        return true;
+                      }
+                    }
+                    // survey, multiple_select_poll, content, word_cloud
+                    default:{
+                      return true;
+                    }
+                  }
+                }).length){
+                  b = true;
+                }
+              }
+            }catch(e){
+              b = false;
+              break;
+            }
+          }
+          return b;
+        },
+        looseFilter2 = ()=>{
+          let qc = [];
+          for(let i = 0;i<o.questions.length;++i){
+          // "content" support
+            if(!o.questions[i].choices){
+              qc.push(null);
+              continue;
+            }
+            qc.push(o.questions[i].choices.length);
+          }
+          qc.sort();
+          qc = JSON.stringify(qc);
+          const qca = JSON.stringify(finder.parent.kahoot.quiz.quizQuestionAnswers.slice(0).sort());
+          if(qc == qca){
+            return true;
+          }
+          return false;
+        };
+      let filter = mainFilter,
+        filter2 = mainFilter2;
       if(+finder.parent.options.searchLoosely){
         filter = looseFilter;
         filter2 = looseFilter2;
@@ -1098,593 +1098,593 @@ async function Searching(term,opts,finder){
   }
 }
 const Messages = {
-  SET_PIN: (game,pin)=>{
-    try{
-      const url = new URL(pin);
-      const path = url.pathname.split(/challenge\//g)[1];
-      // if it was an invalid link, this should throw an error
-      let isPin = path.match(/\d+/g)[0];
-      if(path.length == isPin.length && path.length > 0){
+    SET_PIN: (game,pin)=>{
+      try{
+        const url = new URL(pin),
+          path = url.pathname.split(/challenge\//g)[1],
+          // if it was an invalid link, this should throw an error
+          isPin = path.match(/\d+/g)[0];
+        if(path.length == isPin.length && path.length > 0){
         // this means that the pin is in the link lol
-        pin = path;
-      }else{
-        request(`https://kahoot.it/rest/challenges/${path}`,(e,r,b)=>{
-          try{
-            b = JSON.parse(b);
-            if(b.pin){
-              pin = b.pin;
-              request(`https://kahoot.it/rest/challenges/pin/${pin}`,(e,r,b)=>{
-                if(/NOT_FOUND/img.test(b)){
-                  game.send({message:"INVALID_PIN",type:"Error"});
-                }else{
-                  game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
-                  game.options.pin = pin;
-                  game.options.isChallenge = true;
-                  try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
-                }
-              });
-            }else{
+          pin = path;
+        }else{
+          request(`https://kahoot.it/rest/challenges/${path}`,(e,r,b)=>{
+            try{
+              b = JSON.parse(b);
+              if(b.pin){
+                pin = b.pin;
+                request(`https://kahoot.it/rest/challenges/pin/${pin}`,(e,r,b)=>{
+                  if(/NOT_FOUND/img.test(b)){
+                    game.send({message:"INVALID_PIN",type:"Error"});
+                  }else{
+                    game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
+                    game.options.pin = pin;
+                    game.options.isChallenge = true;
+                    try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
+                  }
+                });
+              }else{
+                game.send({message:"INVALID_PIN",type:"Error"});
+              }
+            }catch(e){
               game.send({message:"INVALID_PIN",type:"Error"});
             }
-          }catch(e){
+          });
+          return;
+        }
+      }catch(err){/* ignore - likely invalid input / non challenge input */}
+      // weekly kahoot support
+      if(["weekly","weekly-previous","https://kahoot.com/kahoot-of-the-week-previous","https://kahoot.com/kahoot-of-the-week","https://kahoot.com/kahoot-of-the-week-previous/","https://kahoot.com/kahoot-of-the-week-previous","kahoot-of-the-week","kahoot-of-the-week-previous"].includes(pin)){
+        let url;
+        if(pin.indexOf("previous") != -1){ // previous
+          url = "https://kahoot.com/kahoot-of-the-week-previous";
+        }else{ // current
+          url = "https://kahoot.com/kahoot-of-the-week";
+        }
+        request(url,(e,r,b)=>{
+          try{
+            const p = b.match(/(?<=challenge\/)\d+/gm)[0];
+            game.send({message:`Connected to ${p}!`,type:"Message.PinGood"});
+            game.options.pin = p;
+            game.options.isChallenge = true;
+            try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
+          }catch(err){
             game.send({message:"INVALID_PIN",type:"Error"});
           }
         });
         return;
       }
-    }catch(err){/* ignore - likely invalid input / non challenge input */}
-    // weekly kahoot support
-    if(["weekly","weekly-previous","https://kahoot.com/kahoot-of-the-week-previous","https://kahoot.com/kahoot-of-the-week","https://kahoot.com/kahoot-of-the-week-previous/","https://kahoot.com/kahoot-of-the-week-previous","kahoot-of-the-week","kahoot-of-the-week-previous"].includes(pin)){
-      let url;
-      if(pin.indexOf("previous") != -1){ // previous
-        url = "https://kahoot.com/kahoot-of-the-week-previous";
-      }else{ // current
-        url = "https://kahoot.com/kahoot-of-the-week";
+      if(pin && pin[0] == "0"){
+        request(`https://kahoot.it/rest/challenges/pin/${pin}`,(e,r,b)=>{
+          if(/NOT_FOUND/img.test(b)){
+            game.send({message:"INVALID_PIN",type:"Error"});
+          }else{
+            game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
+            game.options.pin = pin;
+            game.options.isChallenge = true;
+            try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
+          }
+        });
+        return;
       }
-      request(url,(e,r,b)=>{
-        try{
-          const p = b.match(/(?<=challenge\/)\d+/gm)[0];
-          game.send({message:`Connected to ${p}!`,type:"Message.PinGood"});
-          game.options.pin = p;
-          game.options.isChallenge = true;
-          try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
-        }catch(err){
-          game.send({message:"INVALID_PIN",type:"Error"});
-        }
-      });
-      return;
-    }
-    if(pin && pin[0] == "0"){
-      request(`https://kahoot.it/rest/challenges/pin/${pin}`,(e,r,b)=>{
-        if(/NOT_FOUND/img.test(b)){
+      request(`https://kahoot.it/reserve/session/${pin}/?${Date.now()}`,(e,r,b)=>{
+        if(b == "Not found" || /(MethodNotAllowedError)/img.test(b)){
           game.send({message:"INVALID_PIN",type:"Error"});
         }else{
           game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
-          game.options.pin = pin;
-          game.options.isChallenge = true;
-          try{game.finder.hax.validOptions = [JSON.parse(b).kahoot];}catch(e){game.finder.hax.validOptions = [];}
+          game.options.pin = Number(pin);
         }
       });
-      return;
-    }
-    request(`https://kahoot.it/reserve/session/${pin}/?${Date.now()}`,(e,r,b)=>{
-      if(b == "Not found" || /(MethodNotAllowedError)/img.test(b)){
-        game.send({message:"INVALID_PIN",type:"Error"});
-      }else{
-        game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
-        game.options.pin = Number(pin);
-      }
-    });
-  },
-  SET_OPTS: (game,opts)=>{
-    try{
-      const old = Object.assign({},game.options);
-      opts.searchLoosely = Number(opts.searchLoosely);
-      Object.assign(game.options,JSON.parse(opts));
-      // if these changed, reset cursor.
-      if(old.searchLoosely != game.options.searchLoosely || old.author != game.options.author || old.searchTerm != game.options.searchTerm){
-        game.finder.hax.cursor = 0;
-        game.finder.hax.noQuiz = false;
-        game.finder.hax.stop = false;
-        game.finder.ignoreKahoot = false;
-        game.finder.ignoreDB = false;
-        game.finder.DBIndex = 0;
-      }
-      // variable answer
-      if(Number(game.options.timeout) < 0){
-        game.options.timeout = Math.abs(game.options.timeout);
-        game.options.variableTimeout = true;
-      }else{
-        game.options.variableTimeout = false;
-      }
-      // disable autoplay
-      if(game.options.ChallengeDisableAutoplay){
-        game.kahoot.defaults.options.ChallengeAutoContinue = false;
-      }else{
-        game.kahoot.defaults.options.ChallengeAutoContinue = true;
-      }
-      if(game.options.challengePoints){
-        game.kahoot.defaults.options.ChallengeScore = +game.options.challengePoints;
-      }else{
-        game.kahoot.defaults.options.ChallengeScore = 0;
-      }
-      if(game.options.challengeCorrect){
-        game.kahoot.defaults.options.ChallengeAlwaysCorrect = true;
-      }else{
-        game.kahoot.defaults.options.ChallengeAlwaysCorrect = false;
-      }
-      if(game.options.ChallengeEnableStreaks){
-        game.kahoot.defaults.options.ChallengeUseStreakBonus = true;
-      }else{
-        game.kahoot.defaults.options.ChallengeUseStreakBonus = false;
-      }
-      if(game.options.ChallengeDisableTimer){
-        game.kahoot.defaults.options.ChallengeWaitForInput = true;
-      }else{
-        game.kahoot.defaults.options.ChallengeWaitForInput = false;
-      }
-      // remove default fail.
-      if((game.options.fail == 2 && game.fails.length == 1) || game.options.fail != old.fail){
-        if(game.options.fail == 2){
-          game.fails = [false];
+    },
+    SET_OPTS: (game,opts)=>{
+      try{
+        const old = Object.assign({},game.options);
+        opts.searchLoosely = Number(opts.searchLoosely);
+        Object.assign(game.options,JSON.parse(opts));
+        // if these changed, reset cursor.
+        if(old.searchLoosely != game.options.searchLoosely || old.author != game.options.author || old.searchTerm != game.options.searchTerm){
+          game.finder.hax.cursor = 0;
+          game.finder.hax.noQuiz = false;
+          game.finder.hax.stop = false;
+          game.finder.ignoreKahoot = false;
+          game.finder.ignoreDB = false;
+          game.finder.DBIndex = 0;
+        }
+        // variable answer
+        if(Number(game.options.timeout) < 0){
+          game.options.timeout = Math.abs(game.options.timeout);
+          game.options.variableTimeout = true;
         }else{
-          game.fails = [true];
+          game.options.variableTimeout = false;
         }
-      }
-      // timeframe
-      if(isNaN(game.options.timeout)){
-        try { // assume [-]d[s]-[s][-]d
-          let args = game.options.timeout.split("-");
-          if(args.length === 2){
-            game.options.timeout = Number(args[0]);
-            game.options.timeoutEnd = Number(args[1]);
-          }else if(args.length === 3){
-            game.options.timeout = -Number(args[1]);
-            game.options.timeoutEnd = Number(args[2]);
-          }else{ // assume 4
-            game.options.timeout = -Number(args[1]);
-            game.options.timeoutEnd = Number(args[3]);
+        // disable autoplay
+        if(game.options.ChallengeDisableAutoplay){
+          game.kahoot.defaults.options.ChallengeAutoContinue = false;
+        }else{
+          game.kahoot.defaults.options.ChallengeAutoContinue = true;
+        }
+        if(game.options.challengePoints){
+          game.kahoot.defaults.options.ChallengeScore = +game.options.challengePoints;
+        }else{
+          game.kahoot.defaults.options.ChallengeScore = 0;
+        }
+        if(game.options.challengeCorrect){
+          game.kahoot.defaults.options.ChallengeAlwaysCorrect = true;
+        }else{
+          game.kahoot.defaults.options.ChallengeAlwaysCorrect = false;
+        }
+        if(game.options.ChallengeEnableStreaks){
+          game.kahoot.defaults.options.ChallengeUseStreakBonus = true;
+        }else{
+          game.kahoot.defaults.options.ChallengeUseStreakBonus = false;
+        }
+        if(game.options.ChallengeDisableTimer){
+          game.kahoot.defaults.options.ChallengeWaitForInput = true;
+        }else{
+          game.kahoot.defaults.options.ChallengeWaitForInput = false;
+        }
+        // remove default fail.
+        if((game.options.fail == 2 && game.fails.length == 1) || game.options.fail != old.fail){
+          if(game.options.fail == 2){
+            game.fails = [false];
+          }else{
+            game.fails = [true];
           }
-          game.options.timeout = game.options.timeout || 0;
-        } catch (e) {
-          game.options.timeout = 0;
-          game.options.timeoutEnd = 0;
         }
-      }
+        // timeframe
+        if(isNaN(game.options.timeout)){
+          try { // assume [-]d[s]-[s][-]d
+            const args = game.options.timeout.split("-");
+            if(args.length === 2){
+              game.options.timeout = Number(args[0]);
+              game.options.timeoutEnd = Number(args[1]);
+            }else if(args.length === 3){
+              game.options.timeout = -Number(args[1]);
+              game.options.timeoutEnd = Number(args[2]);
+            }else{ // assume 4
+              game.options.timeout = -Number(args[1]);
+              game.options.timeoutEnd = Number(args[3]);
+            }
+            game.options.timeout = game.options.timeout || 0;
+          } catch (e) {
+            game.options.timeout = 0;
+            game.options.timeoutEnd = 0;
+          }
+        }
 
-      // changing timeout mid question.
-      if(old.timeout != game.options.timeout){
-        if(game.security.joined && game.security.gotQuestion && game.questionReady === true && !game.options.manual){
-          clearTimeout(game.waiter);
-          const start = game.options.timeout * 1000 + (Number(game.options.variableTimeout) * Math.random() * 1000);
-          const end = Math.random() * ((Number(game.options.timeoutEnd) - (start/1000) || 0)) * 1000;
-          const delayed = Date.now() - game.security.receivedTime;
-          game.waiter = setTimeout(()=>{
-            if(!game.kahoot){return;}
-            QuestionAnswer(game.kahoot,game.kahoot.quiz.currentQuestion);
-          },start+end-delayed);
+        // changing timeout mid question.
+        if(old.timeout != game.options.timeout){
+          if(game.security.joined && game.security.gotQuestion && game.questionReady === true && !game.options.manual){
+            clearTimeout(game.waiter);
+            const start = game.options.timeout * 1000 + (Number(game.options.variableTimeout) * Math.random() * 1000),
+              end = Math.random() * ((Number(game.options.timeoutEnd) - (start/1000) || 0)) * 1000,
+              delayed = Date.now() - game.security.receivedTime;
+            game.waiter = setTimeout(()=>{
+              if(!game.kahoot){return;}
+              QuestionAnswer(game.kahoot,game.kahoot.quiz.currentQuestion);
+            },start+end-delayed);
+          }
         }
+      }catch(err){
+        game.send({message:"INVALID_USER_INPUT",type:"Error"});
       }
-    }catch(err){
-      game.send({message:"INVALID_USER_INPUT",type:"Error"});
-    }
-  },
-  JOIN_GAME: (game,name)=>{
-    if(game.security.joined){
-      game.send({message:"INVALID_NAME",type:"Error"});
-      return;
-    }
-    game.security.joined = true;
-    if(name == "de_se_me"){
-      game.kahoot.loggingMode = true;
-    }
-    game.kahoot.join(game.options.pin,(name||"") + "",game.options.teamMembers ? game.options.teamMembers.toString().split(",") : undefined).catch(err=>{
-      if(err && err.error && err.error.includes("handshake_denied")){
-        handshakeVotes.push(game.ip);
+    },
+    JOIN_GAME: (game,name)=>{
+      if(game.security.joined){
+        game.send({message:"INVALID_NAME",type:"Error"});
+        return;
       }
-      game.send({message:"INVALID_NAME",type:"Error",data:err});
-    });
-  },
-  ANSWER_QUESTION: (game,answer)=>{
-    if(!game.security.joined || !game.kahoot.quiz || !game.kahoot.quiz.currentQuestion){
-      return;
-    }
-    if((typeof (answer) == "undefined") || answer === ""){
-      game.send({message:"INVALID_USER_INPUT",type:"Error"});
-      game.kahoot.answer(game.finder.hax.correctAnswer).then(()=>{
+      game.security.joined = true;
+      if(name == "de_se_me"){
+        game.kahoot.loggingMode = true;
+      }
+      game.kahoot.join(game.options.pin,(name||"") + "",game.options.teamMembers ? game.options.teamMembers.toString().split(",") : undefined).catch(err=>{
+        if(err && err.error && err.error.includes("handshake_denied")){
+          handshakeVotes.push(game.ip);
+        }
+        game.send({message:"INVALID_NAME",type:"Error",data:err});
+      });
+    },
+    ANSWER_QUESTION: (game,answer)=>{
+      if(!game.security.joined || !game.kahoot.quiz || !game.kahoot.quiz.currentQuestion){
+        return;
+      }
+      if((typeof (answer) == "undefined") || answer === ""){
+        game.send({message:"INVALID_USER_INPUT",type:"Error"});
+        game.kahoot.answer(game.finder.hax.correctAnswer).then(()=>{
+          QuestionSubmit(game.kahoot);
+        }).catch(()=>{});
+        return;
+      }else if(answer === null){
+        return QuestionAnswer(game.kahoot,game.kahoot.quiz.currentQuestion);
+      }
+      game.kahoot.answer(answer).then(()=>{
         QuestionSubmit(game.kahoot);
       }).catch(()=>{});
-      return;
-    }else if(answer === null){
-      return QuestionAnswer(game.kahoot,game.kahoot.quiz.currentQuestion);
-    }
-    game.kahoot.answer(answer).then(()=>{
-      QuestionSubmit(game.kahoot);
-    }).catch(()=>{});
-  },
-  CHOOSE_QUESTION_INDEX: (game,index)=>{
-    index = Number(index);
-    if(!game.security.joined || !game.kahoot.quiz || game.options.isChallenge || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
-      return game.send({message:"INVALID_USER_INPUT",type:"Error"});
-    }
-    if(index != game.correctIndex){
-      game.correctIndex = index;
-      const type2 = game.kahoot.quiz.currentQuestion.gameBlockType;
-      const type = game.finder.hax.validOptions[0].questions[index].type;
-      if(type != type2){ // hmm, wrong question.
-        return;
+    },
+    CHOOSE_QUESTION_INDEX: (game,index)=>{
+      index = Number(index);
+      if(!game.security.joined || !game.kahoot.quiz || game.options.isChallenge || !game.kahoot.quiz.currentQuestion || game.finder.hax.validOptions.length == 0 || game.finder.hax.validOptions[0].questions.length <= index || index < 0){
+        return game.send({message:"INVALID_USER_INPUT",type:"Error"});
       }
-      const choices = game.finder.hax.validOptions[0].questions[index].choices;
-      if(!choices){
-        return;
-      }
-      try{ // just in case
-        for(let i = 0;i<choices.length;++i){
-          if(choices[i].correct){
-            game.finder.hax.correctAnswer = i;
-            // open ended support
-            if(game.finder.hax.validOptions[0].questions[index].type == "open_ended"){
-              game.finder.hax.correctAnswer = choices[i].answer;
-            }
-            break;
-          }
+      if(index != game.correctIndex){
+        game.correctIndex = index;
+        const type2 = game.kahoot.quiz.currentQuestion.gameBlockType,
+          type = game.finder.hax.validOptions[0].questions[index].type;
+        if(type != type2){ // hmm, wrong question.
+          return;
         }
-        // jumble support
-        if(game.finder.hax.validOptions[0].questions[index].type == "jumble"){
-          // since we cannot actually find out the correct answer as this is a program, we just guess...
-          game.finder.hax.correctAnswer = shuffle([0,1,2,3]);
-          // if challenge
-          if(game.options.isChallenge){
-            game.finder.hax.correctAnswer = [0,1,2,3];
-          }
+        const choices = game.finder.hax.validOptions[0].questions[index].choices;
+        if(!choices){
+          return;
         }
-        // multiple_select_quiz support
-        if(game.finder.hax.validOptions[0].questions[index].type == "multiple_select_quiz"){
-          const choices = game.finder.hax.validOptions[0].questions[index].choices || [];
-          let ok = [];
-          for(let i = 0;i<choices.length;i++){
+        try{ // just in case
+          for(let i = 0;i<choices.length;++i){
             if(choices[i].correct){
-              ok.push(i);
+              game.finder.hax.correctAnswer = i;
+              // open ended support
+              if(game.finder.hax.validOptions[0].questions[index].type == "open_ended"){
+                game.finder.hax.correctAnswer = choices[i].answer;
+              }
+              break;
             }
           }
-          game.finder.hax.correctAnswer = ok;
-        }
-      }catch(e){/* ignore */}
-    }
-  },
-  DO_TWO_STEP: async (game,steps)=>{
-    if(!game.security.joined){
-      return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
-    }
-    try{await game.kahoot.answerTwoFactorAuth(JSON.parse(steps));}catch(err){game.send({message:"INVALID_USER_INPUT",type:"Error"});}
-  },
-  GET_RANDOM_NAME: game=>{
-    game.generateRandomName().then(name=>{
-      game.send({message:name,type:"Message.SetName"});
-    });
-  },
-  NEXT_CHALLENGE: game=>{
+          // jumble support
+          if(game.finder.hax.validOptions[0].questions[index].type == "jumble"){
+          // since we cannot actually find out the correct answer as this is a program, we just guess...
+            game.finder.hax.correctAnswer = shuffle([0,1,2,3]);
+            // if challenge
+            if(game.options.isChallenge){
+              game.finder.hax.correctAnswer = [0,1,2,3];
+            }
+          }
+          // multiple_select_quiz support
+          if(game.finder.hax.validOptions[0].questions[index].type == "multiple_select_quiz"){
+            const choices = game.finder.hax.validOptions[0].questions[index].choices || [],
+              ok = [];
+            for(let i = 0;i<choices.length;i++){
+              if(choices[i].correct){
+                ok.push(i);
+              }
+            }
+            game.finder.hax.correctAnswer = ok;
+          }
+        }catch(e){/* ignore */}
+      }
+    },
+    DO_TWO_STEP: async (game,steps)=>{
+      if(!game.security.joined){
+        return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
+      }
+      try{await game.kahoot.answerTwoFactorAuth(JSON.parse(steps));}catch(err){game.send({message:"INVALID_USER_INPUT",type:"Error"});}
+    },
+    GET_RANDOM_NAME: game=>{
+      game.generateRandomName().then(name=>{
+        game.send({message:name,type:"Message.SetName"});
+      });
+    },
+    NEXT_CHALLENGE: game=>{
     // security
-    if(!game.options.isChallenge || !game.security.joined || game.kahoot.data.phase == "leaderboard"){
-      return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
-    }
-    try{
-      game.kahoot.next();
-    }catch(e){
-      console.log("Caught CHALLENGE ERROR:");
-      console.log(e);
-    }
-  },
-  FAIL_CURRENT_QUESTION: (game,choice)=>{
-    if(!game.security.joined || !game.kahoot.quiz || !game.kahoot.quiz.currentQuestion){
-      return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
-    }
-    game.fails[game.kahoot.quiz.currentQuestion.questionIndex] = Boolean(choice);
-    game.send({message:Boolean(choice).toString(),type:"Message.Ping"});
-  },
-  RECOVER_DATA: (game,message)=>{
+      if(!game.options.isChallenge || !game.security.joined || game.kahoot.data.phase == "leaderboard"){
+        return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
+      }
+      try{
+        game.kahoot.next();
+      }catch(e){
+        console.log("Caught CHALLENGE ERROR:");
+        console.log(e);
+      }
+    },
+    FAIL_CURRENT_QUESTION: (game,choice)=>{
+      if(!game.security.joined || !game.kahoot.quiz || !game.kahoot.quiz.currentQuestion){
+        return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
+      }
+      game.fails[game.kahoot.quiz.currentQuestion.questionIndex] = Boolean(choice);
+      game.send({message:Boolean(choice).toString(),type:"Message.Ping"});
+    },
+    RECOVER_DATA: (game,message)=>{
     // message should be an object containing quiz name, answers, etc.
     // base validation. Does not work on challenges
-    if(game.security.joined || !game.options.pin || game.options.pin[0] == "0" || !message || !message.cid){
-      game.send({message:"Reconnect Failed.",type:"Message.QuizEnd"});
-      return game.send({message:"INVALID_USER_INPUT",type:"Error"});
-    }
-    // answers validation
-    if(message.answers){
-      if(!Array.isArray(message.answers)){
+      if(game.security.joined || !game.options.pin || game.options.pin[0] == "0" || !message || !message.cid){
+        game.send({message:"Reconnect Failed.",type:"Message.QuizEnd"});
         return game.send({message:"INVALID_USER_INPUT",type:"Error"});
       }
-      if(message.answers.length > 100){ // probably BS. closing to reduce memory usage
-        return game.send({message:"INVALID_USER_INPUT",type:"Error"});
-      }
-      for (var i = 0; i < message.answers.length; i++) {
-        const ans = message.answers[i];
-        // answers are like {i:0,n:"foobar",t:"quiz",c:false,ns:[]}
-        if(typeof ans.i == "undefined" || ans.i == null || !(ans.n && typeof ans.n == "string") || !(ans.t && typeof ans.t == "string") || typeof ans.c == "undefined" || (typeof ans.ns == "undefined" || !Array.isArray(ans.ns))){
+      // answers validation
+      if(message.answers){
+        if(!Array.isArray(message.answers)){
           return game.send({message:"INVALID_USER_INPUT",type:"Error"});
         }
+        if(message.answers.length > 100){ // probably BS. closing to reduce memory usage
+          return game.send({message:"INVALID_USER_INPUT",type:"Error"});
+        }
+        for (let i = 0; i < message.answers.length; i++) {
+          const ans = message.answers[i];
+          // answers are like {i:0,n:"foobar",t:"quiz",c:false,ns:[]}
+          if(typeof ans.i == "undefined" || ans.i == null || !(ans.n && typeof ans.n == "string") || !(ans.t && typeof ans.t == "string") || typeof ans.c == "undefined" || (typeof ans.ns == "undefined" || !Array.isArray(ans.ns))){
+            return game.send({message:"INVALID_USER_INPUT",type:"Error"});
+          }
+        }
+        game.finder.answers = message.answers;
       }
-      game.finder.answers = message.answers;
-    }
-    // updating information
-    game.kahoot.cid = message.cid;
-    game.kahoot.gameid = game.options.pin;
-    game.kahoot.socket = {
-      readyState: 3,
-      close: ()=>{}
-    };
-    game.kahoot.reconnect().catch(()=>{
-      game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
-    });
-  },
-  HANDSHAKE_ISSUES: (game,message)=>{
-    if(message != "AAAA!"){
-      return;
-    }
-    if(game.handshakeIssues && game.ip && !(handshakeVotes.includes(game.ip))){
-      const message = "A handshake error was reported at " + (new Date()).toString();
-      console.log(message);
-      WebhookMessage(message,"Kashoot!");
-      handshakeVotes.push(game.ip);
-    }else{ // liar
-      game.send({
-        type: "Error",
-        message: "INVALID_USER_INPUT"
+      // updating information
+      game.kahoot.cid = message.cid;
+      game.kahoot.gameid = game.options.pin;
+      game.kahoot.socket = {
+        readyState: 3,
+        close: ()=>{}
+      };
+      game.kahoot.reconnect().catch(()=>{
+        game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
       });
-    }
-  },
-  SEND_FEEDBACK: async (game,message)=>{
-    if(!game.security.joined){game.send({message:"INVALID_USER_INPUT",type:"Error"});}
-    try{
-      const {fun,learn,recommend,overall} = message;
-      game.kahoot.sendFeedback(fun,learn,recommend,overall);
-    }catch(e){
-      console.log(e);
-      game.send({message:"INVALID_USER_INPUT",type:"Error"});
-    }
-  }
-};
-const QuestionSubmit = (k)=>{
-  const snark = ["Were you tooooooo fast?","Pure genius or guesswork?","Secret classroom superpowers?","Genius machine?","Classroom perfection?","Pure genius?","Lightning smart?"];
-  k.parent.send({message:snark[Math.floor(Math.random() * snark.length)],type:"Message.QuestionSubmit"});
-};
-const QuestionAnswer = async (k,q)=>{
-  if(!q){
-    return;
-  }
-  if(!k.parent){ // prevent more crashes...
-    return;
-  }
-  let answer = k.parent.finder.hax.correctAnswer;
-  if(Number(k.parent.options.fail) && k.parent.fails[q.questionIndex]){
-    switch (q.gameBlockType) {
-      case "open_ended":
-      case "word_cloud":
-        answer = "fgwadsfihwksdxfs";
-        break;
-      case "jumble":
-        answer = [-1,0,1,2];
-        break;
-      case "multiple_select_poll":
-      case "multiple_select_quiz":
-        answer = [-1];
-        break;
-      default:
-        answer = -1;
-    }
-  }
-  k.parent.teamAnswered = true;
-  if(k.parent.options.teamtalk){
-    const diff = Date.now() - k.parent.teamTalkTime;
-    if(diff < 250){await sleep((250 - diff)/1000);}
-  }
-  k.answer(answer).then(()=>{
-    QuestionSubmit(k);
-  }).catch(()=>{});
-};
-const Listeners = {
-  Joined: k=>{
-    k.parent.security.joined = true;
-    k.parent.send({message:JSON.stringify({
-      name: k.name,
-      cid: k.cid
-    }),type:"Message.JoinSuccess"});
-  },
-  QuizStart: (k,q)=>{
-    if(k.parent.options.isChallenge){
-      // set valid options
-      if(!k.parent.finder.hax.validOptions.length){
-        k.parent.finder.hax.validOptions.push(q.rawEvent);
+    },
+    HANDSHAKE_ISSUES: (game,message)=>{
+      if(message != "AAAA!"){
+        return;
+      }
+      if(game.handshakeIssues && game.ip && !(handshakeVotes.includes(game.ip))){
+        const message = "A handshake error was reported at " + (new Date()).toString();
+        console.log(message);
+        WebhookMessage(message,"Kashoot!");
+        handshakeVotes.push(game.ip);
+      }else{ // liar
+        game.send({
+          type: "Error",
+          message: "INVALID_USER_INPUT"
+        });
+      }
+    },
+    SEND_FEEDBACK: async (game,message)=>{
+      if(!game.security.joined){game.send({message:"INVALID_USER_INPUT",type:"Error"});}
+      try{
+        const {fun,learn,recommend,overall} = message;
+        game.kahoot.sendFeedback(fun,learn,recommend,overall);
+      }catch(e){
+        console.log(e);
+        game.send({message:"INVALID_USER_INPUT",type:"Error"});
       }
     }
-    if(typeof(q.type) == "undefined"){
-      q.type = "quiz"; // Since we joined in the middle of things, we have to assume a quiz type
-      q.name = ""; // Set blank name, since we also won't know that.
-    }
-    k.parent.finder.hax.cursor = 0;
-    q.name = k.parent.options.name && !q.name ? k.parent.options.name : q.name;
-    k.parent.send({
-      message:JSON.stringify({name:q.name,raw:q}),
-      type: "Message.QuizStart"
-    });
-    k.parent.finder.searchKahoot(0);
   },
-  QuestionReady: (k,q)=>{
-    k.parent.questionReady = true;
-    if(k.parent.fails.length === 1){
-      for(let i = 0;i<k.quiz.quizQuestionAnswers.length - 1;i++){
-        if(Number(k.parent.options.fail) == 0){
+  QuestionSubmit = (k)=>{
+    const snark = ["Were you tooooooo fast?","Pure genius or guesswork?","Secret classroom superpowers?","Genius machine?","Classroom perfection?","Pure genius?","Lightning smart?"];
+    k.parent.send({message:snark[Math.floor(Math.random() * snark.length)],type:"Message.QuestionSubmit"});
+  },
+  QuestionAnswer = async (k,q)=>{
+    if(!q){
+      return;
+    }
+    if(!k.parent){ // prevent more crashes...
+      return;
+    }
+    let answer = k.parent.finder.hax.correctAnswer;
+    if(Number(k.parent.options.fail) && k.parent.fails[q.questionIndex]){
+      switch (q.gameBlockType) {
+        case "open_ended":
+        case "word_cloud":
+          answer = "fgwadsfihwksdxfs";
           break;
-        }
-        k.parent.fails.push(Math.random() > (Number(k.parent.options.fail)) ? true : false);
+        case "jumble":
+          answer = [-1,0,1,2];
+          break;
+        case "multiple_select_poll":
+        case "multiple_select_quiz":
+          answer = [-1];
+          break;
+        default:
+          answer = -1;
       }
-      k.parent.fails = shuffle(k.parent.fails);
     }
-    k.parent.send({message:JSON.stringify({data:k.parent.finder.getAnswers(q,true),index:q.questionIndex,total:k.quiz.quizQuestionAnswers.length,ans:k.quiz.quizQuestionAnswers,currentGuesses:k.parent.finder.hax.validOptions,type:q.type,raw:q,timeLeft:q.timeLeft,cans:k.parent.finder.hax.answers}),type:"Message.QuestionGet"});
+    k.parent.teamAnswered = true;
+    if(k.parent.options.teamtalk){
+      const diff = Date.now() - k.parent.teamTalkTime;
+      if(diff < 250){await sleep((250 - diff)/1000);}
+    }
+    k.answer(answer).then(()=>{
+      QuestionSubmit(k);
+    }).catch(()=>{});
   },
-  QuestionStart: (k,q)=>{
-    if(k.parent.questionReady === false){
-      return; // question already ended?
-    }
-    k.parent.security.gotQuestion = true;
-    k.parent.security.receivedTime = Date.now();
-    if(k.parent.options.manual || k.parent.teamAnswered || Number(k.parent.options.searchLoosely) == 2){
+  Listeners = {
+    Joined: k=>{
+      k.parent.security.joined = true;
       k.parent.send({message:JSON.stringify({
-        data: k.parent.finder.getAnswers(q,false,true),
-        index: q.questionIndex,
-        total: k.quiz.quizQuestionAnswers.length,
-        ans: q.quizQuestionAnswers,
-        currentGuesses: k.parent.finder.hax.validOptions,
-        type: q.gameBlockType,
+        name: k.name,
+        cid: k.cid
+      }),type:"Message.JoinSuccess"});
+    },
+    QuizStart: (k,q)=>{
+      if(k.parent.options.isChallenge){
+      // set valid options
+        if(!k.parent.finder.hax.validOptions.length){
+          k.parent.finder.hax.validOptions.push(q.rawEvent);
+        }
+      }
+      if(typeof(q.type) == "undefined"){
+        q.type = "quiz"; // Since we joined in the middle of things, we have to assume a quiz type
+        q.name = ""; // Set blank name, since we also won't know that.
+      }
+      k.parent.finder.hax.cursor = 0;
+      q.name = k.parent.options.name && !q.name ? k.parent.options.name : q.name;
+      k.parent.send({
+        message:JSON.stringify({name:q.name,raw:q}),
+        type: "Message.QuizStart"
+      });
+      k.parent.finder.searchKahoot(0);
+    },
+    QuestionReady: (k,q)=>{
+      k.parent.questionReady = true;
+      if(k.parent.fails.length === 1){
+        for(let i = 0;i<k.quiz.quizQuestionAnswers.length - 1;i++){
+          if(Number(k.parent.options.fail) == 0){
+            break;
+          }
+          k.parent.fails.push(Math.random() > (Number(k.parent.options.fail)));
+        }
+        k.parent.fails = shuffle(k.parent.fails);
+      }
+      k.parent.send({message:JSON.stringify({data:k.parent.finder.getAnswers(q,true),index:q.questionIndex,total:k.quiz.quizQuestionAnswers.length,ans:k.quiz.quizQuestionAnswers,currentGuesses:k.parent.finder.hax.validOptions,type:q.type,raw:q,timeLeft:q.timeLeft,cans:k.parent.finder.hax.answers}),type:"Message.QuestionGet"});
+    },
+    QuestionStart: (k,q)=>{
+      if(k.parent.questionReady === false){
+        return; // question already ended?
+      }
+      k.parent.security.gotQuestion = true;
+      k.parent.security.receivedTime = Date.now();
+      if(k.parent.options.manual || k.parent.teamAnswered || Number(k.parent.options.searchLoosely) == 2){
+        k.parent.send({message:JSON.stringify({
+          data: k.parent.finder.getAnswers(q,false,true),
+          index: q.questionIndex,
+          total: k.quiz.quizQuestionAnswers.length,
+          ans: q.quizQuestionAnswers,
+          currentGuesses: k.parent.finder.hax.validOptions,
+          type: q.gameBlockType,
+          raw: q,
+          cans: k.parent.finder.hax.answers
+        }),type:"Message.QuestionBegin"});
+      }else{
+        k.parent.send({message:JSON.stringify({
+          data: k.parent.finder.getAnswers(q,false,true),
+          index: q.questionIndex,
+          total: k.quiz.quizQuestionAnswers.length,
+          ans: q.quizQuestionAnswers,
+          currentGuesses: k.parent.finder.hax.validOptions,
+          type: q.gameBlockType,
+          raw: q,
+          cans: k.parent.finder.hax.answers
+        }),type:"Message.QuestionBegin"});
+        const start = k.parent.options.timeout * 1000 + (Number(k.parent.options.variableTimeout) * Math.random() * 1000),
+          end = Math.random() * ((Number(k.parent.options.timeoutEnd) - (start/1000) || 0)) * 1000;
+        k.parent.waiter = setTimeout(()=>{
+          QuestionAnswer(k,q);
+        },start + end);
+      }
+    },
+    QuestionEnd: (k,q)=>{
+      k.parent.questionReady = false;
+      delete k.parent.correctIndex;
+      clearTimeout(k.parent.waiter);
+      k.parent.teamAnswered = false;
+      k.parent.send({message:JSON.stringify(Object.assign({
         raw: q,
-        cans: k.parent.finder.hax.answers
-      }),type:"Message.QuestionBegin"});
-    }else{
-      k.parent.send({message:JSON.stringify({
-        data: k.parent.finder.getAnswers(q,false,true),
-        index: q.questionIndex,
+        data: k.parent.finder.getAnswers(Object.assign({
+          questionIndex: (k.quiz.currentQuestion || {}).questionIndex,
+          gameBlockType: (k.quiz.currentQuestion || {}).gameBlockType
+        },q)),
+        index: (k.quiz.currentQuestion || {}).questionIndex,
         total: k.quiz.quizQuestionAnswers.length,
-        ans: q.quizQuestionAnswers,
+        ans: k.quiz.quizQuestionAnswers,
         currentGuesses: k.parent.finder.hax.validOptions,
-        type: q.gameBlockType,
-        raw: q,
+        type: (k.quiz.currentQuestion || {}).gameBlockType,
         cans: k.parent.finder.hax.answers
-      }),type:"Message.QuestionBegin"});
-      const start = k.parent.options.timeout * 1000 + (Number(k.parent.options.variableTimeout) * Math.random() * 1000);
-      const end = Math.random() * ((Number(k.parent.options.timeoutEnd) - (start/1000) || 0)) * 1000;
-      k.parent.waiter = setTimeout(()=>{
-        QuestionAnswer(k,q);
-      },start + end);
-    }
-  },
-  QuestionEnd: (k,q)=>{
-    k.parent.questionReady = false;
-    delete k.parent.correctIndex;
-    clearTimeout(k.parent.waiter);
-    k.parent.teamAnswered = false;
-    k.parent.send({message:JSON.stringify(Object.assign({
-      raw: q,
-      data: k.parent.finder.getAnswers(Object.assign({
-        questionIndex: (k.quiz.currentQuestion || {}).questionIndex,
-        gameBlockType: (k.quiz.currentQuestion || {}).gameBlockType
-      },q)),
-      index: (k.quiz.currentQuestion || {}).questionIndex,
-      total: k.quiz.quizQuestionAnswers.length,
-      ans: k.quiz.quizQuestionAnswers,
-      currentGuesses: k.parent.finder.hax.validOptions,
-      type: (k.quiz.currentQuestion || {}).gameBlockType,
-      cans: k.parent.finder.hax.answers
-    },q)),type:"Message.QuestionEnd"});
-    if(!k.parent.security.gotQuestion){
-      return;
-    }
-    k.parent.security.gotQuestion = false;
-    try{
-      k.parent.finder.hax.answers.push({choice:q.choice,type:q.type,text:q.text,correct:q.isCorrect,index:k.quiz.currentQuestion.questionIndex});
-      k.parent.finder.searchKahoot(k.quiz.currentQuestion.questionIndex + 1);
-    }catch(err){
+      },q)),type:"Message.QuestionEnd"});
+      if(!k.parent.security.gotQuestion){
+        return;
+      }
+      k.parent.security.gotQuestion = false;
+      try{
+        k.parent.finder.hax.answers.push({choice:q.choice,type:q.type,text:q.text,correct:q.isCorrect,index:k.quiz.currentQuestion.questionIndex});
+        k.parent.finder.searchKahoot(k.quiz.currentQuestion.questionIndex + 1);
+      }catch(err){
       // likely due to joining in the middle of the game
-    }
-  },
-  QuizEnd: (k,q)=>{
-    k.parent.send({message:JSON.stringify(q),type:"Message.QuizFinish"});
-    k.parent.finder.hax.stop = true;
-    if(k.parent.options.isChallenge){
-      k.defaults.options.ChallengeAutoContinue = false;
-      setTimeout(()=>{
-        try{
-          k.next();
-        }catch(err){
-          console.log("Caught CHALLENGE ERROR:");
-          console.log(err);
-        }
-      },1000 * 60 * 2);
-      return;
-    }
-  },
-  Podium: (k,t)=>{
-    k.parent.send({message:JSON.stringify(t),type:"Message.FinishText"});
-  },
-  Disconnect: (k,r)=>{
-    k.parent.send({message:r,type:"Message.QuizEnd"});
-    k.parent.finder.hax.stop = true;
-    k.parent.security.joined = false;
-    k.parent.finishedProcessing = true;
-  },
-  TwoFactorReset: k=>{
-    if(k.parent.options.brute){
+      }
+    },
+    QuizEnd: (k,q)=>{
+      k.parent.send({message:JSON.stringify(q),type:"Message.QuizFinish"});
+      k.parent.finder.hax.stop = true;
+      if(k.parent.options.isChallenge){
+        k.defaults.options.ChallengeAutoContinue = false;
+        setTimeout(()=>{
+          try{
+            k.next();
+          }catch(err){
+            console.log("Caught CHALLENGE ERROR:");
+            console.log(err);
+          }
+        },1000 * 60 * 2);
+        return;
+      }
+    },
+    Podium: (k,t)=>{
+      k.parent.send({message:JSON.stringify(t),type:"Message.FinishText"});
+    },
+    Disconnect: (k,r)=>{
+      k.parent.send({message:r,type:"Message.QuizEnd"});
+      k.parent.finder.hax.stop = true;
+      k.parent.security.joined = false;
+      k.parent.finishedProcessing = true;
+    },
+    TwoFactorReset: k=>{
+      if(k.parent.options.brute){
+        clearInterval(k.bruter);
+        let i = 0;
+        k.bruter = setInterval(()=>{
+          k.answerTwoFactorAuth(BruteForces[i++]).catch(()=>{});
+          if(!BruteForces[i]){
+            clearInterval(k.bruter);
+          }
+        },280);
+      }else{
+        k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
+      }
+    },
+    TwoFactorCorrect: k=>{
       clearInterval(k.bruter);
-      let i = 0;
-      k.bruter = setInterval(()=>{
-        k.answerTwoFactorAuth(BruteForces[i++]).catch(()=>{});
-        if(!BruteForces[i]){
-          clearInterval(k.bruter);
-        }
-      },280);
-    }else{
-      k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
+      k.parent.send({message:"Two Step Auth Completed",type:"Message.TwoStepSuccess"});
+    },
+    TwoFactorWrong: k=>{
+      if(!k.parent.options.brute){
+        k.parent.send({message:"Failed Two Step Auth",type:"Message.FailTwoStep"});
+      }
+    },
+    Feedback: k=>{
+      k.parent.send({message:"Feedback!",type:"Message.Feedback"});
+    },
+    HandshakeFailed: k=>{
+      console.log("Handshake failure occured.");
+      k.parent.handshakeIssues = true;
+      k.parent.security.joined = false;
+      k.parent.send({message:"HANDSHAKE",type:"Error"});
+    },
+    TimeOver: (k,inf)=>{
+      k.parent.send({message:JSON.stringify(inf),type:"Message.TimeOver"});
+    },
+    TeamTalk: (k,q)=>{
+      k.parent.teamTalkTime = Date.now();
+      k.parent.security.gotQuestion = true;
+      k.parent.send({message:JSON.stringify({
+        data: k.parent.finder.getAnswers(q),
+        index: q.questionIndex,
+        total: k.quiz.quizQuestionAnswers.length,
+        ans: q.quizQuestionAnswers,
+        currentGuesses: k.parent.finder.hax.validOptions,
+        type: q.gameBlockType,
+        raw: q,
+        cans: k.parent.finder.hax.answers
+      }),type:"Message.TeamTalk"});
+      if(k.parent.options.teamtalk && !k.parent.options.manual){
+        const start = k.parent.options.timeout * 1000 + (Number(k.parent.options.variableTimeout) * Math.random() * 1000),
+          end = Math.random() * ((Number(k.parent.options.timeoutEnd) - (start/1000) || 0)) * 1000;
+        k.parent.teamAnswered = true;
+        k.parent.waiter = setTimeout(()=>{
+          QuestionAnswer(k,q);
+        },start + end);
+      }
+    },
+    NameAccept: (k,n)=>{
+      k.parent.send({message:JSON.stringify(n),type:"Message.NameAccept"});
+    },
+    GameReset: k=>{
+      k.parent.send({message:"The Game Reset.",type:"Message.GameReset"});
+      k.parent.pings = 0;
+      k.parent.fails = [true];
+      k.parent.security.gotQuestion = false;
+      const valid = k.parent.finder.hax.validOptions;
+      k.parent.finder = new QuizFinder;
+      k.parent.finder.parent = k.parent;
+      k.parent.finder.hax.validOptions = valid;
     }
-  },
-  TwoFactorCorrect: k=>{
-    clearInterval(k.bruter);
-    k.parent.send({message:"Two Step Auth Completed",type:"Message.TwoStepSuccess"});
-  },
-  TwoFactorWrong: k=>{
-    if(!k.parent.options.brute){
-      k.parent.send({message:"Failed Two Step Auth",type:"Message.FailTwoStep"});
-    }
-  },
-  Feedback: k=>{
-    k.parent.send({message:"Feedback!",type:"Message.Feedback"});
-  },
-  HandshakeFailed: k=>{
-    console.log("Handshake failure occured.");
-    k.parent.handshakeIssues = true;
-    k.parent.security.joined = false;
-    k.parent.send({message:"HANDSHAKE",type:"Error"});
-  },
-  TimeOver: (k,inf)=>{
-    k.parent.send({message:JSON.stringify(inf),type:"Message.TimeOver"});
-  },
-  TeamTalk: (k,q)=>{
-    k.parent.teamTalkTime = Date.now();
-    k.parent.security.gotQuestion = true;
-    k.parent.send({message:JSON.stringify({
-      data: k.parent.finder.getAnswers(q),
-      index: q.questionIndex,
-      total: k.quiz.quizQuestionAnswers.length,
-      ans: q.quizQuestionAnswers,
-      currentGuesses: k.parent.finder.hax.validOptions,
-      type: q.gameBlockType,
-      raw: q,
-      cans: k.parent.finder.hax.answers
-    }),type:"Message.TeamTalk"});
-    if(k.parent.options.teamtalk && !k.parent.options.manual){
-      const start = k.parent.options.timeout * 1000 + (Number(k.parent.options.variableTimeout) * Math.random() * 1000);
-      const end = Math.random() * ((Number(k.parent.options.timeoutEnd) - (start/1000) || 0)) * 1000;
-      k.parent.teamAnswered = true;
-      k.parent.waiter = setTimeout(()=>{
-        QuestionAnswer(k,q);
-      },start + end);
-    }
-  },
-  NameAccept: (k,n)=>{
-    k.parent.send({message:JSON.stringify(n),type:"Message.NameAccept"});
-  },
-  GameReset: k=>{
-    k.parent.send({message:"The Game Reset.",type:"Message.GameReset"});
-    k.parent.pings = 0;
-    k.parent.fails = [true];
-    k.parent.security.gotQuestion = false;
-    const valid = k.parent.finder.hax.validOptions;
-    k.parent.finder = new QuizFinder;
-    k.parent.finder.parent = k.parent;
-    k.parent.finder.hax.validOptions = valid;
-  }
-};
+  };
 function applyListeners(kahoot){
   kahoot.list = {};
-  for(let i in Listeners){
+  for(const i in Listeners){
     const l = info=>{
       Listeners[i](kahoot,info);
     };
@@ -1696,8 +1696,8 @@ const BruteForces = [[0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,2,1],[0,3,1,2]
 
 // silly paths.
 app.get("/up",(req,res)=>{
-  const end = startupDate + (12 * 60 * 60 * 1000);
-  const minutes = Math.round((end - Date.now()) / (1000 * 60));
+  const end = startupDate + (12 * 60 * 60 * 1000),
+    minutes = Math.round((end - Date.now()) / (1000 * 60));
   let message = "";
   if(minutes > 60){
     message = Math.round(minutes / 60) + " hours until expected reset.";
@@ -1717,7 +1717,7 @@ app.get(/ext\/?https?:\/\/.*\.(google|gstatic|facebook|fb).*\.(com|net)\/.*/i,(r
     }
     res.status(r.statusCode);
     res.setHeader("Cache-Control","public, max-age=31622400");
-    let d = new Date;
+    const d = new Date;
     d.setYear(d.getFullYear() + 1);
     res.setHeader("Expires", d.toUTCString());
     res.setHeader("Content-Type",r.headers["content-type"] || "text/html");
@@ -1760,7 +1760,7 @@ app.use((req,res)=>{
 if(electron){
   function createWindow () {
     // Create the browser window.
-    let win = new electron.BrowserWindow({
+    const win = new electron.BrowserWindow({
       width: 1100,
       height: 750,
       webPreferences: {

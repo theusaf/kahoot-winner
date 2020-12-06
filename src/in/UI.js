@@ -53,7 +53,7 @@ const KahootThemes = {
 // Parts
 function Element(name,options){
   const element = document.createElement(name);
-  for(let i in (options || {})){
+  for(const i in (options || {})){
     element[i] = options[i];
   }
   return element;
@@ -369,7 +369,7 @@ class GetReadyPage{
     game.index = question.index || 0;
     game.ans = question.ans;
     game.rawData = question.raw;
-    let timeinfo = {
+    const timeinfo = {
       time: question.raw.timeAvailable || 20000
     };
     if(game.guesses.length >= 1){
@@ -386,9 +386,9 @@ class GetReadyPage{
       game.saveOptions();
     }else if(document.getElementById("timeout_custom_2").value !== ""){
       // doesnt take into account point multipliers
-      const val = Number(document.getElementById("timeout_custom_2").value) - game.score;
-      const remaining = game.total - game.index; // remaining questions
-      const min = 500; // Kahoot removed streak bonus, so min score is now a constant 500.
+      const val = Number(document.getElementById("timeout_custom_2").value) - game.score,
+        remaining = game.total - game.index, // remaining questions
+        min = 500; // Kahoot removed streak bonus, so min score is now a constant 500.
       let time = 0;
       if(val / remaining < min){
         time = timeinfo.time + 500; // aka dont answer question
@@ -450,11 +450,11 @@ class GetReadyPage{
     objects.bottom.append(score);
     if(game.question.type == "content"){
       document.body.className = "blue2";
-      const bdiv = Element("div");
-      const breather = Element("h1",{
-        innerHTML: "§Breather§",
-        className: "shadow"
-      });
+      const bdiv = Element("div"),
+        breather = Element("h1",{
+          innerHTML: "§Breather§",
+          className: "shadow"
+        });
       breather.setAttribute("text","§Breather§");
       const noanswer = Element("h2",{
         innerHTML: "§Breather2§",
@@ -473,16 +473,16 @@ class GetReadyPage{
       return objects;
     }
     const timer = Element("h2",{
-      id: "timer",
-      innerHTML: game.question.timeLeft || "5"
-    });
-    const mcont = Element("div");
-    const ncont = Element("div");
-    const spinimg = Element("img",{
-      src: "/resource/load-large.svg",
-      className: "load_circle",
-      alt: "load_circle"
-    });
+        id: "timer",
+        innerHTML: game.question.timeLeft || "5"
+      }),
+      mcont = Element("div"),
+      ncont = Element("div"),
+      spinimg = Element("img",{
+        src: "/resource/load-large.svg",
+        className: "load_circle",
+        alt: "load_circle"
+      });
     ncont.append(spinimg,timer);
     mcont.append(quest,ncont,readything);
     objects.mid.append(mcont);
@@ -529,13 +529,13 @@ class GetReadyPage{
       if(game.guesses.length == 0){
         objects.main.append(NotFoundDiv());
       }else{
-        const as = game.guesses[0].questions;
-        const qs = [];
+        const as = game.guesses[0].questions,
+          qs = [];
         for(let i = 0; i < as.length; i++){
           if(as[i].type == game.question.type && (as[i].layout == game.rawData.gameBlockLayout || !as[i].layout) && ((typeof as[i].choices === "object" && as[i].choices.length) || null) == game.ans[game.index]){
             // answer filter
-            let add = true;
-            let add2 = 0;
+            let add = true,
+              add2 = 0;
             const ca = game.got_answers.slice(0);
             for(let j = 0; j < ca.length; j++){
               function chfilter(ch){
@@ -599,79 +599,79 @@ class GetReadyPage{
           }),
           qdiv = Element("div",{
             className: "looseOptions"
-          });
-        const filter = (search)=>{
-          qdiv.innerHTML = "";
-          let f = false;
-          for(let i = 0; i < qs.length; i++){
-            const qtext = qs[i].q.question || qs[i].q.title;
-            const regex = /<\/?[ib]>|[^a-z0-9\s]/gmi;
-            const smallRegex = /<\/?[ib]>/gmi;
-            const text = qtext.replace(regex," ").replace(/\s+/gm," ");
-            function escape(input){
-              input = input.replace(/\[/gm,"\\[");
-              input = input.replace(/\(/gm,"\\(");
-              input = input.replace(/\{/gm,"\\{");
-              input = input.replace(/\*/gm,"\\*");
-              input = input.replace(/\+/gm,"\\+");
-              input = input.replace(/\?/gm,"\\?");
-              input = input.replace(/\|/gm,"\\|");
-              input = input.replace(/\^/gm,"\\^");
-              input = input.replace(/\$/gm,"\\$");
-              input = input.replace(/\./gm,"\\.");
-              input = input.replace(/\\/gm,"\\\\");
-              return input;
-            }
-            // pure alphanumeric
-            const match = text.match(new RegExp(search.replace(regex," ").replace(/\s+/gm," "),"gmi"));
-            // all characters
-            const match2 = qtext.replace(smallRegex,"").match(new RegExp(escape(search.replace(smallRegex,"")),"gmi"));
-            // pure alphanumeric, except having no spaces.
-            const match3 = qtext.replace(regex,"").match(new RegExp(search.replace(regex,""),"gmi"));
-            if(match || match2 || match3){
-              if(!f){
-                if(game.correctIndex == qs[i].i){
-                  f = true;
-                }else{
+          }),
+          filter = (search)=>{
+            qdiv.innerHTML = "";
+            let f = false;
+            for(let i = 0; i < qs.length; i++){
+              const qtext = qs[i].q.question || qs[i].q.title,
+                regex = /<\/?[ib]>|[^a-z0-9\s]/gmi,
+                smallRegex = /<\/?[ib]>/gmi,
+                text = qtext.replace(regex," ").replace(/\s+/gm," ");
+              function escape(input){
+                input = input.replace(/\[/gm,"\\[");
+                input = input.replace(/\(/gm,"\\(");
+                input = input.replace(/\{/gm,"\\{");
+                input = input.replace(/\*/gm,"\\*");
+                input = input.replace(/\+/gm,"\\+");
+                input = input.replace(/\?/gm,"\\?");
+                input = input.replace(/\|/gm,"\\|");
+                input = input.replace(/\^/gm,"\\^");
+                input = input.replace(/\$/gm,"\\$");
+                input = input.replace(/\./gm,"\\.");
+                input = input.replace(/\\/gm,"\\\\");
+                return input;
+              }
+              // pure alphanumeric
+              const match = text.match(new RegExp(search.replace(regex," ").replace(/\s+/gm," "),"gmi")),
+                // all characters
+                match2 = qtext.replace(smallRegex,"").match(new RegExp(escape(search.replace(smallRegex,"")),"gmi")),
+                // pure alphanumeric, except having no spaces.
+                match3 = qtext.replace(regex,"").match(new RegExp(search.replace(regex,""),"gmi"));
+              if(match || match2 || match3){
+                if(!f){
+                  if(game.correctIndex == qs[i].i){
+                    f = true;
+                  }else{
+                    send({
+                      type: "CHOOSE_QUESTION_INDEX",
+                      message: qs[i].i
+                    });
+                    game.correctIndex = qs[i].i;
+                    game.question.data = game.guesses[0].questions[qs[i].i].choices;
+                    game.question.ans = game.ans;
+                    f = true;
+                  }
+                }
+                const m = match || match2 || match3,
+                  // add the element
+                  elem = Element("p");
+                let parsed = qtext;
+                for(let j = 0;j<m.length;j++){
+                  parsed = qtext.replace(m[j],"<b>" + m[j] + "</b>");
+                }
+                elem.innerHTML = parsed;
+                elem.addEventListener("click",()=>{
                   send({
                     type: "CHOOSE_QUESTION_INDEX",
                     message: qs[i].i
                   });
                   game.correctIndex = qs[i].i;
                   game.question.data = game.guesses[0].questions[qs[i].i].choices;
+                  game.ans[game.index] = game.question.data ? game.question.data.length : 4;
                   game.question.ans = game.ans;
-                  f = true;
+                  Array.from(qdiv.children).forEach((item) => {
+                    item.className = "";
+                  });
+                  elem.className = "looseChoice";
+                });
+                if(qdiv.children.length === 0){
+                  elem.className = "looseChoice";
                 }
+                qdiv.append(elem);
               }
-              const m = match || match2 || match3;
-              // add the element
-              const elem = Element("p");
-              let parsed = qtext;
-              for(let j = 0;j<m.length;j++){
-                parsed = qtext.replace(m[j],"<b>" + m[j] + "</b>");
-              }
-              elem.innerHTML = parsed;
-              elem.addEventListener("click",()=>{
-                send({
-                  type: "CHOOSE_QUESTION_INDEX",
-                  message: qs[i].i
-                });
-                game.correctIndex = qs[i].i;
-                game.question.data = game.guesses[0].questions[qs[i].i].choices;
-                game.ans[game.index] = game.question.data ? game.question.data.length : 4;
-                game.question.ans = game.ans;
-                Array.from(qdiv.children).forEach((item) => {
-                  item.className = "";
-                });
-                elem.className = "looseChoice";
-              });
-              if(qdiv.children.length === 0){
-                elem.className = "looseChoice";
-              }
-              qdiv.append(elem);
             }
-          }
-        };
+          };
         filter("");
         cont.append(inp,qdiv);
         objects.main.append(cont);
@@ -697,18 +697,18 @@ class GetReadyPage{
       }
       chdiv.append(Element("br"),Element("br"),sp);
       const adiv = Element("div",{
-        className: "questionPreviewAnswers",
-        innerHTML: "<h4>§CorrectAnswers§</h4>"
-      });
-      let co = [];
-      for(let i in game.answers){
+          className: "questionPreviewAnswers",
+          innerHTML: "<h4>§CorrectAnswers§</h4>"
+        }),
+        co = [];
+      for(const i in game.answers){
         if(game.answers[i].correct){
           co.push(i);
         }
       }
-      for(let i in co){
-        const cols = ["red","blue","yellow","green"];
-        const template = Element("template");
+      for(const i in co){
+        const cols = ["red","blue","yellow","green"],
+          template = Element("template");
         template.innerHTML = `<div class="${game.answers[co[i]].correct ? "correct" : ""}">
           <img class="icon${cols[co[i]]}" src="/resource/${KahootThemes[game.theme][cols[co[i]]]}" alt="answer choice icon">
           <span>${game.answers[co[i]].answer}</span>
@@ -784,11 +784,11 @@ class QuizStartPage{
     });
     text2.setAttribute("text","§Loading§");
     const img = Element("img",{
-      src: "/resource/load-hole.svg",
-      alt: "loading...",
-      className: "load_circle"
-    });
-    const cont = Element("div");
+        src: "/resource/load-hole.svg",
+        alt: "loading...",
+        className: "load_circle"
+      }),
+      cont = Element("div");
     cont.append(text1,img,text2);
     objects.mid.append(cont);
     document.body.className = "purple2";
@@ -820,11 +820,11 @@ class QuestionAnswererPage{
     // content slides
     if(game.question.type == "content"){
       document.body.className = "blue2";
-      const bdiv = Element("div");
-      const breather = Element("h1",{
-        innerHTML: "§Breather§",
-        className: "shadow"
-      });
+      const bdiv = Element("div"),
+        breather = Element("h1",{
+          innerHTML: "§Breather§",
+          className: "shadow"
+        });
       breather.setAttribute("text","§Breather§");
       const noanswer = Element("h2",{
         innerHTML: "§Breather2§",
@@ -914,8 +914,8 @@ class QuestionAnswererPage{
         function rearrange(e,a){
           const info = [];
           // get all sides
-          let offset = 0;
-          let currentIndex = 0;
+          let offset = 0,
+            currentIndex = 0;
           for(let i = 0;i<a.length;i++){
             if(a[i].style.visibility === "hidden"){
               currentIndex = i;
@@ -929,8 +929,8 @@ class QuestionAnswererPage{
           }
           // check which is closest
           const x = (e.x || e.touches[0].clientX) + offset;
-          let closestIndex = 0;
-          let closestValue = Infinity;
+          let closestIndex = 0,
+            closestValue = Infinity;
           for(let i = 0;i<info.length;i++){
             if(Math.abs(x - info[i][0]) < closestValue){
               closestValue = Math.abs(x - info[i][0]);
@@ -957,17 +957,17 @@ class QuestionAnswererPage{
           el.style.visibility = "hidden";
           copy.className = "draggable";
           const mousemove = function(e){
-            copy.style.left = ((e.x || e.touches[0].clientX) - 16) + "px";
-            rearrange(e,div.querySelectorAll("img.jumble"));
-          };
-          const mouseup = function(){
-            copy.outerHTML = "";
-            el.style.visibility = "";
-            window.removeEventListener("mousemove",mousemove);
-            window.removeEventListener("touchmove",mousemove);
-            window.removeEventListener("mouseup",mouseup);
-            window.removeEventListener("touchend",mouseup);
-          };
+              copy.style.left = ((e.x || e.touches[0].clientX) - 16) + "px";
+              rearrange(e,div.querySelectorAll("img.jumble"));
+            },
+            mouseup = function(){
+              copy.outerHTML = "";
+              el.style.visibility = "";
+              window.removeEventListener("mousemove",mousemove);
+              window.removeEventListener("touchmove",mousemove);
+              window.removeEventListener("mouseup",mouseup);
+              window.removeEventListener("touchend",mouseup);
+            };
           window.addEventListener("mousemove",mousemove);
           window.addEventListener("touchmove",mousemove);
           window.addEventListener("mouseup",mouseup);
@@ -1018,8 +1018,8 @@ class QuestionAnswererPage{
           ok = Element("img",{
             src: "/resource/check.svg",
             onclick: ()=>{
-              let tmp = [];
-              for(let i in game.multiAnswer){
+              const tmp = [];
+              for(const i in game.multiAnswer){
                 if(game.multiAnswer[i]){
                   tmp.push(Number(i));
                 }
@@ -1116,15 +1116,15 @@ class QuestionAnswererPage{
       }
       let questionTime = question.raw.timeAvailable / 1000;
       const qdiv = Element("p",{
-        className: "chtimer",
-        innerHTML: questionTime
-      });
-      const chtimer = setInterval(()=>{
-        qdiv.innerHTML = --questionTime;
-        if(!qdiv.isConnected){
-          clearInterval(chtimer);
-        }
-      },1000);
+          className: "chtimer",
+          innerHTML: questionTime
+        }),
+        chtimer = setInterval(()=>{
+          qdiv.innerHTML = --questionTime;
+          if(!qdiv.isConnected){
+            clearInterval(chtimer);
+          }
+        },1000);
       objects.bottom.prepend(qdiv);
     }else if(game.guesses.length === 0){
       objects.main.append(NotFoundDiv());
@@ -1263,14 +1263,14 @@ class QuizEndPage{
     }
     document.body.className = "purple";
     const place = Element("h1",{
-      innerHTML: message
-    });
-    const gg = Element("h2",{
-      innerHTML: "§GG§"
-    });
-    const blurb = Element("p",{
-      innerText: "§DidWellShareWithFriends§"
-    });
+        innerHTML: message
+      }),
+      gg = Element("h2",{
+        innerHTML: "§GG§"
+      }),
+      blurb = Element("p",{
+        innerText: "§DidWellShareWithFriends§"
+      });
     if(game.endData.podiumMedalType){
       const image = Element("img",{
         src: `/resource/${game.endData.podiumMedalType}.svg`,
@@ -1293,13 +1293,13 @@ class QuizEndPage{
       });
       const launchButtons = Array.from(document.getElementsByClassName("out"));
       if(document.getElementById("outguess")){
-        const o = document.getElementById("outguess");
-        const a = document.getElementById("kahootguess");
+        const o = document.getElementById("outguess"),
+          a = document.getElementById("kahootguess");
         if(o.getAttribute("url") === a.getAttribute("url")){
           o.className = "out block correct";
         }
       }
-      for(let button of launchButtons){
+      for(const button of launchButtons){
         button.addEventListener("click",()=>{
           if(!button.getAttribute("url")){return;}
           window.open(button.getAttribute("url"),"_blank");
@@ -1321,12 +1321,12 @@ class TeamTalkPage{
     mid.innerHTML = "";
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "cyan";
     const timer = Element("h2",{
-      innerHTML: "5"
-    });
-    const title = Element("h1",{
-      innerHTML: "§TeamTalka§",
-      className: "shadow"
-    });
+        innerHTML: "5"
+      }),
+      title = Element("h1",{
+        innerHTML: "§TeamTalka§",
+        className: "shadow"
+      });
     title.setAttribute("text","§TeamTalka§");
     const subtitle = Element("h2",{
       innerHTML: "§Discuss§",
@@ -1335,12 +1335,12 @@ class TeamTalkPage{
     subtitle.setAttribute("text","§Discuss§");
     timer.id = "timer";
     const img = Element("img",{
-      src: "/resource/load-large.svg",
-      className: "load_circle",
-      alt: "load_circle"
-    });
-    const div = Element("div");
-    const div2 = Element("div");
+        src: "/resource/load-large.svg",
+        className: "load_circle",
+        alt: "load_circle"
+      }),
+      div = Element("div"),
+      div2 = Element("div");
     div2.append(img,timer);
     div.append(title,div2,subtitle);
     mid.append(div);
@@ -1447,9 +1447,9 @@ class FeedbackPage{
     </div>`;
     main.append(ranking);
     const stars = Array.from(document.querySelectorAll("[name=\"star\"]"));
-    for(let input of stars){
+    for(const input of stars){
       input.addEventListener("click",()=>{
-        for(let inp of stars){
+        for(const inp of stars){
           inp.className = "";
         }
         const n = +input.id.split("star")[1];
@@ -1458,14 +1458,14 @@ class FeedbackPage{
         }
       });
     }
-    const happy = document.getElementById("feel1");
-    const neutral = document.getElementById("feel2");
-    const sad = document.getElementById("feel3");
+    const happy = document.getElementById("feel1"),
+      neutral = document.getElementById("feel2"),
+      sad = document.getElementById("feel3");
     happy.onclick = sad.onclick = neutral.onclick = ()=>{
-      const fun = (document.querySelector("input[name=\"star\"]:checked") || {}).value;
-      const learn = (document.querySelector("input[name=\"learn\"]:checked") || {}).value;
-      const recommend = (document.querySelector("input[name=\"rec\"]:checked") || {}).value;
-      const overall = document.querySelector("input[name=\"feel\"]:checked").value;
+      const fun = (document.querySelector("input[name=\"star\"]:checked") || {}).value,
+        learn = (document.querySelector("input[name=\"learn\"]:checked") || {}).value,
+        recommend = (document.querySelector("input[name=\"rec\"]:checked") || {}).value,
+        overall = document.querySelector("input[name=\"feel\"]:checked").value;
       send({
         type: "SEND_FEEDBACK",
         message: {
@@ -1481,8 +1481,8 @@ class FeedbackPage{
 }
 
 function calculateTimeout(points,time){
-  const score = points; // - calculateStreakPoints(streak);
-  const timeout = -2 * time * ((score / 1000) - 1);
+  const score = points, // - calculateStreakPoints(streak);
+    timeout = -2 * time * ((score / 1000) - 1);
   if(timeout < 0.1){
     return 0;
   }
@@ -1524,7 +1524,7 @@ async function resetGame(recover){
     await game.sendPin(oldgame.pin);
     const wait = async evt=>{
       evt = evt.data;
-      let data = JSON.parse(evt);
+      const data = JSON.parse(evt);
       if(data.type == "Message.PinGood"){
         new LobbyPage;
         // wait 25 seconds to confirm client disconnect.
@@ -1573,7 +1573,7 @@ function clearUI(){
 
 let presetNumber = 0;
 function loadSetting(setting,name){
-  for(let i in setting){
+  for(const i in setting){
     const e = document.getElementById(i);
     if(e.type == "checkbox" || e.type == "radio"){
       e.checked = setting[i];
@@ -1619,11 +1619,11 @@ function loadPresets(){
     item.outerHTML = "";
   });
   try {
-    const presets = JSON.parse(localStorage.presets);
-    const after = document.getElementById("preset_add_div");
-    for(let preset of presets){
-      const info = preset.options;
-      const template = Element("template");
+    const presets = JSON.parse(localStorage.presets),
+      after = document.getElementById("preset_add_div");
+    for(const preset of presets){
+      const info = preset.options,
+        template = Element("template");
       template.innerHTML = `<div class="preset flex remove">
         <div class="center">
           <span class="presetTitle">${preset.name} <label for="preset_${presetNumber}">(?)</label></span>
@@ -1671,28 +1671,28 @@ function loadPresets(){
   } catch (e) {/* No local storage yet */}
 }
 
-const ChallengeContinueButton = document.getElementById("ChallengeNext");
-const SettingDiv = document.getElementById("settings");
-const SettingSwitch = document.getElementById("menu_toggle");
-const AboutSwitch = document.getElementById("about");
-const ChangelogSwitch = document.getElementById("changelog");
-const HideDiv = document.getElementsByClassName("Loading")[0];
-const UIError = document.getElementsByClassName("Error")[0];
-const UIDiv = document.getElementsByClassName("Main")[0];
-const HideAnswers = document.getElementById("hideAnswers");
-const LoadingText = document.getElementById("loadingText");
-const ThemeChooser = document.getElementById("theme");
-const QuizResult = document.getElementById("quizresult");
+const ChallengeContinueButton = document.getElementById("ChallengeNext"),
+  SettingDiv = document.getElementById("settings"),
+  SettingSwitch = document.getElementById("menu_toggle"),
+  AboutSwitch = document.getElementById("about"),
+  ChangelogSwitch = document.getElementById("changelog"),
+  HideDiv = document.getElementsByClassName("Loading")[0],
+  UIError = document.getElementsByClassName("Error")[0],
+  UIDiv = document.getElementsByClassName("Main")[0],
+  HideAnswers = document.getElementById("hideAnswers"),
+  LoadingText = document.getElementById("loadingText"),
+  ThemeChooser = document.getElementById("theme"),
+  QuizResult = document.getElementById("quizresult");
 new LoginPage(false);
 loadPresets();
 let closePage = 0;
 
-const SearchDivSettings = document.getElementById("div_search_options");
-const GameDivSettings = document.getElementById("div_game_options");
-const ChallengeDivSettings = document.getElementById("div_challenge_options");
-const dso = document.getElementById("dso");
-const dgo = document.getElementById("dgo");
-const dco = document.getElementById("dco");
+const SearchDivSettings = document.getElementById("div_search_options"),
+  GameDivSettings = document.getElementById("div_game_options"),
+  ChallengeDivSettings = document.getElementById("div_challenge_options"),
+  dso = document.getElementById("dso"),
+  dgo = document.getElementById("dgo"),
+  dco = document.getElementById("dco");
 SearchDivSettings.onchange = GameDivSettings.onchange = ChallengeDivSettings.onchange = function(e){
   switch (e.target.id) {
     case "div_search_options":
@@ -1951,8 +1951,8 @@ SettingSwitch.addEventListener("click",()=>{
 });
 
 // Quiz Search
-const SearchInput = document.getElementById("sub-quiz-input");
-const SearchOutput = document.getElementById("sub-quiz-output");
+const SearchInput = document.getElementById("sub-quiz-input"),
+  SearchOutput = document.getElementById("sub-quiz-output");
 let SearchIndex = 0;
 function Search(term,index){
   SearchOutput.innerHTML = "§Loading§";
@@ -1991,9 +1991,9 @@ function FormatSearch(quizzes){
   </span>
   <hr/>
   `;
-  for(let i in quizzes){
-    const quiz = quizzes[i];
-    const template = Element("template");
+  for(const i in quizzes){
+    const quiz = quizzes[i],
+      template = Element("template");
     template.innerHTML = `<span>
       <span class="sub-quiz-img"><img src="${quiz.cover}"/></span>
       <span class="sub-quiz-title">${quiz.title}</span>

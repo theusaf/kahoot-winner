@@ -1,5 +1,5 @@
-/* global ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, ThemeChooser, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TutorialDiv */
-var socket = null;
+/* global ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TutorialDiv, TimeUpPage, FeedbackPage, TeamTalkPage */
+let socket = null;
 
 const MessageHandler = {
   Error: {
@@ -86,7 +86,7 @@ const MessageHandler = {
       }
       try{
         TutorialDiv.innerHTML = "";
-      }catch(e){}
+      }catch(e){/* No TutorialDiv? */}
       return new LoginPage(true);
     },
     JoinSuccess: data=>{
@@ -101,7 +101,7 @@ const MessageHandler = {
       return new LobbyPage;
     },
     QuizStart: ()=>{
-      try{game.music.pause();}catch(e){}
+      try{game.music.pause();}catch(e){/* No music */}
       return new QuizStartPage;
     },
     QuestionGet: info=>{
@@ -117,7 +117,7 @@ const MessageHandler = {
       return new QuestionSnarkPage(message);
     },
     QuestionEnd: info=>{
-      try{game.music.pause();}catch(e){}
+      try{game.music.pause();}catch(e){/* No music */}
       return new QuestionEndPage(info);
     },
     QuizFinish: info=>{
@@ -170,7 +170,7 @@ const MessageHandler = {
     NameAccept: n=>{
       const data = JSON.parse(n);
       game.name = data.playerName;
-      try{document.getElementById("L2").innerHTML = `<p>${data.playerName}</p>`;}catch(e){}
+      try{document.getElementById("L2").innerHTML = `<p>${data.playerName}</p>`;}catch(e){/* No name object */}
     },
     TimeOver: ()=>{
       new TimeUpPage;
@@ -223,7 +223,7 @@ class Game{
           socket = this.socket;
           socket.onmessage = evt=>{
             evt = evt.data;
-            let data = JSON.parse(evt);
+            const data = JSON.parse(evt);
             if(data.type == "Error"){
               return MessageHandler.Error[data.message](data.data);
             }
@@ -328,8 +328,8 @@ class Game{
     send({type:"GET_RANDOM_NAME",message:"please?"});
   }
   saveOptions(){
-    const settings = SettingDiv.querySelectorAll("input,select");
-    const opts = {};
+    const settings = SettingDiv.querySelectorAll("input,select"),
+      opts = {};
     for(let i = 0;i<settings.length;++i){
       opts[settings[i].id] = settings[i].type == "checkbox" ? settings[i].checked : settings[i].value;
     }
@@ -369,7 +369,7 @@ class Game{
     if(!opts){
       return;
     }
-    for(let i in opts){
+    for(const i in opts){
       const elem = document.getElementById(i);
       if(elem.type == "checkbox"){
         elem.checked = opts[i];
@@ -414,7 +414,7 @@ class Game{
     }
   }
   answerJ(list){
-    let li = [];
+    const li = [];
     for(let i = 0;i<list.length;i++){
       li.push(Number(list[i].getAttribute("index")));
     }
@@ -463,7 +463,7 @@ function setCookie(val){
   document.cookie = `lang=${val}; expires=${new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)).toGMTString()}; path=/`;
   if("serviceWorker" in navigator){
     navigator.serviceWorker.getRegistrations().then(async function(registrations) {
-      for(let registration of registrations) {
+      for(const registration of registrations) {
         await registration.unregister();
       }
       if(val !== "en"){
@@ -487,9 +487,10 @@ function setCookie(val){
   }
 }
 
-let game = new Game;
-let egg = "";
+let game = null;
+game = new Game;
 const eggstyle = document.createElement("style");
+let egg = "";
 eggstyle.innerHTML = `p,.sm span,img,h1,h2,.About h3,.tut_cont h3,h4{
   animation: infinite windance 1s;
 }`;
@@ -571,20 +572,20 @@ window.addEventListener("keydown",e=>{
 
 function detectPlatform(){
   let OSName = "Linux";
-  if (navigator.appVersion.indexOf("Win")!=-1) OSName="Windows";
-  if (navigator.appVersion.indexOf("Mac")!=-1) OSName="MacOS";
-  if (navigator.appVersion.indexOf("X11")!=-1) OSName="UNIX";
-  if (navigator.appVersion.indexOf("Linux")!=-1) OSName="Linux";
+  if (navigator.appVersion.indexOf("Win")!=-1) {OSName="Windows";}
+  if (navigator.appVersion.indexOf("Mac")!=-1) {OSName="MacOS";}
+  if (navigator.appVersion.indexOf("X11")!=-1) {OSName="UNIX";}
+  if (navigator.appVersion.indexOf("Linux")!=-1) {OSName="Linux";}
   return OSName;
 }
 
-localStorage.KW_Version = "v4.0.1";
+localStorage.KW_Version = "v4.0.2";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
 checkVersion.onload = function(){
-  const version = checkVersion.response.split(": ")[1];
-  const locVersion = localStorage.KW_Version || version;
+  const version = checkVersion.response.split(": ")[1],
+    locVersion = localStorage.KW_Version || version;
   if(localStorage.KW_Update == "false"){
     return;
   }
@@ -605,7 +606,7 @@ checkVersion.onload = function(){
           if("serviceWorker" in navigator){
             document.getElementById("UpdateYes").innerHTML = "§UpdateAvailable5§";
             navigator.serviceWorker.getRegistrations().then(async function(registrations) {
-              for(let registration of registrations) {
+              for(const registration of registrations) {
                 await registration.unregister();
               }
               setTimeout(function(){

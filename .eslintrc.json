@@ -1,22 +1,50 @@
 {
     "env": {
-        "commonjs": true,
-        "es6": true,
+        "browser": true,
+        "es2020": true,
         "node": true
     },
     "extends": "eslint:recommended",
-    "globals": {
-        "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
-    },
     "parserOptions": {
-        "ecmaVersion": 2018
+        "ecmaVersion": 11,
+        "sourceType": "module"
     },
     "rules": {
-      "semi": ["error", "always"],
-      "quotes": ["error", "double"],
-      "no-control-regex": ["off"],
-      "no-empty": ["warn"]
+        "no-inner-declarations": ["off"],
+        "no-global-assign": ["off"],
+        "no-control-regex": ["off"],
+        "no-empty": ["warn"],
+        "indent": [
+            "error",
+            2,
+            {
+              "SwitchCase": 1
+            }
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "double"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-unused-vars": ["warn"],
+        "no-var": ["error"],
+        "curly": ["error"],
+        "no-unneeded-ternary": ["error"],
+        "one-var": ["error",{
+          "separateRequires": false,
+          "var": "consecutive",
+          "let": "consecutive",
+          "const": "consecutive"
+        }],
+        "operator-assignment": ["error"],
+        "prefer-const": ["error"]
     },
     "root": true
 }

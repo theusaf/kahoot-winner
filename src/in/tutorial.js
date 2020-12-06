@@ -1,4 +1,4 @@
-/* global ErrorHandler,LoginPage,dataLayer,resetGame,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch */
+/* global ErrorHandler,LoginPage,dataLayer,resetGame,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch,LobbyPage */
 
 window.addEventListener("load",()=>{
   if(localStorage.seenNotice !== "4.0.0"){
@@ -44,9 +44,9 @@ function activateTutorial(){
 
 function tutorialSteps(n){
   dataLayer.push({event:"do_tutorial",value:n});
-  const data = document.getElementById("tut_data");
-  const [next,close] = Array.from(document.querySelectorAll("#tut_data>button"));
-  const info = document.getElementById("tut_info");
+  const data = document.getElementById("tut_data"),
+    [next,close] = Array.from(document.querySelectorAll("#tut_data>button")),
+    info = document.getElementById("tut_info");
   next.setAttribute("tut-step",+n + 1);
   next.innerHTML = "§ChallengeNext§";
   close.innerHTML = "§Done§";
@@ -201,7 +201,7 @@ function tutorialSteps(n){
             isNotice: true
           });
         },300);
-        try{close.removeEventListener(a);}catch(e){}
+        try{close.removeEventListener(a);}catch(e){/* No longer exists */}
       }
       close.addEventListener("click",a);
       if (SettingSwitch.checked) {SettingSwitch.click();}
