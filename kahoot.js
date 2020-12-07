@@ -483,7 +483,7 @@ class QuizFinder{
             const {index,type,choice,text,correct} = a[i];
             switch(type){
               case "quiz":{
-                if(choice !== null){
+                if(choice !== null && typeof choice !== "undefined"){
                   if(o.questions[index].choices.filter((choice)=>{
                     return text === choice.answer && choice.correct === correct;
                   }).length !== 0){
@@ -507,7 +507,7 @@ class QuizFinder{
               }
               case "jumble":
               case "multiple_select_quiz":{
-                if(choice && choice.length === 0){
+                if(choice && choice.length === 0 || (choice && choice.includes(null))){
                   continue;
                 }
                 const texts = text.split("|");
@@ -545,7 +545,7 @@ class QuizFinder{
               }
               switch(type){
                 case "quiz":{
-                  if(choice !== null){
+                  if(choice !== null && typeof choice !== "undefined"){
                     if(question.choices.filter((choice)=>{
                       return text === choice.answer && choice.correct === correct;
                     }).length !== 0){
@@ -569,7 +569,7 @@ class QuizFinder{
                 }
                 case "jumble":
                 case "multiple_select_quiz":{
-                  if(choice && choice.length === 0){
+                  if(choice && choice.length === 0 || choice.includes(null)){
                     return true;
                   }
                   const texts = text.split("|");
@@ -770,7 +770,7 @@ function SearchDatabase(finder,index){
                 switch(type){
                   case "jumble":
                   case "multiple_select_quiz":{
-                    if(choice && choice.length === 0){
+                    if(choice && choice.length === 0 || (choice && choice.includes(null))){
                       ok = true;
                       break;
                     }
@@ -782,7 +782,7 @@ function SearchDatabase(finder,index){
                     break;
                   }
                   case "quiz":{
-                    if(choice === null){
+                    if(choice === null || typeof choice === "undefined"){
                       ok = true;
                       break;
                     }
@@ -843,7 +843,7 @@ function SearchDatabase(finder,index){
               switch(type){
                 case "jumble":
                 case "multiple_select_quiz":{
-                  if(choice && choice.length === 0){
+                  if(choice && choice.length === 0 || (choice && choice.includes(null))){
                     ok = true;
                     break;
                   }
@@ -855,7 +855,7 @@ function SearchDatabase(finder,index){
                   break;
                 }
                 case "quiz":{
-                  if(choice === null){
+                  if(choice === null || typeof choice === "undefined"){
                     ok = true;
                     break;
                   }
@@ -941,14 +941,14 @@ async function Searching(term,opts,finder){
                 } = a[i];
                 switch(type){
                   case "quiz":{
-                    // didn't answer, have to assume its good
-                    if(choice == null){
+                  // didn't answer, have to assume its good
+                    if(choice === null || typeof choice === "undefined"){
                       return true;
                     }
                     return k.correct === correct && k.answer === text;
                   }
                   case "open_ended":{
-                    // we don't know the correct answer
+                  // we don't know the correct answer
                     if(correct === false){
                       return true;
                     }
@@ -956,7 +956,7 @@ async function Searching(term,opts,finder){
                   }
                   case "multiple_select_quiz":
                   case "jumble":{
-                    if(choice && choice.length && text){
+                    if(choice && choice.length && text && !choice.includes(null)){
                       const texts = text.split("|");
                       let c = false;
                       for(let j = 0;j<texts.length;j++){
@@ -968,7 +968,7 @@ async function Searching(term,opts,finder){
                       }
                       return c;
                     }else{
-                      // no answers!
+                    // no answers!
                       return true;
                     }
                   }
@@ -1018,14 +1018,14 @@ async function Searching(term,opts,finder){
                   } = a[i];
                   switch(type){
                     case "quiz":{
-                      // didn't answer, have to assume its good
-                      if(choice == null){
+                    // didn't answer, have to assume its good
+                      if(choice === null || typeof choice === "undefined"){
                         return true;
                       }
                       return k.correct === correct && k.answer === text;
                     }
                     case "open_ended":{
-                      // we don't know the correct answer
+                    // we don't know the correct answer
                       if(correct === false){
                         return true;
                       }
@@ -1033,7 +1033,7 @@ async function Searching(term,opts,finder){
                     }
                     case "multiple_select_quiz":
                     case "jumble":{
-                      if(choice && choice.length && text){
+                      if(choice && choice.length && text && !choice.includes(null)){
                         const texts = text.split("|");
                         let c = false;
                         for(let j = 0;j<texts.length;j++){
@@ -1045,7 +1045,7 @@ async function Searching(term,opts,finder){
                         }
                         return c;
                       }else{
-                        // no answers!
+                      // no answers!
                         return true;
                       }
                     }
@@ -1463,7 +1463,7 @@ const Messages = {
           answer = "fgwadsfihwksdxfs";
           break;
         case "jumble":
-          answer = [-1,0,1,2];
+          answer = [0,1,2,3];
           break;
         case "multiple_select_poll":
         case "multiple_select_quiz":

@@ -542,7 +542,7 @@ class GetReadyPage{
                 const {text,correct,type,choice} = ca[j];
                 switch(type){
                   case "quiz":{
-                    if(choice === null){
+                    if(choice === null || typeof choice === "undefined"){
                       return false;
                     }
                     return text === ch.answer && ch.correct === correct;
