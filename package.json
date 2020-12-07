@@ -21,6 +21,7 @@
     "kahoot-search": "^1.0.4",
     "kahoot.js-updated": "^2.2.1",
     "request": "^2.88.2",
+    "semver": "^7.3.4",
     "ws": "^7.4.0",
     "yauzl": "^2.10.0"
   },

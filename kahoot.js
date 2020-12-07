@@ -1808,6 +1808,12 @@ if(electron){
       if(b.includes(require("./package.json").version)){
         console.log("Client is up to date.");
       }else{
+        const semver = require("semver"),
+          kv = semver.clean(b.split(":")[1]);
+        if(semver.gt(require("./package.json").version,kv)){
+          console.log("Client is ahead of current version.");
+          return;
+        }
         console.log("Client is not up to date.");
         const {response} = await electron.dialog.showMessageBox({
           buttons: ["Later","Update"],
