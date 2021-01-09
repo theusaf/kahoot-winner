@@ -12,7 +12,7 @@ const compression = require("compression"),
   http = require("http"),
   cookieParser = require("cookie-parser"),
   {URL} = require("url"),
-  {edit} = require("./regex.js"),
+  {edit} = require("./util/regex.js"),
   request = require("request"),
   fs = require("fs"),
   yauzl = require("yauzl"),
@@ -43,7 +43,6 @@ function sleep(time){
   });
 }
 
-const KahootDatabase = {};
 let KahootDatabaseInitialized = false;
 
 // getting rid of old database files
@@ -73,7 +72,8 @@ if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(pat
     yauzl.open(path.join(mainPath,"kdb.zip"),{lazyEntries: true},(err,zip)=>{
       if(err){ebar(-1);return console.log("Failed to extract: " + err);}
       const {entryCount} = zip;
-      let i = 0;
+      let i = 0,
+        j = 0;
       zip.readEntry();
       zip.on("entry",entry=>{
         if(/\/$/.test(entry.fileName)){
@@ -85,9 +85,14 @@ if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(pat
         }else{
           zip.openReadStream(entry,(err,stream)=>{
             if(err){ebar(-1);return console.log("Failed to extract: " + err);}
-            stream.on("end",()=>{
+            stream.on("end",async ()=>{
               i++;
-              ebar(0.3 + 0.3*(i/entryCount));
+              j++;
+              ebar(0.3 + 0.6*(i/entryCount));
+              if(j >= 500){
+                j = 0;
+                await sleep(0.2);
+              }
               zip.readEntry();
             });
             stream.pipe(fs.createWriteStream(path.join(mainPath,entry.fileName)));
@@ -95,14 +100,14 @@ if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(pat
         }
       });
       zip.once("end",()=>{
-        ebar(0.66);
+        ebar(0.9);
         console.log("Database successfully extracted. Removing unneeded files and downloading keys.");
         fs.unlinkSync(path.join(mainPath,"kdb.zip"));
         request("https://archive.org/download/kahoot-win/full-export-keys-sectioned.json",(e,r,b)=>{
           if(e){ebar(-1);return console.log("Failed: " + e);}
           fs.writeFile(path.join(mainPath,"keys.json"),b,(e)=>{
             if(e){ebar(-1);console.log("err writing keys");}
-            ebar(0.9);
+            ebar(0.99);
             loadDatabase();
           });
         });
@@ -111,43 +116,21 @@ if(!fs.existsSync(path.join(mainPath,"keys.json")) || Number(fs.readFileSync(pat
   });
 }else{
   console.log("Using loaded database");
-  loadDatabase(true);
+  loadDatabase();
 }
 
 function ReadItem(item){
   return new Promise(function(resolve, reject) {
-    fs.readFile(path.join(mainPath,"json-full",item),(err,data)=>{
+    fs.readFile(path.join(mainPath,"json-full",item),"utf8",(err,data)=>{
       if(err){reject();}
       resolve(JSON.parse(data));
     });
   });
 }
 
-function loadDatabase(a){
-  fs.readFile(path.join(mainPath,"keys.json"),async (err,data)=>{
-    if(err){return;}
-    const keys = JSON.parse(data),
-      total = Object.keys(keys).length;
-    let i = 0;
-    for(const length in keys){
-      KahootDatabase[length] = [];
-      for(let i = 0;i<keys[length].length;i++){
-        try{
-          KahootDatabase[length].push(await ReadItem(keys[length][i] + ".json"));
-        }catch(e){
-          console.log("Error: " + e);
-        }
-      }
-      i++;
-      if(a){
-        ebar(i/total);
-      }else{
-        ebar(0.9 + 0.1*(i/total));
-      }
-    }
-    KahootDatabaseInitialized = true;
-    ebar(-1);
-  });
+function loadDatabase(){
+  ebar(-1);
+  KahootDatabaseInitialized = true;
 }
 
 app.enable("trust proxy");
@@ -193,16 +176,6 @@ app.use((req,res,next)=>{
     res.header("Access-Control-Allow-Origin",req.get("origin"));
   }
   next();
-});
-app.get("/",(req,res,next)=>{
-  const cookies = req.cookies,
-    lang = cookies["lang"],
-    langs = ["en","es","zh"];
-  if(lang && lang !== "en" && langs.includes(lang)){
-    res.redirect("/" + lang);
-  }else{
-    next();
-  }
 });
 app.use(express.static(path.join(__dirname,"public"),{
   maxAge:"1y",
@@ -298,6 +271,7 @@ class Cheater{
     this.pings = 0;
     this.finder = new QuizFinder;
     this.finder.parent = this;
+    this.handshakeIssues = false;
     this.options = {
       pin: 0,
       fail: false,
@@ -524,8 +498,8 @@ class QuizFinder{
             }
             return false;
           }catch(err){
-          // we log stuff, but assume the worst, so we continue looping.
-          // UPDATE: no longer logging stuff, we just return false.
+            // we log stuff, but assume the worst, so we continue looping.
+            // UPDATE: no longer logging stuff, we just return false.
             return false;
           }
         }
@@ -587,8 +561,8 @@ class QuizFinder{
             }
             return false;
           }catch(err){
-          // we log stuff, but assume the worst, so we continue looping.
-          // UPDATE: no longer logging stuff, we just return false.
+            // we log stuff, but assume the worst, so we continue looping.
+            // UPDATE: no longer logging stuff, we just return false.
             return false;
           }
         }
@@ -614,7 +588,8 @@ class QuizFinder{
     }
     if(!this.parent.options.uuid){
       const searchText = (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : ""),
-        len = this.parent.kahoot.quiz.quizQuestionAnswers.length;
+        len = this.parent.kahoot.quiz.quizQuestionAnswers.length,
+        keys = await ReadItem("../keys.json");
       if((searchText.replace(/\s\*/g,"")) == ""){
         if(!this.hax.noQuiz){
           this.hax.noQuiz = true;
@@ -623,7 +598,7 @@ class QuizFinder{
             message: "EMPTY_NAME"
           });
         }
-        const results = (!this.ignoreDB && SearchDatabase(this,this.DBIndex)) || [];
+        const results = (!this.ignoreDB && await SearchDatabase(this,this.DBIndex)) || [];
         this.DBIndex += DBAmount || 50;
         if(!this.parent){
           this.hax.stop = true;
@@ -634,10 +609,10 @@ class QuizFinder{
           return;
         }
         if(results.length){
-          this.hax.validOptions = results || [];
+          this.hax.validOptions = results;
           return console.log("Setting results from database");
         }
-        if(!KahootDatabase[len] || this.DBIndex >= Object.keys(KahootDatabase[len]).length){
+        if(!keys[len] || this.DBIndex >= keys[len].length){
           this.ignoreDB = true;
         }else{
           await sleep(0.1);
@@ -648,7 +623,7 @@ class QuizFinder{
       }
       console.log(searchText);
       const results = (!this.ignoreKahoot && await Searching(searchText,options,this)) || [],
-        results2 = (!this.ignoreDB && SearchDatabase(this,this.DBIndex)) || [];
+        results2 = (!this.ignoreDB && await SearchDatabase(this,this.DBIndex)) || [];
       if(!this.parent){
         this.hax.stop = true;
         return;
@@ -670,26 +645,25 @@ class QuizFinder{
         return;
       }
       if(this.parent.kahoot.quiz.currentQuestion && index < this.parent.kahoot.quiz.currentQuestion.questionIndex + 1){
-        this.hax.validOptions = results || results2 || [];
+        this.hax.validOptions = results || results2;
         return;
       }
       if(results.length == 0){
         this.DBIndex += DBAmount || 50;
         if(results2.length !== 0){
           console.log("Setting results from database");
-          this.hax.validOptions = results2 || [];
+          this.hax.validOptions = results2;
           return;
         }
-        if(!KahootDatabase[len] || this.DBIndex >= Object.keys(KahootDatabase[len]).length){
+        if(!keys[len] || this.DBIndex >= keys[len].length){
           this.ignoreDB = true;
-          return;
         }
         await sleep(0.1);
         console.log("Researching");
         this.searchKahoot(index);
       }else{
         console.log("Setting results");
-        this.hax.validOptions = results || [];
+        this.hax.validOptions = results;
         return;
       }
     }else{
@@ -729,9 +703,7 @@ class QuizFinder{
     }
   }
 }
-function SaveItem(){}
-function WebhookMessage(){SaveItem();}
-function SearchDatabase(finder,index){
+async function SearchDatabase(finder,index){
   if(!KahootDatabaseInitialized){
     return [];
   }
@@ -890,15 +862,15 @@ function SearchDatabase(finder,index){
       }
       return true;
     },
-    len = finder.parent.kahoot.quiz.quizQuestionAnswers.length;
-  if(!KahootDatabase[len]){
+    len = finder.parent.kahoot.quiz.quizQuestionAnswers.length,
+    keys = await ReadItem("../keys.json");
+  if(!keys[len]){
     return [];
   }
-  const res = [],
-    keys = Object.keys(KahootDatabase[len]);
+  const res = [];
   try{
     for(let i = index || 0;i< index + (DBAmount || 50);i++){
-      const item = KahootDatabase[len][keys[i]];
+      const item = await ReadItem(keys[len][i] + ".json");
       if(filt(item)){
         res.push(item);
       }
@@ -941,14 +913,14 @@ async function Searching(term,opts,finder){
                 } = a[i];
                 switch(type){
                   case "quiz":{
-                  // didn't answer, have to assume its good
+                    // didn't answer, have to assume its good
                     if(choice === null || typeof choice === "undefined"){
                       return true;
                     }
                     return k.correct === correct && k.answer === text;
                   }
                   case "open_ended":{
-                  // we don't know the correct answer
+                    // we don't know the correct answer
                     if(correct === false){
                       return true;
                     }
@@ -968,7 +940,7 @@ async function Searching(term,opts,finder){
                       }
                       return c;
                     }else{
-                    // no answers!
+                      // no answers!
                       return true;
                     }
                   }
@@ -987,7 +959,7 @@ async function Searching(term,opts,finder){
         mainFilter2 = ()=>{
           let correct = true;
           for(let i = 0;i<o.questions.length;++i){
-          // "content" support
+            // "content" support
             if(!o.questions[i].choices){
               continue;
             }
@@ -1018,7 +990,7 @@ async function Searching(term,opts,finder){
                   } = a[i];
                   switch(type){
                     case "quiz":{
-                    // didn't answer, have to assume its good
+                      // didn't answer, have to assume its good
                       if(choice === null || typeof choice === "undefined"){
                         return true;
                       }
@@ -1068,7 +1040,7 @@ async function Searching(term,opts,finder){
         looseFilter2 = ()=>{
           let qc = [];
           for(let i = 0;i<o.questions.length;++i){
-          // "content" support
+            // "content" support
             if(!o.questions[i].choices){
               qc.push(null);
               continue;
@@ -1105,7 +1077,7 @@ const Messages = {
           // if it was an invalid link, this should throw an error
           isPin = path.match(/\d+/g)[0];
         if(path.length == isPin.length && path.length > 0){
-        // this means that the pin is in the link lol
+          // this means that the pin is in the link lol
           pin = path;
         }else{
           request(`https://kahoot.it/rest/challenges/${path}`,(e,r,b)=>{
@@ -1331,7 +1303,7 @@ const Messages = {
           }
           // jumble support
           if(game.finder.hax.validOptions[0].questions[index].type == "jumble"){
-          // since we cannot actually find out the correct answer as this is a program, we just guess...
+            // since we cannot actually find out the correct answer as this is a program, we just guess...
             game.finder.hax.correctAnswer = shuffle([0,1,2,3]);
             // if challenge
             if(game.options.isChallenge){
@@ -1364,7 +1336,7 @@ const Messages = {
       });
     },
     NEXT_CHALLENGE: game=>{
-    // security
+      // security
       if(!game.options.isChallenge || !game.security.joined || game.kahoot.data.phase == "leaderboard"){
         return game.send({message:"SESSION_NOT_CONNECTED",type:"Error"});
       }
@@ -1383,8 +1355,8 @@ const Messages = {
       game.send({message:Boolean(choice).toString(),type:"Message.Ping"});
     },
     RECOVER_DATA: (game,message)=>{
-    // message should be an object containing quiz name, answers, etc.
-    // base validation. Does not work on challenges
+      // message should be an object containing quiz name, answers, etc.
+      // base validation. Does not work on challenges
       if(game.security.joined || !game.options.pin || game.options.pin[0] == "0" || !message || !message.cid){
         game.send({message:"Reconnect Failed.",type:"Message.QuizEnd"});
         return game.send({message:"INVALID_USER_INPUT",type:"Error"});
@@ -1424,7 +1396,6 @@ const Messages = {
       if(game.handshakeIssues && game.ip && !(handshakeVotes.includes(game.ip))){
         const message = "A handshake error was reported at " + (new Date()).toString();
         console.log(message);
-        WebhookMessage(message,"Kashoot!");
         handshakeVotes.push(game.ip);
       }else{ // liar
         game.send({
@@ -1492,7 +1463,7 @@ const Messages = {
     },
     QuizStart: (k,q)=>{
       if(k.parent.options.isChallenge){
-      // set valid options
+        // set valid options
         if(!k.parent.finder.hax.validOptions.length){
           k.parent.finder.hax.validOptions.push(q.rawEvent);
         }
@@ -1569,7 +1540,7 @@ const Messages = {
           gameBlockType: (k.quiz.currentQuestion || {}).gameBlockType
         },q)),
         index: (k.quiz.currentQuestion || {}).questionIndex,
-        total: k.quiz.quizQuestionAnswers.length,
+        total: (k.quiz.quizQuestionAnswers || []).length,
         ans: k.quiz.quizQuestionAnswers,
         currentGuesses: k.parent.finder.hax.validOptions,
         type: (k.quiz.currentQuestion || {}).gameBlockType,
@@ -1583,7 +1554,7 @@ const Messages = {
         k.parent.finder.hax.answers.push({choice:q.choice,type:q.type,text:q.text,correct:q.isCorrect,index:k.quiz.currentQuestion.questionIndex});
         k.parent.finder.searchKahoot(k.quiz.currentQuestion.questionIndex + 1);
       }catch(err){
-      // likely due to joining in the middle of the game
+        // likely due to joining in the middle of the game
       }
     },
     QuizEnd: (k,q)=>{
@@ -1696,7 +1667,7 @@ const BruteForces = [[0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,2,1],[0,3,1,2]
 
 // silly paths.
 app.get("/up",(req,res)=>{
-  const end = startupDate + (12 * 60 * 60 * 1000),
+  const end = startupDate + (24 * 60 * 60 * 1000),
     minutes = Math.round((end - Date.now()) / (1000 * 60));
   let message = "";
   if(minutes > 60){
@@ -1729,6 +1700,34 @@ app.get("/creator",(req,res)=>{
 });
 app.get("/how-it-works",(req,res)=>{
   res.redirect("https://kahoot-win.herokuapp.com/how-it-works");
+});
+app.get("/search",(req,res)=>{
+  const params = req.query;
+  if(params.q == undefined){
+    res.status(400);
+    return res.send(JSON.stringify({error:"INVALID_USER_INPUT",message:"Missing Query"}));
+  }
+  const opts = {
+    cursor: params.c == undefined ? 0 : params.c,
+    limit: 25,
+    includeCard: !!params.card
+  };
+  if(Number(params.u)){
+    request(`https://create.kahoot.it/rest/kahoots/${params.q}`,(e,r,b)=>{
+      const data = JSON.parse(b);
+      if(data.error){
+        res.status(404);
+        return res.send(JSON.stringify({error:"INVALID_USER_INPUT",message:"INVALID_UUID"}));
+      }else{
+        res.send(b);
+      }
+    });
+  }else{
+    const a = new Search(params.q,opts);
+    a.search().then(o=>{
+      res.send(o);
+    });
+  }
 });
 app.get("/api",(req,res)=>{
   res.redirect("https://kahoot.js.org");

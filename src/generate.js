@@ -1,17 +1,17 @@
-const locales = require("./locales.json");
-const fs = require("fs");
-const path = require("path");
-const minify = require("minify");
+const locales = require("./locales.json"),
+  fs = require("fs"),
+  path = require("path"),
+  minify = require("minify");
 const options = {
-  html: {
-    removeAttributeQuotes: false,
-    removeEmptyAttributes: false,
-    removeEmptyElements: false,
-    removeOptionalTags: false
-  }
-};
+    html: {
+      removeAttributeQuotes: false,
+      removeEmptyAttributes: false,
+      removeEmptyElements: false,
+      removeOptionalTags: false
+    }
+  },
 
-const oldlog = console.log;
+  oldlog = console.log;
 console.log = function(m){
   if(typeof m !== "string"){
     return oldlog(m);
@@ -34,12 +34,12 @@ async function run(){
   if(!fs.existsSync(path.join(__dirname,"out"))){
     fs.mkdirSync(path.join(__dirname,"out"));
   }
-  for(let lang in locales){
+  for(const lang in locales){
     const js = {};
     // replace missing with english.
     if(lang === "en"){
-      for(let item in locales.en){
-        for(let l2 in locales){
+      for(const item in locales.en){
+        for(const l2 in locales){
           if(l2 === "en"){continue;}
           if(!locales[l2][item]){
             if(l2 !== "sga"){console.log(`${c.y}Item ${item} does not exist in ${l2}. Using english default.`);}
@@ -48,7 +48,7 @@ async function run(){
         }
       }
     }
-    for(let file of files){
+    for(const file of files){
       if(!/\.(html|js|css)$/gi.test(file)){
         console.log(`${c.y}Skipping ${file}.`);
         continue;
@@ -56,7 +56,7 @@ async function run(){
       console.log(`${c.b}Translating ${file} (${lang})...`);
       let f = fs.readFileSync(path.join(__dirname,"in",file),"utf8");
       f = f.replace(/§LangCode§/mg,lang);
-      for(let item in locales[lang]){
+      for(const item in locales[lang]){
         const regex = new RegExp(`§${item.replace(/\\/mg,"\\\\").replace(/\(/gm,"\\(").replace(/\[/gm,"\\[").replace(/\./gm,"\\.").replace(/\?/gm,"\\?").replace(/\$/gm,"\\$").replace(/\^/gm,"\\^").replace(/\*/gm,"\\*").replace(/\|/gm,"\\|")}§`,"mg");
         f = f.replace(regex,locales[lang][item]);
       }
@@ -75,8 +75,8 @@ async function run(){
         console.log(`${c.g}Done.`);
         if(min.includes("§")){
           console.log(`${c.y}${file} (${lang}) has unfinished translations.`);
-          const matchRegex = /(.){0,10}§.*?§(.){0,10}/gm;
-          const matches = min.match(matchRegex);
+          const matchRegex = /(.){0,10}§.*?§(.){0,10}/gm,
+            matches = min.match(matchRegex);
           for(let i = 0; i < matches.length; i++){
             console.log(`${c.y}- ...${c.r}${matches[i]}${c.y}... <-- HERE`);
           }
@@ -108,7 +108,7 @@ async function run(){
               continue;
             }
             let name = "locales/" + dir.name;
-            if(name === "locales/en"){name = "public"}
+            if(name === "locales/en"){name = "public";}
             fs.renameSync(path.join(__dirname,"out",dir.name,file),path.join(__dirname,"..",name,file));
           }
         });

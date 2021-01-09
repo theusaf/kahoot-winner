@@ -1,6 +1,12 @@
 /* global ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TutorialDiv, TimeUpPage, FeedbackPage, TeamTalkPage */
 let socket = null;
 
+// Navigation
+if(location.pathname === "/" && localStorage.autoNavigatePage && localStorage.autoNavigatePage !== "en"){
+  window.stop();
+  location.pathname = localStorage.autoNavigatePage;
+}
+
 const MessageHandler = {
   Error: {
     INVALID_USER_INPUT: ()=>{
@@ -73,6 +79,13 @@ const MessageHandler = {
     },
     PRIVATE_ID: ()=>{
       new ErrorHandler("§InvalidUUID§");
+    },
+    SERVER_OVERLOADED: (data)=>{
+      new ErrorHandler("§ServerOverloaded§ " + data);
+      game.proxyRetry = data;
+    },
+    SERVER_TRANSFER: (data)=>{
+      game.proxyRetry = data;
     }
   },
   Message: {
@@ -214,12 +227,12 @@ class Game{
     this.questionStarted = false;
     this.questionAnswered = false;
   }
-  sendPin(pin){
+  sendPin(pin,host){
     return new Promise((res)=>{
       this.pin = pin;
       grecaptcha.ready(()=>{
         grecaptcha.execute("6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n",{action:"submit"}).then((token)=>{
-          this.socket = new WebSocket(`${(location.protocol == "http:" ? "ws://" : "wss://")}${location.host}?token=${token}`);
+          this.socket = new WebSocket(`${(location.protocol == "http:" ? "ws://" : "wss://")}${host || location.host}?token=${token}`);
           socket = this.socket;
           socket.onmessage = evt=>{
             evt = evt.data;
@@ -256,7 +269,9 @@ class Game{
                   return x.onerror(t);
                 }
                 activateLoading(false,false);
-                if(!game.quizEnded && game.pin[0] != "0"){
+                if(game.proxyRetry){
+                  resetGame(game.proxyRetry);
+                }else if(!game.quizEnded && game.pin[0] != "0"){
                   resetGame(true);
                 }else{
                   resetGame();
@@ -436,19 +451,26 @@ class Game{
     }
     this.saveTimeout = setTimeout(this.saveOptions,500);
   }
-  playSound(url){
+  playSound(url,once){
     if(!this.music){
       this.music = new Audio();
       this.music.addEventListener("timeupdate",()=>{
-        if(this.music.currentTime > this.music.duration - 0.44){
+        if(this.music.currentTime > this.music.duration - 0.44 && !this.music.once){
           this.music.currentTime = 0;
           this.music.play();
         }
       });
+      this.music.addEventListener("canplaythrough",()=>{
+        this.music.res && this.music.res();
+      });
     }
-    this.music.pause();
-    this.music.src = url;
-    this.music.play();
+    return new Promise((res)=>{
+      this.music.once = once;
+      this.music.res = res;
+      this.music.pause();
+      this.music.src = url;
+      this.music.play();
+    });
   }
 }
 
@@ -460,30 +482,11 @@ function send(message){
 }
 
 function setCookie(val){
-  document.cookie = `lang=${val}; expires=${new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)).toGMTString()}; path=/`;
-  if("serviceWorker" in navigator){
-    navigator.serviceWorker.getRegistrations().then(async function(registrations) {
-      for(const registration of registrations) {
-        await registration.unregister();
-      }
-      if(val !== "en"){
-        location.href = "/" + val;
-      }else{
-        location.href = "/";
-      }
-    }).catch(()=>{
-      if(val !== "en"){
-        location.href = "/" + val;
-      }else{
-        location.href = "/";
-      }
-    });
+  localStorage.autoNavigatePage = val;
+  if(val !== "en"){
+    location.href = "/" + val;
   }else{
-    if(val !== "en"){
-      location.href = "/" + val;
-    }else{
-      location.href = "/";
-    }
+    location.href = "/";
   }
 }
 
@@ -495,7 +498,7 @@ eggstyle.innerHTML = `p,.sm span,img,h1,h2,.About h3,.tut_cont h3,h4{
   animation: infinite windance 1s;
 }`;
 let shouldStop = false;
-window.addEventListener("keydown",e=>{
+window.addEventListener("keydown",async (e)=>{
   if(e.key == "Escape"){
     if(closePage == 0){
       SettingSwitch.click();
@@ -507,7 +510,7 @@ window.addEventListener("keydown",e=>{
   }
   egg += e.key;
   try{
-    if("winner".search(egg) != 0 && "return by death".search(egg) != 0 && "behold an unthinkable present".search(egg) != 0 && "explosion".search(egg) != 0){
+    if("winner".search(egg) !== 0 && "return by death".search(egg) !== 0 && "behold an unthinkable present".search(egg) !== 0 && "explosion".search(egg) !== 0 && "01189998819991197253".search(egg) !== 0){
       egg = "";
       if(shouldStop){game.music.pause();shouldStop=false;}
       try{
@@ -515,11 +518,35 @@ window.addEventListener("keydown",e=>{
       }catch(err){
         // meh
       }
-    }else if(egg == "winner"){
+    }else if(egg === "winner"){
       document.body.append(eggstyle);
-    }else if(egg == "return by death"){
+    }else if(egg === "01189998819991197253"){
+      await game.playSound("/resource/music/01189998819991197253.m4a",true);
+      const container = Element("div",{
+          style: `position: fixed;
+          bottom: 8rem;
+          left: 0;
+          color: white;
+          font-size: 1.25rem;
+          width: 100%;
+          z-index: 500;`
+        }),
+        numbers = Element("h2",{
+          style: "width: 21.5rem;margin:auto;"
+        }),
+        str = "01189998819991197253",
+        timings = [.3,.5,.34,.33,.7,.23,.27,1.28,.45,.45,.5,.45,.9,.25,.34,.45,.73,.52,.5,1.77];
+      container.append(numbers);
+      document.body.append(container);
+      for(let i = 0;i<str.length;i++){
+        await sleep(timings[i]);
+        numbers.innerHTML += str[i];
+      }
+      await sleep(1.5);
+      numbers.outerHTML = "";
+    }else if(egg === "return by death"){
       if(game.theme === "ReZero"){
-        game.playSound("/resource/music/return_by_death.mp3");
+        await game.playSound("/resource/music/return_by_death.mp3");
         shouldStop=true;
         document.body.style = "box-shadow:inset 0 0 10rem 5rem darkviolet;";
         setTimeout(()=>{
@@ -527,19 +554,19 @@ window.addEventListener("keydown",e=>{
           document.body.style = "";
         },Math.random() * 20000 + 10000);
       }
-    }else if(egg == "behold an unthinkable present"){
+    }else if(egg === "behold an unthinkable present"){
       if(game.theme === "ReZero"){
         game.playSound("/resource/music/behold_unthinkable_present.m4a");
         shouldStop=true;
       }
-    }else if(egg == "explosion"){
+    }else if(egg === "explosion"){
       // due to the amount of styles in this one, this can only be used during the login screen
       if(game.theme === "KonoSuba" && game.pin === 0){
-        game.playSound("/resource/music/megumin_explosion.mp3");
+        await game.playSound("/resource/music/megumin_explosion.mp3",true);
         // starting fire
         document.body.style = "box-shadow:inset 0 0 0.7rem 0.7rem #451b0e,inset 0 0 1.4rem 1.4rem #973716,inset 0 0 1.8rem 1.8rem #cd4606,inset 0 0 2.1rem 2.1rem #ec760c,inset 0 0 2.4rem 2.4rem #ffae34,inset 0 0 2.7rem 2.7rem #fefcc9";
         const megu = document.createElement("img");
-        megu.src = "/resource/red-konosuba.svg";
+        megu.src = "/resource/img/game/theme/konosuba/red.svg";
         megu.style = "position:fixed;top:calc(50% - 5rem);left:100%;width:10rem;transition:left 4s;";
         document.body.append(megu);
         setTimeout(()=>{megu.style.left = "calc(75% - 5rem)";});
@@ -555,7 +582,6 @@ window.addEventListener("keydown",e=>{
             setTimeout(()=>{
               megu.outerHTML = "";
               explosion.style.background = "black";
-              game.music.pause();
               setTimeout(()=>{
                 explosion.outerHTML = "";
               },3e3);
@@ -579,7 +605,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v4.0.3";
+localStorage.KW_Version = "v5.0.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

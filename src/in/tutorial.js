@@ -211,7 +211,7 @@ function tutorialSteps(n){
         }
       };
       new QuizEndPage(JSON.stringify({
-        metal: "upvote-filled"
+        podiumMedalType: "gold"
       }));
       next.outerHTML = "";
       info.innerHTML = `<p><strong>§Tut12§</strong></p>
@@ -242,7 +242,7 @@ function showNotice(){
     <p>§Notice4§</p>
     <p>§Notice5§</p>
     <div>
-      <img src="/resource/misc/notice-2020-07-03.png" alt="input at the top">
+      <img src="/resource/img/misc/notice-2020-07-03.png" alt="input at the top">
     </div>
   </div>`;
   document.body.append(temp.content.cloneNode(true));

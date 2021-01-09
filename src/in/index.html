@@ -3,7 +3,7 @@
   <head>
     <link rel="preload" href="/ext/https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta name="version" content="4.0.3">
+    <meta name="version" content="5.0.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="§Title§">
     <meta name="description" content="§Description§">
@@ -14,9 +14,9 @@
     <meta name="designer" content="theusaf">
     <meta name="owner" content="theusaf">
     <meta name="Classification" content="Gaming">
-    <meta name="image" content="https://kahoot-win.herokuapp.com/resource/misc/screenshow2.png">
-    <meta property="og:image:secure_url" content="https://kahoot-win.herokuapp.com/resource/misc/screenshow2.png">
-    <meta property="og:image" content="http://kahoot-win.herokuapp.com/resource/misc/screenshow2.png">
+    <meta name="image" content="https://kahoot-win.herokuapp.com/resource/img/misc/screenshow2.png">
+    <meta property="og:image:secure_url" content="https://kahoot-win.herokuapp.com/resource/img/misc/screenshow2.png">
+    <meta property="og:image" content="http://kahoot-win.herokuapp.com/resource/img/misc/screenshow2.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:url" content="https://kahoot-win.herokuapp.com/">
     <meta property="og:title" content="§Description2§">
@@ -29,18 +29,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <!-- Scheme.org metadata -->
     <script type="application/ld+json">
-    {
-      "@context" : "http://schema.org",
-      "@type" : "WebSite",
-      "name" : "Kahoot Winner",
-      "url" : "https://kahoot-win.herokuapp.com",
-      "sameAs" : [
-        "https://twitter.com/theusafyt",
-        "https://www.facebook.com/theusafmc",
-        "https://www.youtube.com/theusaf",
-        "https://discord.gg/58SHzC2"
-      ]
-    }
+      {"@context" : "http://schema.org","@type" : "WebSite","name" : "Kahoot Winner","url" : "https://kahoot-win.herokuapp.com","sameAs" : ["https://twitter.com/theusafyt","https://www.facebook.com/theusafmc","https://www.youtube.com/theusaf","https://discord.gg/58SHzC2"]}
     </script>
     <!-- Facebook Pixel Code -->
     <script>
@@ -98,7 +87,7 @@
       <div class="form">
         <div id="firstdiv">
           <div class="displayFlex">
-            <label onclick="window.location.reload();return false;" class="mobireload" itemprop="result"><img src="/resource/reset.svg"></img></label>
+            <label onclick="window.location.reload();return false;" class="mobireload" itemprop="result"><img src="/resource/img/game/icon/reset.svg"></img></label>
             <br class="mobireload">
             <!-- Reconnect button removed in 2.13.0 (deprecated.) No use for it, can cause issues. Shortcut is usable still -->
             <!-- label onclick="send({type:'RECONNECT',message:'I think i lost connection'})" class="button block" itemprop="result"><span>Reconnect Bot</span><p class="shortcut">ctrl + e</p></label -->
@@ -112,6 +101,7 @@
                 <option value="Music">Kahoot + 🎵</option>
                 <option value="ReZero">§ReZero§</option>
                 <option value="Minecraft">Minecraft</option>
+                <option value="Duck">Duck</option>
               </select>
             </div>
           </div>
@@ -150,7 +140,7 @@
             </div>
             <label for="sub-uuid">
               <span class="shortcut2">
-                <div style="width: 1.5rem;background-size: cover;display:inline-block;background-repeat:no-repeat;background-image:url(/resource/icon-gear.svg)">
+                <div style="width: 1.5rem;background-size: cover;display:inline-block;background-repeat:no-repeat;background-image:url(/resource/img/site/icon-gear.svg)">
                   &nbsp;
                 </div>
               </span>
@@ -193,7 +183,7 @@
             <input type="text" id="timeout" placeholder="# seconds"><label for="info-timeout"><p class="shortcut2">?</p></label>
             <label for="sub-timeout">
               <span class="shortcut2">
-                <div style="width: 1.5rem;background-size: cover;display:inline-block;background-repeat:no-repeat;background-image:url(/resource/icon-gear.svg)">
+                <div style="width: 1.5rem;background-size: cover;display:inline-block;background-repeat:no-repeat;background-image:url(/resource/img/site/icon-gear.svg)">
                   &nbsp;
                 </div>
               </span>
@@ -278,7 +268,7 @@
                 <p>§SearchLoose4§</p>
                 <script>
                   document.getElementById("info-loose").addEventListener("click",function(){
-                    document.getElementById("image-loose").src = "/resource/misc/loose-search.png";
+                    document.getElementById("image-loose").src = "/resource/img/misc/loose-search.png";
                   },{once:true});
                 </script>
               </div>
@@ -299,7 +289,7 @@
                 <p>§Bypass2FA3§</p>
                 <script>
                   document.getElementById("info-brute").addEventListener("click",function(){
-                    document.getElementById("image-brute").src = "/resource/misc/2facode.png";
+                    document.getElementById("image-brute").src = "/resource/img/misc/2facode.png";
                   },{once:true});
                 </script>
               </div>
@@ -346,7 +336,7 @@
                 <p>§PreviewQuestion2§</p>
                 <script>
                   document.getElementById("info-preview").addEventListener("click",function(){
-                    document.getElementById("image-preview").src = "/resource/misc/preview-question.png";
+                    document.getElementById("image-preview").src = "/resource/img/misc/preview-question.png";
                   },{once:true});
                 </script>
               </div>
@@ -471,6 +461,8 @@
                     <p>§Manual§ <span class="red">§OFF§</span></p>
                     <p>§Preview§ <span class="red">§OFF§</span></p>
                     <p>§TeamTalk§ <span class="red">§OFF§</span></p>
+                    <p>§DisableTimer§ <span class="red">§OFF§</span></p>
+                    <p>§DisableAuto§ <span class="red">§OFF§</span></p>
                   </div>
                   <button class="block" onclick="loadSetting({teamtalk:false,theme:'Kahoot',fail:'0',brute:false,manual:false,searchLoosely:'0',teamMembers:'',timeout:'',previewQuestion:false},'Default');">Restore</button>
                 </div>
@@ -484,20 +476,20 @@
               </div>
             </div>
           </div>
-          <label class="button relative" for="preset_toggle"><span class="mobihide2">§Presets§</span><img src="/resource/icon-about.svg" alt="preset" class="mobishow2"/></label>
+          <label class="button relative" for="preset_toggle"><span class="mobihide2">§Presets§</span><img src="/resource/img/site/icon-about.svg" alt="preset" class="mobishow2"/></label>
         </div>
       </div>
     </div>
     <meta content="toggle" itemprop="result"/>
     <div class="misc">
       <label for="menu_toggle">
-        <img src="/resource/icon-gear.svg" alt="Icons made by Pixel perfect from www.flaticon.com">
+        <img src="/resource/img/site/icon-gear.svg" alt="Icons made by Pixel perfect from www.flaticon.com">
       </label>
     </div>
     <div id="ui">
       <div class="Loading">
         <div>
-          <img src="/resource/load-hole.svg" alt="load_circle">
+          <img src="/resource/img/game/icon/load-hole.svg" alt="load_circle">
           <p id="loadingText"></p>
         </div>
       </div>
@@ -561,10 +553,10 @@
         <p itemtype="https://schema.org/Answer">§AboutAnswer5§</p>
         <br>
         <div class="sm">
-          <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/logo-paypal.svg" alt="paypal"><span>§Donate§</span></a>
-          <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg" alt="discord"><span>Discord</span></a>
-          <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
-          <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>
+          <a href="https://paypal.me/theusafyt" target="_blank"><img src="/resource/img/site/logo-paypal.svg" alt="paypal"><span>§Donate§</span></a>
+          <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/img/site/logo-discord.svg" alt="discord"><span>Discord</span></a>
+          <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/img/site/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
+          <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/img/site/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>
         </div>
       </div>
       <meta content="toggle" itemprop="result"/>
@@ -572,16 +564,17 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p><a href="/blog/update-5-0-0">5.0.0</a> - Updated medals, sorted files, improved backend stuff, added new themes.</p>
           <p>4.0.3 - Fixes an issue with purposely fail.</p>
           <p>4.0.1 / 4.0.2 - Small bug fixes, fixed styling for really tiny screens.</p>
-          <p><a href="https://kahoot-win.herokuapp.com/blog/update-4-0-0" target="_blank">4.0.0</a> - Major update. New UI look, new searching method for latest Kahoot! changes.</p>
+          <p><a href="/blog/update-4-0-0" target="_blank">4.0.0</a> - Major update. New UI look, new searching method for latest Kahoot! changes.</p>
           <p>3.3.1 - Fixes some bugs.</p>
-          <p><a href="https://kahoot-win.herokuapp.com/blog/update-3-3-0" target="_blank">3.3.0</a> - Bugs and new features! (Disable the question timer, better quiz id support, lock a quiz, and more!)</p>
-          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-2-0">3.2.0</a> - New themes, secrets, bug fixes, and caching improvements.</p>
+          <p><a href="/blog/update-3-3-0" target="_blank">3.3.0</a> - Bugs and new features! (Disable the question timer, better quiz id support, lock a quiz, and more!)</p>
+          <p><a target="_blank" href="/blog/update-3-2-0">3.2.0</a> - New themes, secrets, bug fixes, and caching improvements.</p>
           <p>3.1.2 - Now hides language picker in panic mode. Added the ability to change timeout mid-question (improves timeout sub-option)</p>
           <p>3.1.1 - Added some more themes.</p>
-          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-1-0">3.1.0</a> - Fixes bugs, adds music and another challenge option.</p><!-- If you speak Standard Galactic, you can now use Kahoot Winner in SGA! -->
-          <p><a target="_blank" href="https://kahoot-win.herokuapp.com/blog/update-3-0-0">3.0.0</a> - Major update. See below:</p>
+          <p><a target="_blank" href="/blog/update-3-1-0">3.1.0</a> - Fixes bugs, adds music and another challenge option.</p><!-- If you speak Standard Galactic, you can now use Kahoot Winner in SGA! -->
+          <p><a target="_blank" href="/blog/update-3-0-0">3.0.0</a> - Major update. See below:</p>
           <ul>
             <li>Upgraded backend database and Kahoot api.</li>
             <li>Minified static files for better performance.</li>
@@ -739,7 +732,7 @@
       }
     </script>
     <!-- The core Firebase JS SDK is always required and must be listed first -->
-    <script async src="/ext/https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
+    <script async src="/ext/https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
     <script>
       // Your web app's Firebase configuration
       var firebaseConfig = {
@@ -760,7 +753,7 @@
             addedScript = true;
             const script = document.createElement("script");
             script.setAttribute("async","");
-            script.src = "/ext/https://www.gstatic.com/firebasejs/7.14.2/firebase-analytics.js";
+            script.src = "/ext/https://www.gstatic.com/firebasejs/8.2.1/firebase-analytics.js";
             document.body.append(script);
           }
           return setTimeout(init,2000);

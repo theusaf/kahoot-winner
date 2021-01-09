@@ -1,54 +1,80 @@
 /* global game, dataLayer, send, socket, Game */
-const KahootThemes = {
-  Kahoot: {
-    red: "red.svg",
-    blue: "blue.svg",
-    green: "green.svg",
-    yellow: "yellow.svg",
-    logo: "logo-xmas.svg"
-  },
-  KonoSuba: {
-    red: "red-konosuba.svg",
-    blue: "blue-konosuba.svg",
-    green: "green-konosuba.svg",
-    yellow: "yellow-konosuba.svg",
-    logo: "logo-konosuba.svg"
-  },
-  // rainbow doesn't actually change any images
-  // but will be detected for to change css.
-  get Rainbow(){
-    return KahootThemes.Kahoot;
-  },
-  // music doesn't actually change any images
-  // but will be detected to play music/sounds.
-  get Music(){
-    return KahootThemes.Kahoot;
-  },
-  FRANXX: {
-    red: "red-franxx.svg",
-    blue: "blue-franxx.svg",
-    green: "green-franxx.svg",
-    yellow: "yellow-franxx.svg",
-    get logo(){
-      return KahootThemes.Kahoot.logo;
+const AprilFoolsThemes = ["KonoSuba","ReZero","FRANXX"],
+  AprilFoolTheme = AprilFoolsThemes[Math.floor(Math.random() * AprilFoolsThemes.length)],
+  KahootThemes = {
+    get Kahoot(){
+      const today = new Date();
+      if(today.getMonth() === 3 && today.getDate() <= 7){
+        return KahootThemes[AprilFoolTheme];
+      }else{
+        return {
+          red: "kahoot/red.svg",
+          blue: "kahoot/blue.svg",
+          green: "kahoot/green.svg",
+          yellow: "kahoot/yellow.svg",
+          get logo(){
+            if(today.getMonth() >= 9 && today.getMonth() < 11){
+            // fall!
+              return "kahoot/logo-halloween.svg";
+            }else if(today.getMonth() === 11){
+            // winter!
+              return "kahoot/logo-xmas.svg";
+            }else{
+              return "kahoot/logo.svg";
+            }
+          }
+        };
+      }
+    },
+    KonoSuba: {
+      red: "konosuba/red.svg",
+      blue: "konosuba/blue.svg",
+      green: "konosuba/green.svg",
+      yellow: "konosuba/yellow.svg",
+      logo: "konosuba/logo.svg"
+    },
+    // rainbow doesn't actually change any images
+    // but will be detected for to change css.
+    get Rainbow(){
+      return KahootThemes.Kahoot;
+    },
+    // music doesn't actually change any images
+    // but will be detected to play music/sounds.
+    get Music(){
+      return KahootThemes.Kahoot;
+    },
+    FRANXX: {
+      red: "franxx/red.svg",
+      blue: "franxx/blue.svg",
+      green: "franxx/green.svg",
+      yellow: "franxx/yellow.svg",
+      get logo(){
+        return KahootThemes.Kahoot.logo;
+      }
+    },
+    ReZero: {
+      red: "rezero/red.svg",
+      blue: "rezero/blue.svg",
+      green: "rezero/green.svg",
+      yellow: "rezero/yellow.svg",
+      logo: "rezero/logo.svg"
+    },
+    // Also has music ("Minecraft", "Pigstep")
+    Minecraft: {
+      red: "minecraft/red.svg",
+      blue: "minecraft/blue.svg",
+      green: "minecraft/green.svg",
+      yellow: "minecraft/yellow.svg",
+      logo: "minecraft/logo.png"
+    },
+    Duck: {
+      logo: "duck/logo.svg",
+      red: "duck/red.svg",
+      green: "duck/green.svg",
+      blue: "duck/blue.svg",
+      yellow: "duck/yellow.svg"
     }
-  },
-  ReZero: {
-    red: "red-rezero.svg",
-    blue: "blue-rezero.svg",
-    green: "green-rezero.svg",
-    yellow: "yellow-rezero.svg",
-    logo: "logo-rezero.svg"
-  },
-  // Also has music ("Minecraft", "Pigstep")
-  Minecraft: {
-    red: "red-mc.svg",
-    blue: "blue-mc.svg",
-    green: "green-mc.svg",
-    yellow: "yellow-mc.svg",
-    logo: "logo-mc.png"
-  }
-};
+  };
 
 // Parts
 function Element(name,options){
@@ -82,15 +108,12 @@ class LoginPage{
     QuizResult.removeAttribute("url");
     ChallengeContinueButton.style.display = "none";
     RemoveHandshakeFail();
-    if(new Date().toString().search("Apr 1") != -1 || new Date().toString().search("Mar 31") != -1){
-      game.theme = "KonoSuba";
-    }
     const div = clearUI();
     div.className = "Login";
     div.setAttribute("ui-event","Login");
     const logo = Element("img",{
         alt: "Kahoot logo",
-        src: `/resource/${KahootThemes[game.theme].logo}`
+        src: `/resource/img/game/theme/${KahootThemes[game.theme].logo}`
       }),
       logoText = Element("p",{
         id: "logotext",
@@ -159,7 +182,7 @@ class LoginPage{
         language = Element("div",{
           id: "lang"
         });
-      language.innerHTML = `<label for="langToggle"><img src="/resource/language.svg"/></label>
+      language.innerHTML = `<label for="langToggle"><img src="/resource/img/site/language.svg"/></label>
       <input class="ch" id="langToggle" type="checkbox"/>
       <div class="lang">
         <button onclick="setCookie('en')">English</button>
@@ -176,14 +199,14 @@ class LoginPage{
       className: "sm sidebar correct"
     });
     social.innerHTML = `<div class="mobihide2 mobihide">
-    <a href="/creator" target="_blank"><img src="/resource/icon-kahoot.svg" alt="create"><span>§Creator§</span></a>
-    <a href="/api" target="_blank"><img src="/resource/icon-api.svg" alt="api"><span>§API§</span></a>
-    <a href="/blog" target="_blank"><img src="/resource/icon-blog.svg" alt="Icon made from http://www.onlinewebfonts.com/icon is licensed by CC BY 3.0"><span>§Blog§</span></a>
-    <a href="/blog/download" target="_blank" class="mobihide2 mobihide"><img src="/resource/icon192.png" alt="download mark"><span>§AppDownload§</span></a>
+    <a href="/creator" target="_blank"><img src="/resource/img/site/icon-kahoot.svg" alt="create"><span>§Creator§</span></a>
+    <a href="/api" target="_blank"><img src="/resource/img/site/icon-api.svg" alt="api"><span>§API§</span></a>
+    <a href="/blog" target="_blank"><img src="/resource/img/site/icon-blog.svg" alt="Icon made from http://www.onlinewebfonts.com/icon is licensed by CC BY 3.0"><span>§Blog§</span></a>
+    <a href="/blog/download" target="_blank" class="mobihide2 mobihide"><img src="/resource/img/site/icon192.png" alt="download mark"><span>§AppDownload§</span></a>
     </div>
-    <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/logo-discord.svg" alt="discord"><span>Discord</span></a>
-    <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
-    <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>`;
+    <a href="https://discord.gg/58SHzC2" target="_blank"><img src="/resource/img/site/logo-discord.svg" alt="discord"><span>Discord</span></a>
+    <a href="https://twitter.com/theusafyt" target="_blank"><img src="/resource/img/site/logo-twitter.svg" alt="twitter"><span>Twitter</span></a>
+    <a href="https://www.facebook.com/theusafmc" target="_blank"><img src="/resource/img/site/logo-fbook.svg" alt="facebook"><span>Facebook</span></a>`;
     if(!i){div.append(social);}
     UIDiv.append(div);
   }
@@ -207,28 +230,28 @@ class TwoStepPage{
         className: "Answers"
       }),
       r = Element("img",{
-        src: `/resource/${KahootThemes[game.theme].red}`,
+        src: `/resource/img/game/theme/${KahootThemes[game.theme].red}`,
         alt: "Red",
         onclick: ()=>{
           game.answer2(0,r);
         }
       }),
       b = Element("img",{
-        src: `/resource/${KahootThemes[game.theme].blue}`,
+        src: `/resource/img/game/theme/${KahootThemes[game.theme].blue}`,
         alt: "Blue",
         onclick: ()=>{
           game.answer2(1,b);
         }
       }),
       g = Element("img",{
-        src: `/resource/${KahootThemes[game.theme].green}`,
+        src: `/resource/img/game/theme/${KahootThemes[game.theme].green}`,
         alt: "Green",
         onclick: ()=>{
           game.answer2(2,g);
         }
       }),
       y = Element("img",{
-        src: `/resource/${KahootThemes[game.theme].yellow}`,
+        src: `/resource/img/game/theme/${KahootThemes[game.theme].yellow}`,
         alt: "Yellow",
         onclick: ()=>{
           game.answer2(3,y);
@@ -429,7 +452,7 @@ class GetReadyPage{
       }),
       typeimg = Element("img",{
         alt: "",
-        src: `/resource/type/${question.type}.svg`
+        src: `/resource/img/game/type/${question.type}.svg`
       }),
       typetext = Element("span",{
         innerHTML: typedefs[question.type]
@@ -438,11 +461,11 @@ class GetReadyPage{
         id: "quizTypeImage"
       });
     if(question.type === "multiple_select_quiz"){
-      typeimg.src = "/resource/type/quiz.svg";
+      typeimg.src = "/resource/img/game/type/quiz.svg";
     }else if(question.type === "multiple_select_poll"){
-      typeimg.src = "/resource/type/survey.svg";
+      typeimg.src = "/resource/img/game/type/survey.svg";
     }else if(question.type === "quiz" && game.rawData.gameBlockLayout === "TRUE_FALSE"){
-      typeimg.src = "/resource/type/true_false.svg";
+      typeimg.src = "/resource/img/game/type/true_false.svg";
       typetext.innerHTML = "§TypeTrueFalse§";
     }
     typediv.append(typeimg,typetext);
@@ -462,7 +485,7 @@ class GetReadyPage{
       });
       noanswer.setAttribute("text","§Breather2§");
       const img = Element("img",{
-        src: "/resource/content-slide.svg",
+        src: "/resource/img/game/icon/content-slide.svg",
         id: "ContentImage"
       });
       bdiv.append(breather,img,noanswer);
@@ -479,7 +502,7 @@ class GetReadyPage{
       mcont = Element("div"),
       ncont = Element("div"),
       spinimg = Element("img",{
-        src: "/resource/load-large.svg",
+        src: "/resource/img/game/icon/load-large.svg",
         className: "load_circle",
         alt: "load_circle"
       });
@@ -710,7 +733,7 @@ class GetReadyPage{
         const cols = ["red","blue","yellow","green"],
           template = Element("template");
         template.innerHTML = `<div class="${game.answers[co[i]].correct ? "correct" : ""}">
-          <img class="icon${cols[co[i]]}" src="/resource/${KahootThemes[game.theme][cols[co[i]]]}" alt="answer choice icon">
+          <img class="icon${cols[co[i]]}" src="/resource/img/game/theme/${KahootThemes[game.theme][cols[co[i]]]}" alt="answer choice icon">
           <span>${game.answers[co[i]].answer}</span>
         </div>`;
         adiv.append(template.content.cloneNode(true));
@@ -784,7 +807,7 @@ class QuizStartPage{
     });
     text2.setAttribute("text","§Loading§");
     const img = Element("img",{
-        src: "/resource/load-hole.svg",
+        src: "/resource/img/game/icon/load-hole.svg",
         alt: "loading...",
         className: "load_circle"
       }),
@@ -832,7 +855,7 @@ class QuestionAnswererPage{
       });
       noanswer.setAttribute("text","§Breather2§");
       const img = Element("img",{
-        src: "/resource/content-slide.svg",
+        src: "/resource/img/game/icon/content-slide.svg",
         id: "ContentImage"
       });
       bdiv.append(breather,img,noanswer);
@@ -875,19 +898,19 @@ class QuestionAnswererPage{
       activateLoading(false,!document.getElementById("manual").checked);
     }else{
       const r = Element("img",{
-          src: `/resource/${KahootThemes[game.theme].red}`,
+          src: `/resource/img/game/theme/${KahootThemes[game.theme].red}`,
           alt: "Red"
         }),
         b = Element("img",{
-          src: `/resource/${KahootThemes[game.theme].blue}`,
+          src: `/resource/img/game/theme/${KahootThemes[game.theme].blue}`,
           alt: "Blue"
         }),
         g = Element("img",{
-          src: `/resource/${KahootThemes[game.theme].green}`,
+          src: `/resource/img/game/theme/${KahootThemes[game.theme].green}`,
           alt: "Green"
         }),
         y = Element("img",{
-          src: `/resource/${KahootThemes[game.theme].yellow}`,
+          src: `/resource/img/game/theme/${KahootThemes[game.theme].yellow}`,
           alt: "Yellow"
         }),
         items = [r,b,y,g],
@@ -902,8 +925,8 @@ class QuestionAnswererPage{
         if(game.rawData.gameBlockLayout == "TRUE_FALSE"){
           r.setAttribute("css","layout-tfb");
           b.setAttribute("css","layout-tfr");
-          r.src = b.src = `/resource/${KahootThemes[game.theme].blue}`;
-          b.src = `/resource/${KahootThemes[game.theme].red}`;
+          r.src = b.src = `/resource/img/game/theme/${KahootThemes[game.theme].blue}`;
+          b.src = `/resource/img/game/theme/${KahootThemes[game.theme].red}`;
         }
       }
       objects.main.append(div);
@@ -987,13 +1010,13 @@ class QuestionAnswererPage{
             className: "AnswerOptions"
           }),
           ok = Element("img",{
-            src: "/resource/check.svg",
+            src: "/resource/img/game/icon/check.svg",
             onclick: ()=>{
               game.answerJ(div.querySelectorAll("img.jumble"));
             }
           }),
           reset = Element("img",{
-            src: "/resource/reset.svg",
+            src: "/resource/img/game/icon/reset.svg",
             onclick: ()=>{
               game.jumbleAnswer = [];
               new QuestionAnswererPage;
@@ -1016,7 +1039,7 @@ class QuestionAnswererPage{
             className: "AnswerOptions"
           }),
           ok = Element("img",{
-            src: "/resource/check.svg",
+            src: "/resource/img/game/icon/check.svg",
             onclick: ()=>{
               const tmp = [];
               for(const i in game.multiAnswer){
@@ -1028,7 +1051,7 @@ class QuestionAnswererPage{
             }
           }),
           reset = Element("img",{
-            src: "/resource/reset.svg",
+            src: "/resource/img/game/icon/reset.svg",
             onclick: ()=>{
               game.multiAnswer = {
                 0: false,
@@ -1144,7 +1167,7 @@ class QuestionSnarkPage{
     snark.setAttribute("text",snark.innerText);
     const div = Element("div"),
       img = Element("img",{
-        src: "/resource/load-hole.svg",
+        src: "/resource/img/game/icon/load-hole.svg",
         className: "load_circle"
       });
     div.append(snark,img);
@@ -1193,14 +1216,14 @@ class QuestionEndPage{
     }catch(e){/* No nemesis */}
     const correctMark = Element("img",{
         id: "correctMark",
-        src: info.isCorrect ? "/resource/check.svg" : "/resource/cross.svg"
+        src: info.isCorrect ? "/resource/img/game/icon/check.svg" : "/resource/img/game/icon/cross.svg"
       }),
       pointsEarned = Element("h3",{
         innerHTML: info.isCorrect ? "+" + (info.points + info.pointsData.answerStreakPoints.streakBonus) : "§KeepTrying§",
         className: "shadow"
       }),
       streakImage = Element("img",{
-        src: "/resource/fire.svg"
+        src: "/resource/img/game/icon/fire.svg"
       }),
       streakImageContainer = Element("div",{
         id: "streakImage"
@@ -1273,7 +1296,7 @@ class QuizEndPage{
       });
     if(game.endData.podiumMedalType){
       const image = Element("img",{
-        src: `/resource/${game.endData.podiumMedalType}.svg`,
+        src: `/resource/img/game/medal/${game.endData.podiumMedalType}.svg`,
         alt: "Victory Medal",
         id: "resultMedal"
       });
@@ -1335,7 +1358,7 @@ class TeamTalkPage{
     subtitle.setAttribute("text","§Discuss§");
     timer.id = "timer";
     const img = Element("img",{
-        src: "/resource/load-large.svg",
+        src: "/resource/img/game/icon/load-large.svg",
         className: "load_circle",
         alt: "load_circle"
       }),
@@ -1494,7 +1517,7 @@ function activateLoading(image,show,text,ext){
   HideDiv.style.pointerEvents = show ? "all" : "none";
   HideDiv.children[0].children[0].style.display = image ? "inline-block" : "none";
   LoadingText.innerHTML = text ? text : "";
-  HideDiv.children[0].children[0].src = ext ? "/resource/load-large.svg" : "/resource/load-hole.svg";
+  HideDiv.children[0].children[0].src = ext ? "/resource/img/game/icon/load-large.svg" : "/resource/img/game/icon/load-hole.svg";
 }
 
 function setSchema(element,type,scope,prop){
@@ -1520,39 +1543,43 @@ async function resetGame(recover){
     socket = null;
   }
   game = new Game();
-  if(recover){
-    await game.sendPin(oldgame.pin);
-    const wait = async evt=>{
-      evt = evt.data;
-      const data = JSON.parse(evt);
-      if(data.type == "Message.PinGood"){
-        new LobbyPage;
-        // wait 25 seconds to confirm client disconnect.
-        let t = (25000 - (Date.now() - oldgame.disconnectTime))/1000;
-        if(t <= 2){
-          t = 2;
-        }
-        new ErrorHandler("Reconnecting... Please wait. You should be reconnected when this message dissappears.",{
-          time: t * 1000
-        });
-        await sleep(t);
-        send({
-          message: {
-            cid: oldgame.cid,
-            answers: oldgame.got_answers
-          },
-          type: "RECOVER_DATA"
-        });
-        if(oldgame.oldQuizUUID){
-          document.getElementById("uuid").value = oldgame.oldQuizUUID;
-        }
-        game.saveOptions();
-      }else{ // asumming that the first result should be "pingood" after sending the pin.
-        resetGame();
+  const wait = async evt=>{
+    evt = evt.data;
+    const data = JSON.parse(evt);
+    if(data.type == "Message.PinGood"){
+      new LobbyPage;
+      // wait 25 seconds to confirm client disconnect.
+      let t = (25000 - (Date.now() - oldgame.disconnectTime))/1000;
+      if(t <= 2){
+        t = 2;
       }
-      socket.removeEventListener("message",wait);
-    };
+      new ErrorHandler("Reconnecting... Please wait. You should be reconnected when this message dissappears.",{
+        time: t * 1000
+      });
+      await sleep(t);
+      send({
+        message: {
+          cid: oldgame.cid,
+          answers: oldgame.got_answers
+        },
+        type: "RECOVER_DATA"
+      });
+      if(oldgame.oldQuizUUID){
+        document.getElementById("uuid").value = oldgame.oldQuizUUID;
+      }
+      game.saveOptions();
+    }else{ // asumming that the first result should be "pingood" after sending the pin.
+      resetGame();
+    }
+    socket.removeEventListener("message",wait);
+  };
+  if(recover === true){
+    await game.sendPin(oldgame.pin);
     socket.addEventListener("message",wait);
+    return;
+  }else if(recover){
+    // reconnect using differnt proxy service
+    await game.sendPin(oldgame.pin,recover);
     return;
   }
   new LoginPage;
@@ -1608,7 +1635,9 @@ function addPreset(name){
       searchLoosely: game.opts.searchLoosely,
       teamMembers: game.opts.teamMembers,
       theme: game.opts.theme,
-      timeout: game.opts.timeout
+      timeout: game.opts.timeout,
+      ChallengeDisableTimer: game.opts.ChallengeDisableTimer,
+      ChallengeDisableAutoplay: game.opts.ChallengeDisableAutoplay
     }
   });
   localStorage.presets = JSON.stringify(list);
@@ -1638,9 +1667,11 @@ function loadPresets(){
             <p>§Manual§ <span class="${(info.manual && "green") || "red"}">${(info.manual && "§ON§") || "§OFF§"}</span></p>
             <p>§Preview§ <span class="${(info.previewQuestion && "green") || "red"}">${(info.previewQuestion && "§ON§") || "§OFF§"}</span></p>
             <p>§TeamTalk§ <span class="${(info.teamtalk && "green") || "red"}">${(info.teamtalk && "§ON§") || "§OFF§"}</span></p>
+            <p>§DisableTimer§ <span class="${(info.ChallengeDisableTimer && "green") || "red"}">${(info.ChallengeDisableTimer && "§ON§") || "§OFF§"}</span></p>
+            <p>§DisableAuto§ <span class="${(info.ChallengeDisableAutoplay && "green") || "red"}">${(info.ChallengeDisableAutoplay && "§ON§") || "§OFF§"}</span></p>
           </div>
           <button id="restore_${presetNumber}" class="block">§Restore§</button>
-          <img src="/resource/cross.svg" alt="delete" id="delete_${presetNumber}">
+          <img src="/resource/img/game/icon/cross.svg" alt="delete" id="delete_${presetNumber}">
         </div>
       </div>`;
       document.getElementById("preset_container").insertBefore(template.content.cloneNode(true),after);
@@ -1758,7 +1789,7 @@ function Themer(){
   }
   const logo = document.querySelector(".Login>img[alt=\"Kahoot logo\"]");
   if(logo){
-    logo.src = "/resource/" + KahootThemes[game.theme].logo;
+    logo.src = "/resource/img/game/theme/" + KahootThemes[game.theme].logo;
   }
 }
 ThemeChooser.addEventListener("change",Themer);
@@ -1983,7 +2014,7 @@ function Search(term,index){
 function FormatSearch(quizzes){
   SearchOutput.innerHTML = `
   <span>
-    <span class="sub-quiz-img"><img src="/resource/red-konosuba.svg"/></span>
+    <span class="sub-quiz-img"><img src="/resource/img/game/theme/konosuba/red.svg"/></span>
     <span class="sub-quiz-title">§QuizTitle§</span>
     <span class="sub-quiz-author">§QuizAuthor§</span>
     <span class="sub-quiz-questions">§NumQuestion§</span>

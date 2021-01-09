@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="160" height="160" viewBox="0 0 160 160">
+    <defs>
+        <path id="ypb1pbvf0b" d="M31.836 62.444L31.836 0.844 2.972 0.844 2.972 14.308 14.412 14.308 14.412 62.444z"/>
+        <path id="7iyzth89mc" d="M29.392 62.444L29.392 0.844 0.528 0.844 0.528 14.308 11.968 14.308 11.968 62.444z"/>
+        <filter id="f31r69gbla" width="115%" height="115%" x="-7.5%" y="-7.5%" filterUnits="objectBoundingBox">
+            <feOffset dy="2" in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="2"/>
+            <feColorMatrix in="shadowBlurOuter1" result="shadowMatrixOuter1" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"/>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <g fill-rule="nonzero">
+            <g filter="url(#f31r69gbla)" transform="translate(-880 -468) translate(880 468)">
+                <g>
+                    <path fill="#3469B3" d="M70.094 10.98L84.791 10.98 84.791 25.678 70.094 25.678z" opacity=".45" transform="translate(4.444 12.111) rotate(127.185 77.443 18.33)"/>
+                    <path fill="#3469B3" d="M60.542 4.76c.06-3.507-22.862 4.476-21.925.364" opacity=".5" transform="translate(4.444 12.111)"/>
+                    <path fill="#FFC00A" d="M35.714 0.225L0.181 85.049 75.904 138.243 151.052 93.305 119.39 0.225z" transform="translate(4.444 12.111)"/>
+                    <path fill="#FFA602" d="M41.067 9.297L9.828 82.842 75.934 128.959 141.072 89.979 113.614 9.297z" transform="translate(4.444 12.111)"/>
+                    <g>
+                        <g fill="#000" opacity=".15" transform="translate(4.444 12.111) translate(57.778 32.111)">
+                            <use xlink:href="#ypb1pbvf0b"/>
+                            <use xlink:href="#ypb1pbvf0b"/>
+                        </g>
+                        <g transform="translate(4.444 12.111) translate(57.778 32.111)">
+                            <use fill="#000" xlink:href="#7iyzth89mc"/>
+                            <use fill="#F2F2F2" xlink:href="#7iyzth89mc"/>
+                        </g>
+                    </g>
+                    <path fill="#FFF" d="M5.685 88.92L37.347 111.147 135.417 46.946 123.26 12.079zM41.369 113.99L57.306 125.179 143.703 71.502 137.02 52.087z" opacity=".15" transform="translate(4.444 12.111)"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
