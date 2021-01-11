@@ -29,7 +29,7 @@ const MessageHandler = {
     INVALID_NAME: (err)=>{
       clearTimeout(game.handshakeTimeout);
       if(err.description !== "Duplicate name"){
-        new ErrorHandler("§ConnectFail§: " + (err.error || err));
+        new ErrorHandler("§ConnectFail§: " + (err.description || err.error || err));
         return new LoginPage();
       }
       new ErrorHandler("§InvalidName§");
@@ -85,6 +85,7 @@ const MessageHandler = {
       game.proxyRetry = data;
     },
     SERVER_TRANSFER: (data)=>{
+      new ErrorHandler("Transferring to another server...");
       game.proxyRetry = data;
     }
   },
@@ -249,6 +250,9 @@ class Game{
             activateLoading(true,true,"<br><br><br><br><p>Reconnecting</p>");
             let i = 0;
             function check(t){
+              if(game.proxyRetry){
+                return resetGame(game.proxyRetry);
+              }
               const x = new XMLHttpRequest();
               x.open("GET","/up");
               x.send();
@@ -605,7 +609,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v5.0.0";
+localStorage.KW_Version = "v5.0.1";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
