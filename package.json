@@ -54,7 +54,7 @@
       "public",
       "locales",
       "kahoot.js",
-      "regex.js",
+      "util",
       "package.json"
     ],
     "appImage": {
