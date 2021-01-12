@@ -714,7 +714,7 @@ class GetReadyPage{
         sp = Element("span");
       if(game.guesses.length == 0){
         chdiv.className = "ChallengeQuestion noQuiz";
-        sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.herokuapp.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
+        sp.innerHTML = `<input id="nameInput" placeholder="§EnterQuizName§" value="${document.getElementById("searchTerm").value.replace(/&/g,"&amp;").replace(/"/g,"&quot;") || ""}" oninput="document.getElementById('searchTerm').value = this.value;game.updateName();"></input><a href="https://kahoot-win.com/blog/quiz-not-found" target="_blank" class="error-info">[?]</a>`;
       }else{
         sp.innerHTML = "§Question§: " + (game.guesses[0].questions[game.index].question || game.guesses[0].questions[game.index].title);
       }

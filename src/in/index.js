@@ -609,7 +609,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v5.0.1";
+localStorage.KW_Version = "v5.0.2";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

@@ -1696,10 +1696,10 @@ app.get(/ext\/?https?:\/\/.*\.(google|gstatic|facebook|fb).*\.(com|net)\/.*/i,(r
   });
 });
 app.get("/creator",(req,res)=>{
-  res.redirect("https://kahoot-win.herokuapp.com/creator");
+  res.redirect("https://kahoot-win.com/creator");
 });
 app.get("/how-it-works",(req,res)=>{
-  res.redirect("https://kahoot-win.herokuapp.com/how-it-works");
+  res.redirect("https://kahoot-win.com/how-it-works");
 });
 app.get("/search",(req,res)=>{
   const params = req.query;
@@ -1733,7 +1733,7 @@ app.get("/api",(req,res)=>{
   res.redirect("https://kahoot.js.org");
 });
 app.get(/\/blog\/?.*?/i,(req,res)=>{
-  res.redirect("https://kahoot-win.herokuapp.com" + req.url);
+  res.redirect("https://kahoot-win.com" + req.url);
 });
 
 // 404 Page
@@ -1748,12 +1748,12 @@ app.use((req,res)=>{
 
   // respond with json
   if (req.accepts("json")) {
-    res.send(JSON.stringify({error:"Not found",message:"Visit https://kahoot-win.herokuapp.com",status:404}));
+    res.send(JSON.stringify({error:"Not found",message:"Visit https://kahoot-win.com",status:404}));
     return;
   }
 
   // default to plain-text. send()
-  res.type("txt").send("[404] I think you made a typo! Try going to https://kahoot-win.herokuapp.com/");
+  res.type("txt").send("[404] I think you made a typo! Try going to https://kahoot-win.com/");
 });
 
 if(electron){
@@ -1799,7 +1799,7 @@ if(electron){
   }
 
   // Check latest version with live site
-  request("https://kahoot-win.herokuapp.com/up",async (e,r,b)=>{
+  request("https://kahoot-win.com/up",async (e,r,b)=>{
     if(e){
       return console.log("Error fetching latest version information");
     }
@@ -1820,7 +1820,7 @@ if(electron){
           title: "New Version"
         });
         if(response === 1){
-          electron.shell.openExternal("https://kahoot-win.herokuapp.com/blog/download");
+          electron.shell.openExternal("https://kahoot-win.com/blog/download");
           electron.app.exit(0);
         }
       }
