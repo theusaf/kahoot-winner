@@ -17,16 +17,16 @@
     "cookie-parser": "^1.4.5",
     "emoji-regex": "^9.2.0",
     "express": "^4.17.1",
+    "got": "^11.8.1",
     "ip": "^1.1.5",
     "kahoot-search": "^1.0.4",
-    "kahoot.js-updated": "^2.2.5",
-    "request": "^2.88.2",
+    "kahoot.js-updated": "^2.2.6",
     "semver": "^7.3.4",
     "ws": "^7.4.2",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "electron": "^11.1.1",
+    "electron": "^11.2.0",
     "electron-builder": "^22.9.1",
     "eslint": "^7.17.0"
   },
