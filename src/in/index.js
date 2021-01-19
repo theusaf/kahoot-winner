@@ -1,4 +1,4 @@
-/* global ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TutorialDiv, TimeUpPage, FeedbackPage, TeamTalkPage */
+/* global sleep, ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TutorialDiv, TimeUpPage, FeedbackPage, TeamTalkPage */
 let socket = null;
 
 // Navigation
@@ -609,14 +609,14 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v5.0.2";
+localStorage.KW_Version = "v5.0.3";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
 checkVersion.onload = function(){
   const version = checkVersion.response.split(": ")[1],
     locVersion = localStorage.KW_Version || version;
-  if(localStorage.KW_Update == "false"){
+  if(localStorage.KW_Update == "false" || checkVersion.status !== 200){
     return;
   }
   if(version != locVersion){

@@ -3,12 +3,12 @@
   "name": "Kahoot Winner",
   "icons": [
     {
-      "src": "/resource/icon192.png",
+      "src": "/resource/img/site/icon192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/resource/icon512.png",
+      "src": "/resource/img/site/icon512.png",
       "type": "image/png",
       "sizes": "512x512"
     }

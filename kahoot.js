@@ -148,7 +148,8 @@ app.use(compression({
         css: "text/css",
         json: "application/json",
         txt: "text/plain",
-        html: "text/html"
+        html: "text/html",
+        xml: "application/xml"
       },
       t = req.url.split(".")[1],
       a = types[t];
@@ -162,7 +163,7 @@ app.use(compression({
       res.header("Content-Type",a);
     }
     if(t === undefined){
-      res.header("Content-Type","text/html");
+      // res.header("Content-Type","text/html");
     }
     return compression.filter(req,res);
   }
@@ -669,7 +670,6 @@ class QuizFinder{
         return;
       }
     }else{
-      //console.log("uuid specified");
       try{
         const data = await got(`https://create.kahoot.it/rest/kahoots/${this.parent.options.uuid}`).json();
         if(data.error){
@@ -1188,8 +1188,8 @@ const Messages = {
           game.kahoot.defaults.options.ChallengeWaitForInput = false;
         }
         // remove default fail.
-        if((game.options.fail === 2 && game.fails.length === 1) || game.options.fail != old.fail){
-          if(game.options.fail === 2){
+        if((+game.options.fail === 2 && +game.fails.length === 1) || game.options.fail != old.fail){
+          if(+game.options.fail === 2){
             game.fails = [false];
           }else{
             game.fails = [true];
@@ -1243,7 +1243,7 @@ const Messages = {
         game.kahoot.loggingMode = true;
       }
       game.kahoot.join(game.options.pin,(name||"") + "",game.options.teamMembers ? game.options.teamMembers.toString().split(",") : undefined).catch(err=>{
-        if(err && err.error && err.error.includes("handshake_denied")){
+        if(err && err.error && JSON.stringify(err.error).includes("handshake_denied")){
           handshakeVotes.push(game.ip);
         }
         game.send({message:"INVALID_NAME",type:"Error",data:err});
@@ -1543,6 +1543,9 @@ const Messages = {
       }
       k.parent.security.gotQuestion = false;
       try{
+        if(typeof q.choice === "undefined"){
+          return;
+        }
         k.parent.finder.hax.answers.push({choice:q.choice,type:q.type,text:q.text,correct:q.isCorrect,index:k.quiz.currentQuestion.questionIndex});
         k.parent.finder.searchKahoot(k.quiz.currentQuestion.questionIndex + 1);
       }catch(err){
@@ -1673,7 +1676,7 @@ app.get("/up",(req,res)=>{
 app.get(/ext\/?https?:\/\/.*\.(google|gstatic|facebook|fb).*\.(com|net)\/.*/i,async (req,res)=>{
   const url = req.url.split("/ext/").slice(1).join("/ext/");
   try{
-    const {statusCode,headers,body} = await got(url);
+    const {body,statusCode,headers} = await got(url);
     res.status(statusCode);
     res.setHeader("Cache-Control","public, max-age=31622400");
     const d = new Date;
@@ -1692,10 +1695,10 @@ app.get("/how-it-works",(req,res)=>{
   res.redirect("https://kahoot-win.com/how-it-works");
 });
 app.get("/search",async (req,res)=>{
+  res.setHeader("Cache-Control","public, max-age=86400");
   const params = req.query;
   if(params.q === undefined){
-    res.status(400);
-    return res.json({error:"INVALID_USER_INPUT",message:"Missing Query"});
+    return res.status(400).json({error:"INVALID_USER_INPUT",message:"Missing Query"});
   }
   const opts = {
     cursor: params.c === undefined ? 0 : params.c,
@@ -1706,7 +1709,7 @@ app.get("/search",async (req,res)=>{
     try{
       const data = await got(`https://create.kahoot.it/rest/kahoots/${params.q}`).json();
       if(data.error){
-        throw "search error";
+        throw "invaid search";
       }
       res.json(data);
     }catch(e){

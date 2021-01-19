@@ -1181,6 +1181,9 @@ class QuestionSnarkPage{
 class QuestionEndPage{
   constructor(info){
     info = JSON.parse(info);
+    if(typeof info.choice === "undefined"){
+      return new TimeUpPage;
+    }
     if(info.isCorrect){
       game.streak++;
     }else{
