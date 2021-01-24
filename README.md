@@ -13,6 +13,7 @@ You may modify the code to remove the electron stuff.
 **Important: The latest version uses recaptcha v3**
 - You need to create a recaptcha account and add your site domain (unless you are just using it as localhost)
 - This means that you need to modify `index.html` and `index.js` to use your recaptcha public keys
+- See reformatting below
 
 The app doesn't actually verify the requests, so you can actually just remove all things related to recaptcha
 
@@ -35,6 +36,14 @@ Alternatively, I have uploaded various versions of the files in [archive.org](ht
 - `json-full.zip` A zip file containing all items. (Stored in a folder named "json-full")
 
 ## Reformat for use in non-gui devices
+Just run the following command:
+```bash
+npm run reformat
+```
+This uses the power of regular expressions to get rid of the things you do not need!
+
+**OR**
+
 Simply append `--disable-electron` when starting the app:
 ```bash
 node kahoot.js --disable-electron

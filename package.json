@@ -5,7 +5,9 @@
   "main": "kahoot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "generate": "cd src; node generate.js",
+    "reformat": "npm uninstall electron electron-builder && node util/reformat.js && npm run generate"
   },
   "keywords": [
     "kahoot"
@@ -28,7 +30,8 @@
   "devDependencies": {
     "electron": "^11.2.0",
     "electron-builder": "^22.9.1",
-    "eslint": "^7.18.0"
+    "eslint": "^7.18.0",
+    "minify": "^6.0.1"
   },
   "build": {
     "appId": "io.github.theusaf.kahoot-win",
