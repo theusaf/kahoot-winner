@@ -128,7 +128,7 @@ if(!fs.existsSync(path.join(mainPath,"keys.json")) || +(fs.readFileSync(path.joi
 function ReadItem(item){
   return new Promise(function(resolve, reject) {
     fs.readFile(path.join(mainPath,"json-full",item),"utf8",(err,data)=>{
-      if(err){reject();}
+      if(err){return reject();}
       resolve(JSON.parse(data));
     });
   });
@@ -591,8 +591,13 @@ class QuizFinder{
     }
     if(!this.parent.options.uuid){
       const searchText = (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : ""),
-        len = this.parent.kahoot.quiz.quizQuestionAnswers.length,
+        len = this.parent.kahoot.quiz.quizQuestionAnswers.length;
+      let keys = {};
+      try{
         keys = await ReadItem("../keys.json");
+      }catch(e){
+        console.log("Could not get keys",e);
+      }
       if((searchText.replace(/\s\*/g,"")) === ""){
         if(!this.hax.noQuiz){
           this.hax.noQuiz = true;
