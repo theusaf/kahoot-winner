@@ -1,13 +1,13 @@
 {
   "name": "kahoot-win",
-  "version": "5.0.3",
+  "version": "5.1.0",
   "description": "A Kahoot Cheating Website",
   "main": "kahoot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "generate": "cd src; node generate.js",
-    "reformat": "npm uninstall electron electron-builder && node util/reformat.js && npm run generate"
+    "reformat": "npm uninstall electron electron-builder && node reformat.js && npm run generate"
   },
   "keywords": [
     "kahoot"
@@ -22,13 +22,13 @@
     "got": "^11.8.1",
     "ip": "^1.1.5",
     "kahoot-search": "^1.0.4",
-    "kahoot.js-updated": "^2.3.2",
+    "kahoot.js-updated": "^2.3.3",
     "semver": "^7.3.4",
     "ws": "^7.4.2",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "electron": "^11.2.0",
+    "electron": "^11.2.1",
     "electron-builder": "^22.9.1",
     "eslint": "^7.18.0",
     "minify": "^6.0.1"
@@ -36,7 +36,7 @@
   "build": {
     "appId": "io.github.theusaf.kahoot-win",
     "productName": "Kahoot Winner",
-    "copyright": "Copyright ©2020 theusaf",
+    "copyright": "Copyright ©2020-2021 theusaf",
     "mac": {
       "icon": "icon.icns",
       "target": "dmg"
@@ -57,7 +57,7 @@
       "public",
       "locales",
       "kahoot.js",
-      "util",
+      "app",
       "package.json"
     ],
     "appImage": {

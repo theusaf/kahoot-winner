@@ -1,5 +1,5 @@
-const CACHE_NAME = "kahoot-win-cache-v5.0.3";
-const CONST_NAME = "kahoot-win-cache-consts-v5.0.0";
+const CACHE_NAME = "kahoot-win-cache-v5.1.0";
+const CONST_NAME = "kahoot-win-cache-consts-v5.1.0";
 const URLCONSTS = [
   "/resource/img/game/theme/duck/logo.svg",
   "/resource/img/game/theme/duck/red.svg",
@@ -33,7 +33,7 @@ const URLCONSTS = [
   "/resource/img/game/medal/bronze.svg",
   "/resource/img/game/medal/gold.svg",
   "/resource/img/game/medal/silver.svg",
-  "/resource/img/game/icon/icon-gear.svg",
+  "/resource/img/site/icon-gear.svg",
   "/resource/img/game/icon/load-hole.svg",
   "/resource/img/game/icon/load-large.svg",
   "/resource/img/game/icon/fire.svg",

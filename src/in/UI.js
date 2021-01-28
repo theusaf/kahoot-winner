@@ -247,14 +247,14 @@ class TwoStepPage{
         src: `/resource/img/game/theme/${KahootThemes[game.theme].green}`,
         alt: "Green",
         onclick: ()=>{
-          game.answer2(2,g);
+          game.answer2(3,g);
         }
       }),
       y = Element("img",{
         src: `/resource/img/game/theme/${KahootThemes[game.theme].yellow}`,
         alt: "Yellow",
         onclick: ()=>{
-          game.answer2(3,y);
+          game.answer2(2,y);
         }
       });
     div.append(r,b,y,g);
@@ -1903,8 +1903,14 @@ const shortcuts = e=>{
           document.head.append(icon);
           document.title = "Play Kahoot!";
         }
-        document.getElementById("manual").checked = true;
-        document.getElementById("hideAnswers").checked = Boolean(SettingDiv.style.display);
+        if(SettingDiv.style.display) {
+          game.panicSettings = JSON.parse(JSON.stringify(game.opts));
+          document.getElementById("manual").checked = true;
+          document.getElementById("hideAnswers").checked = true;
+          document.getElementById("previewQuestion").checked = false;
+        }else{
+          game.opts = game.panicSettings;
+        }
         game.saveOptions();
         // yes, that is a typo
         dataLayer.push({type:"panick",value:""});

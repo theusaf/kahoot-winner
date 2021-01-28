@@ -227,6 +227,7 @@ class Game{
     this.correctIndex = null;
     this.questionStarted = false;
     this.questionAnswered = false;
+    this.panicSettings = null;
   }
   sendPin(pin,host){
     return new Promise((res)=>{
@@ -245,7 +246,9 @@ class Game{
           };
           socket.onclose = ()=>{
             game.disconnectTime = Date.now();
-            new ErrorHandler("Session disconnected.");
+            if (!game.proxyRetry) {
+              new ErrorHandler("Session disconnected.");
+            }
             // attempt to reconnect
             activateLoading(true,true,"<br><br><br><br><p>Reconnecting</p>");
             let i = 0;
@@ -269,7 +272,7 @@ class Game{
                 },t * 1000);
               };
               x.onload = function(){
-                if(x.status != 200 || !/^-?\d+ (hours|minutes) until expected reset.*$/.test(x.response)){
+                if(x.status !== 200 && x.status !== 304){
                   return x.onerror(t);
                 }
                 activateLoading(false,false);
@@ -311,7 +314,7 @@ class Game{
       if(document.getElementById("handshake-fail-div")){
         document.getElementById("handshake-fail-div").outerHTML = "";
       }
-      MessageHandler.Error.HANDSHAKE();
+      new ErrorHandler("This is taking a long time. If this continues longer, you may need to try again.");
       let url;
       switch (detectPlatform()) {
         case "Windows":
@@ -609,7 +612,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v5.0.3";
+localStorage.KW_Version = "v5.1.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
