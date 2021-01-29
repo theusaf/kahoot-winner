@@ -3,7 +3,13 @@ const fs = require("fs"),
   path = require("path");
 module.exports = function ReadItem(item){
   return new Promise(function(resolve, reject) {
-    fs.readFile(path.join(globals.mainPath,"json-full",item),"utf8",(err,data)=>{
+    let pth = path.join(globals.mainPath,"json-full",item);
+    if(item === "keys.json"){
+      pth = path.join(globals.mainPath,item);
+    }else if(item.indexOf("/objects/") === 0){
+      pth = path.join(globals.mainPath,"json-full",item.split("/objects/")[1]);
+    }
+    fs.readFile(pth,"utf8",(err,data)=>{
       if(err){return reject();}
       resolve(JSON.parse(data));
     });

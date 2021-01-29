@@ -14,7 +14,7 @@ const MessageHandler = {
       return;
     },
     INVALID_PIN: ()=>{
-      new LoginPage(false);
+      resetGame();
       return new ErrorHandler("§InvalidPIN§");
     },
     MAX_SESSION_COUNT: ()=>{
@@ -30,7 +30,7 @@ const MessageHandler = {
       clearTimeout(game.handshakeTimeout);
       if(err.description !== "Duplicate name"){
         new ErrorHandler("§ConnectFail§: " + (err.description || err.error || err));
-        return new LoginPage();
+        return resetGame();
       }
       new ErrorHandler("§InvalidName§");
       return new LoginPage(true);
@@ -612,7 +612,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v5.1.0";
+localStorage.KW_Version = "v5.2.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();

@@ -1,4 +1,6 @@
 const {BruteForces} = require("./globals.js"),
+  LiveTwoStepAnswer = require("kahoot.js-updated/src/assets/LiveTwoStepAnswer"),
+  sleep = require("../util/sleep.js"),
   shuffle = require("../util/shuffle.js"),
   QuestionAnswer = require("./QuestionAnswer.js"),
   QuizFinder = require("./QuizFinder.js");
@@ -11,22 +13,25 @@ const Listeners = {
     }),type:"Message.JoinSuccess"});
   },
   QuizStart: (k,q)=>{
+    if(!k.parent || !k.parent.finder){
+      return;
+    }
     if(k.parent.options.isChallenge){
       // set valid options
       if(!k.parent.finder.hax.validOptions.length){
         k.parent.finder.hax.validOptions.push(q.rawEvent);
       }
     }
-    if(typeof(q.type) === "undefined"){
-      q.type = "quiz"; // Since we joined in the middle of things, we have to assume a quiz type
-      q.name = ""; // Set blank name, since we also won't know that.
-    }
     k.parent.finder.hax.cursor = 0;
-    q.name = k.parent.options.name && !q.name ? k.parent.options.name : q.name;
+    k.parent.finder.hax.realName = q.quizTitle;
+    q.name = k.parent.options.name && !q.quizTitle ? k.parent.options.name : q.quizTitle;
     k.parent.send({
       message:JSON.stringify({name:q.name,raw:q}),
       type: "Message.QuizStart"
     });
+    if(k.parent.finder.hax.realName){
+      k.parent.finder.hax.noQuiz = true;
+    }
     k.parent.finder.searchKahoot(0);
   },
   QuestionReady: (k,q)=>{
@@ -134,22 +139,28 @@ const Listeners = {
     k.parent.security.joined = false;
     k.parent.finishedProcessing = true;
   },
-  TwoFactorReset: k=>{
+  TwoFactorReset: async k=>{
     if(k.parent.options.brute){
-      clearInterval(k.bruter);
-      let i = 0;
-      k.bruter = setInterval(()=>{
-        k.answerTwoFactorAuth(BruteForces[i++]).catch(()=>{});
-        if(!BruteForces[i]){
-          clearInterval(k.bruter);
+      // answer all possible combinations in ~2 seconds!
+      const pack = [];
+      for(let i = 0; i < BruteForces.length; i++){
+        const m = new LiveTwoStepAnswer(k, BruteForces[i]);
+        m.id = `${++k.messageId}`;
+        pack.push(m);
+      }
+      // send in batches
+      for(let i = 0; i < pack.length; i+=4){
+        if(!k.socket) {
+          return;
         }
-      },280);
+        await sleep(.28);
+        k.socket.send(JSON.stringify(pack.slice(i,i + 4)));
+      }
     }else{
       k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
     }
   },
   TwoFactorCorrect: k=>{
-    clearInterval(k.bruter);
     k.parent.send({message:"Two Step Auth Completed",type:"Message.TwoStepSuccess"});
   },
   TwoFactorWrong: k=>{

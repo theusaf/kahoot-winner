@@ -4,7 +4,8 @@ const {edit} = require("../util/regex.js"),
   readJSON = require("../util/readjson.js"),
   {Searching,SearchDatabase} = require("./search.js"),
   shuffle = require("../util/shuffle.js"),
-  sleep = require("../util/sleep.js");
+  sleep = require("../util/sleep.js"),
+  toFlat = require("../util/toFlat.js");
 class QuizFinder{
   constructor(){
     this.cursor = 0;
@@ -16,7 +17,8 @@ class QuizFinder{
       answers: [],
       correctAnswer: 0,
       cursor: 0,
-      stop: false
+      stop: false,
+      realName: null
     };
   }
   getAnswers(q,log,noset){
@@ -250,8 +252,8 @@ class QuizFinder{
       options.author = this.parent.options.author;
     }
     if(!this.parent.options.uuid){
-      const searchText = (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : ""),
-        len = this.parent.kahoot.quiz.quizQuestionAnswers.length;
+      const searchText = this.hax.realName ? edit(this.hax.realName) : (this.parent.options.searchTerm ? edit(this.parent.options.searchTerm) : ""),
+        len = toFlat(this.parent.kahoot.quiz.quizQuestionAnswers);
       if((searchText.replace(/\s\*/g,"")) === ""){
         if(!this.hax.noQuiz){
           this.hax.noQuiz = true;
@@ -277,7 +279,7 @@ class QuizFinder{
         let keys = {};
         try{
           if(globals.KahootDatabaseInitialized){
-            keys = await readJSON("../keys.json");
+            keys = await readJSON("keys.json");
           }
         }catch(e){
           console.log("Failed to fetch keys",e);
@@ -302,7 +304,7 @@ class QuizFinder{
       if(typeof results.totalHits === "number"){
         this.hax.totalHits = results.totalHits;
       }
-      if(this.hax.cursor >= 7500 || (this.hax.totalHits < this.hax.cursor)){
+      if(this.hax.cursor >= 9975 || (this.hax.totalHits < this.hax.cursor)){
         this.ignoreKahoot = true;
         if(this.ignoreDB){
           this.hax.stop = true;
@@ -328,7 +330,7 @@ class QuizFinder{
         let keys = {};
         try{
           if(globals.KahootDatabaseInitialized){
-            keys = await readJSON("../keys.json");
+            keys = await readJSON("keys.json");
           }
         }catch(e){
           console.log("Failed to fetch keys",e);

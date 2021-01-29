@@ -71,17 +71,12 @@ const Messages = {
       }
       return;
     }
-    try{
-      const {body} = await got(`https://kahoot.it/reserve/session/${pin}/?${Date.now()}`);
-      if(body === "Not found" || /(MethodNotAllowedError)/img.test(body)){
-        game.send({message:"INVALID_PIN",type:"Error"});
-      }else{
-        game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
-        game.options.pin = +pin;
-      }
-    }catch(e){
-      game.send({message:"INVALID_PIN",type:"Error"});
+    // Just set the pin, validate in join
+    if (isNaN(pin) && pin !== "test") {
+      return game.send({message:"INVALID_PIN",type:"Error"});
     }
+    game.send({message:`Connected to ${pin}!`,type:"Message.PinGood"});
+    game.options.pin = +pin;
   },
   SET_OPTS: (game,opts)=>{
     try{

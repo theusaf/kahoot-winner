@@ -1,16 +1,6 @@
 /* global ErrorHandler,LoginPage,dataLayer,resetGame,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch,LobbyPage */
 
 window.addEventListener("load",()=>{
-  if(localStorage.seenNotice !== "4.0.0"){
-    new ErrorHandler("Important Notice! Click to show",{
-      isNotice: true,
-      onclick: (e,div)=>{
-        div.outerHTML = "";
-        showNotice();
-      },
-      permanent: true
-    });
-  }
   if(localStorage.returningUser === "3.3.0"){
     return;
   }
@@ -230,20 +220,4 @@ function tutorialSteps(n){
       </ol>`;
     }
   }
-}
-
-function showNotice(){
-  localStorage.seenNotice = "4.0.0";
-  const temp = document.createElement("template");
-  temp.innerHTML = `<div class="notice">
-    <button onclick="document.querySelector('.notice').outerHTML = '';">OK</button>
-    <h3><b>§Notice1§: </b><span class="red">§Notice2§</span></h3>
-    <h4>§Notice3§</h4>
-    <p>§Notice4§</p>
-    <p>§Notice5§</p>
-    <div>
-      <img src="/resource/img/misc/notice-2020-07-03.png" alt="input at the top">
-    </div>
-  </div>`;
-  document.body.append(temp.content.cloneNode(true));
 }

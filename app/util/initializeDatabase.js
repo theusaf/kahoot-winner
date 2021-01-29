@@ -68,7 +68,7 @@ module.exports = async function initializeDatabase(){
           console.log("Database successfully extracted. Removing unneeded files and downloading keys.");
           fs.unlinkSync(path.join(mainPath,"kdb.zip"));
           try{
-            const {body} = await got("https://archive.org/download/kahoot-win/full-export-keys-sectioned.json");
+            const {body} = await got("https://archive.org/download/kahoot-win/full-export-keys-sectioned-2.json");
             fs.writeFile(path.join(mainPath,"keys.json"),body,(e)=>{
               if(e){
                 globals.ebar(-1);

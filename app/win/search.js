@@ -1,6 +1,7 @@
 const globals = require("./globals.js"),
   readJSON = require("../util/readjson.js"),
-  Search = require("kahoot-search");
+  Search = require("kahoot-search"),
+  toFlat = require("../util/toFlat.js");
 async function SearchDatabase(finder,index){
   if(!globals.KahootDatabaseInitialized){
     return [];
@@ -14,6 +15,11 @@ async function SearchDatabase(finder,index){
       }
       if(finder.parent.options.author){
         if(finder.parent.options.author != k.author){
+          return false;
+        }
+      }
+      if(finder.hax.realName){
+        if(k.title !== finder.hax.realName && k.title){
           return false;
         }
       }
@@ -162,9 +168,9 @@ async function SearchDatabase(finder,index){
     },
     res = [];
   try{
-    const keys = (await readJSON("../keys.json"))[finder.parent.kahoot.quiz.quizQuestionAnswers.length];
+    const keys = (await readJSON("keys.json"))[toFlat(finder.parent.kahoot.quiz.quizQuestionAnswers)];
     for(let i = index || 0;i < index + (globals.DBAmount || 50);i++){
-      const item = await readJSON(keys[i] + ".json");
+      const item = await readJSON("/objects/" + keys[i] + ".json");
       if(filt(item)){
         res.push(item);
       }
@@ -190,6 +196,9 @@ async function Searching(term,opts,finder){
           let b = false;
           if(!finder.hax.answers.length){
             b = true;
+          }
+          if(finder.hax.realName){
+            return o.title === finder.hax.realName;
           }
           for(let i = 0;i < a.length;++i){
             if(!o.questions[a[i].index].choices){
@@ -270,6 +279,9 @@ async function Searching(term,opts,finder){
           let b = false;
           if(!finder.hax.answers.length){
             b = true;
+          }
+          if(finder.hax.realName){
+            return o.title === finder.hax.realName;
           }
           for(let i = 0;i < a.length;++i){
             try{

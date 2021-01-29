@@ -1,4 +1,4 @@
-const CACHE_NAME = "kahoot-win-cache-v5.1.0";
+const CACHE_NAME = "kahoot-win-cache-v5.2.0";
 const CONST_NAME = "kahoot-win-cache-consts-v5.1.0";
 const URLCONSTS = [
   "/resource/img/game/theme/duck/logo.svg",
