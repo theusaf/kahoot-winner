@@ -149,12 +149,12 @@ const Listeners = {
         pack.push(m);
       }
       // send in batches
-      for(let i = 0; i < pack.length; i+=4){
+      for(let i = 0; i < pack.length; i+=2){
         if(!k.socket) {
           return;
         }
-        await sleep(.28);
-        k.socket.send(JSON.stringify(pack.slice(i,i + 4)));
+        await sleep(.4);
+        k.socket.send(JSON.stringify(pack.slice(i,i + 2)));
       }
     }else{
       k.parent.send({message:"Two Step Auth Required",type:"Message.RunTwoSteps"});
