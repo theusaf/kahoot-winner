@@ -316,6 +316,9 @@ class QuizFinder{
         this.hax.stop = true;
         return;
       }
+      if(!this.parent.kahoot.quiz){
+        return;
+      }
       if(this.parent.kahoot.quiz.currentQuestion && index < this.parent.kahoot.quiz.currentQuestion.questionIndex + 1){
         this.hax.validOptions = results || results2;
         return;
