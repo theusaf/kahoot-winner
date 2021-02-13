@@ -6,5 +6,6 @@ module.exports = {
   KahootDatabaseInitialized: false,
   mainPath: process.argv.includes("--disable-electron") ? path.join(__dirname,"../../") : path.join((require("electron").app || require("electron").remote.app).getPath("appData"),"Kahoot Winner"),
   startupDate: Date.now(),
-  ebar: () => {}
+  ebar: () => {},
+  keys: {}
 };

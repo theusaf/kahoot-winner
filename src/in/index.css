@@ -590,8 +590,7 @@ input.ch{
 
 /* QuizStart */
 [ui-event="QuizStart"] > #L1,
-[ui-event="Lobby"] > #L1,
-[ui-event="TimeUp"] > #L1{
+[ui-event="Lobby"] > #L1 {
   display: none;
 }
 [ui-event="QuizStart"] #UIMid{
@@ -638,7 +637,8 @@ input.ch{
 [ui-event="TeamTalk"] #L1,
 [ui-event="QuestionAnswer"] #L1,
 [ui-event="Answered"] #L1,
-[ui-event="QuestionEnd"] #L1{
+[ui-event="QuestionEnd"] #L1,
+[ui-event="TimeUp"] #L1 {
   display: flex;
   height: 3rem;
   padding-left: 0;

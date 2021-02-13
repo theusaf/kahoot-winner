@@ -3,7 +3,7 @@
   <head>
     <link rel="preload" href="/ext/https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel = 'stylesheet'">
     <link rel="stylesheet" href="index.css">
-    <meta name="version" content="5.2.0">
+    <meta name="version" content="6.0.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="title" content="§Title§">
     <meta name="description" content="§Description§">
@@ -89,8 +89,6 @@
           <div class="displayFlex">
             <label onclick="window.location.reload();return false;" class="mobireload" itemprop="result"><img src="/resource/img/game/icon/reset.svg"></img></label>
             <br class="mobireload">
-            <!-- Reconnect button removed in 2.13.0 (deprecated.) No use for it, can cause issues. Shortcut is usable still -->
-            <!-- label onclick="send({type:'RECONNECT',message:'I think i lost connection'})" class="button block" itemprop="result"><span>Reconnect Bot</span><p class="shortcut">ctrl + e</p></label -->
             <div class="flex displayFlex" style="flex-flow: column;">
               <label for="theme"><span>§Theme§</span></label>
               <select id="theme" class="block">
@@ -344,6 +342,19 @@
               </div>
             </div></label>
 
+            <!--<meta content="toggle" itemprop="result"/>
+            <input class="ch" type="checkbox" id="showQuestionTimer">
+            <label class="ch button" for="showQuestionTimer"><span>§ShowTimer§</span><label for="info-hide"><p class="shortcut2">?</p></label>
+            <input type="checkbox" class="ch info" id="info-showQuestionTimer">
+            <div class="info">
+              <div>
+                <label for="info-showQuestionTimer">X</label>
+                <h4>§ShowTimer§</h4>
+                <p class="mobihide">§Shortcut§ <code>ctrl + i</code></p>
+                <p>§ShowTimer1§</p>
+              </div>
+            </div></label>-->
+
             <meta content="toggle" itemprop="result"/>
             <input class="ch" type="checkbox" id="hideAnswers">
             <label class="ch button" for="hideAnswers"><span>§HideCorrect§</span><label for="info-hide"><p class="shortcut2">?</p></label>
@@ -569,6 +580,7 @@
       <div class="Changelog">
         <div>
           <label for="changelog" id="changelogclose">X</label>
+          <p><a href="/blog/update-6-0-0">6.0.0</a> - Increased speed of searching and joining games. Added some new features.</p>
           <p><a href="/blog/update-5-2-0">5.2.0</a> - Fixed more bugs, re-implemented the automatic quiz name search.</p>
           <p>5.1.0 - Bug fixes, improvements.</p>
           <p>5.0.1 / 5.0.2 - Small bug fixes. New domain!</p>
@@ -714,6 +726,7 @@
         </div>
       </div>
     </div>
+    <script src="/resource/misc/kahoot.js-updated.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
     <!-- Web App Script -->
     <script type="text/javascript">

@@ -1,6 +1,8 @@
 {
   "en": {
+
     "//1": "index.html",
+
     "AboutQuestion6": "Clearing Cache Tutorial",
     "PanicLabel": "About Panic Mode",
     "AboutDisclaimer": "Disclaimer: I do not take responsibility for any punishments caused by cheating using this tool. This tool was mainly made for entertainment purposes.",
@@ -119,7 +121,9 @@
     "AboutAnswer5": "The small gears in the settings are the 'sub-settings' which allows more control over the option and unlocks extra features.",
     "Tutorial": "Tutorial",
     "Donate": "Donate",
+
     "//2": "index.js",
+
     "ServerOverloaded": "The server is overloaded! Using new server:",
     "InvalidInput": "Invalid user input",
     "InvalidPIN": "Invalid PIN",
@@ -145,7 +149,10 @@
     "UpdateAvailable4": "Disable update notification",
     "UpdateAvailable5": "Please wait...",
     "UpdateAvailable6": "There was an error forcing an update. Please clear or reload the page cache manually.",
+
     "//3": "UI.js",
+
+    "JoinSoon": "You'll be able to join soon",
     "InvalidUUID": "The Quiz ID Provided is invalid or belongs to a private quiz",
     "TypeQuiz": "Quiz",
     "TypeOpenEnded": "Type Answer",
@@ -154,6 +161,7 @@
     "TypeWordCloud": "Word Cloud",
     "TypeTrueFalse": "True or False",
     "TypeContent": "Slide",
+    "TypeBrainstorm": "Brainstorm",
     "DidWellShareWithFriends": "Enjoyed Kahoot Winner?🔥Share this website with your friends and win more Kahoot!s",
     "ActualGame": "Kahoot Quiz",
     "GuessGame": "Guessed Quiz",
@@ -232,7 +240,9 @@
     "HowFeel": "To continue, tell us how you feel",
     "DidLearn": "Did you learn something?",
     "DoRecommend": "Do you recommend it?",
+
     "//4": "tutorial.js",
+
     "Tut1": "Hey there! Looks like you are new here. Would you like a tutorial?",
     "Tut2": "Note: Do not actually do any actions in this tutorial. Just press \"Next\" and \"Done\".",
     "Tut2a": "Joining a game: PIN",
@@ -308,12 +318,16 @@
     "Notice3": "What does this mean?",
     "Notice4": "You now need to input the quiz name yourself. You may get lucky if the quiz is super popular, as we now store Kahoot quizzes that have been played in the database.",
     "Notice5": "You can put the quiz name at the input at the top:",
+
     "//5": "index.css",
+
     "Close": "Close",
     "Open": "Open"
   },
   "es": {
+
     "//1": "index.html",
+
     "AboutQuestion6": "Tutorial de limpieza de caché",
     "PanicLabel": "Acerca del modo de pánico",
     "AboutDisclaimer": "Descargo de responsabilidad: no me hago responsable de los castigos causados por hacer trampa con esta herramienta. Esta herramienta se creó principalmente con fines de entretenimiento.",
@@ -432,7 +446,9 @@
     "AboutAnswer5": "Los pequeños engranajes en la configuración son las 'sub-configuraciones' que permiten un mayor control sobre la opción y desbloquean funciones adicionales.",
     "Tutorial": "Tutorial",
     "Donate": "Donar",
+
     "//2": "index.js",
+
     "ServerOverloaded": "¡El servidor está sobrecargado! Usando un nuevo servidor:",
     "InvalidInput": "Entrada de usuario no válida",
     "InvalidPIN": "PIN inválido",
@@ -458,7 +474,10 @@
     "UpdateAvailable4": "Deshabilitar la notificación de actualización",
     "UpdateAvailable5": "Por favor espera...",
     "UpdateAvailable6": "Hubo un error al forzar una actualización. Borre o vuelva a cargar la caché de la página manualmente.",
+
     "//3": "UI.js",
+
+    "JoinSoon": "Podrás unirte pronto",
     "InvalidUUID": "La ID de prueba proporcionada no es válida o pertenece a una prueba privada",
     "TypeQuiz": "Examen",
     "TypeOpenEnded": "Abierto",
@@ -467,6 +486,7 @@
     "TypeWordCloud": "Nube de palabras",
     "TypeTrueFalse": "Verdadero o falso",
     "TypeContent": "Diapositivas",
+    "TypeBrainstorm": "Idea genial",
     "DidWellShareWithFriends": "¿Disfrutaste de Kahoot Winner? 🔥 Comparte este sitio web con tus amigos y gana más Kahoot! S",
     "ActualGame": "Prueba de Kahoot",
     "GuessGame": "Prueba adivinada",
@@ -545,7 +565,9 @@
     "HowFeel": "Para continuar, cuéntanos como te sientes",
     "DidLearn": "¿Aprendiste algo?",
     "DoRecommend": "¿Lo recomiendas?",
+
     "//4": "tutorial.js",
+
     "Tut1": "¡Hola! Parece que eres nuevo aquí. ¿Quieres un tutorial?",
     "Tut2": "Nota: en realidad, no realice ninguna acción en este tutorial. Simplemente presione \"Siguiente\" y \"Listo\".",
     "Tut2a": "Unirse a un juego: PIN",
@@ -621,12 +643,16 @@
     "Notice3": "¿Qué significa esto?",
     "Notice4": "Ahora debe ingresar el nombre de la prueba usted mismo. Puede tener suerte si el cuestionario es muy popular, ya que ahora almacenamos cuestionarios de Kahoot que se han jugado en la base de datos.",
     "Notice5": "Puede poner el nombre de la prueba en la entrada en la parte superior:",
+
     "//5": "index.css",
+
     "Close": "Cerca",
     "Open": "Abierto"
   },
   "zh": {
+
     "//1": "index.html",
+
     "AboutQuestion6": "清除缓存教程",
     "PanicLabel": "关于恐慌模式",
     "AboutDisclaimer": "免责声明：对于因使用此工具作弊而造成的任何惩罚，我不承担任何责任。 该工具主要用于娱乐目的。",
@@ -745,7 +771,9 @@
     "AboutAnswer5": "设置中的小齿轮是“子设置”，可以对选项进行更多控制并解锁其他功能。",
     "Tutorial": "讲解",
     "Donate": "捐款",
+
     "//2": "index.js",
+
     "ServerOverloaded": "服务器超载！ 使用新服务器：",
     "InvalidInput": "无效的用户输入",
     "InvalidPIN": "PIN码无效",
@@ -771,7 +799,10 @@
     "UpdateAvailable4": "禁用更新通知",
     "UpdateAvailable5": "请稍候...",
     "UpdateAvailable6": "强制更新时出错。 请手动清除或重新加载页面缓存。",
+
     "//3": "UI.js",
+
+    "JoinSoon": "您很快就能加入",
     "InvalidUUID": "提供的测验ID无效或属于私人测验",
     "TypeQuiz": "测验",
     "TypeOpenEnded": "输入答案",
@@ -780,6 +811,7 @@
     "TypeWordCloud": "词云",
     "TypeTrueFalse": "对或错",
     "TypeContent": "幻灯片放映",
+    "TypeBrainstorm": "头脑风暴",
     "DidWellShareWithFriends": "享受Kahoot赢家吗？🔥与您的朋友分享此网站并赢取更多Kahoot！",
     "ActualGame": "Kahoot测验",
     "GuessGame": "猜测验",
@@ -858,7 +890,9 @@
     "HowFeel": "要继续，请告诉我们您的感受",
     "DidLearn": "你学到了什么吗？",
     "DoRecommend": "你会推荐吗？",
+
     "//4": "tutorial.js",
+
     "Tut1": "嘿！ 看来您是新来的。 您要教程吗？",
     "Tut2": "注意：在本教程中实际上不要执行任何操作。 只需按“下一步”和“完成”。",
     "Tut2a": "加入游戏：PIN",
@@ -934,7 +968,9 @@
     "Notice3": "这是什么意思？",
     "Notice4": "现在，您需要自己输入测验名称。 如果测验非常受欢迎，您可能会很幸运，因为我们现在将已播放的Kahoot测验存储在数据库中。",
     "Notice5": "您可以将测验名称放在顶部的输入中：",
+
     "//5": "index.css",
+
     "Close": "关",
     "Open": "打开"
   },

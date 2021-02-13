@@ -1,5 +1,6 @@
-/* global sleep, ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TutorialDiv, TimeUpPage, FeedbackPage, TeamTalkPage */
+/* global socket, KahootClient, sleep, ErrorHandler, ChangelogSwitch, AboutSwitch, SettingSwitch, closePage, LoginPage, activateLoading, dataLayer, TwoStepPage, LobbyPage, resetGame, grecaptcha, SettingDiv, QuizEndPage, QuestionEndPage, QuestionSnarkPage, QuestionAnswererPage, GetReadyPage, QuizStartPage, LobbyPage, TimeUpPage, FeedbackPage, TeamTalkPage */
 let socket = null;
+socket = null;
 
 // Navigation
 if(location.pathname === "/" && localStorage.autoNavigatePage && localStorage.autoNavigatePage !== "en"){
@@ -7,166 +8,192 @@ if(location.pathname === "/" && localStorage.autoNavigatePage && localStorage.au
   location.pathname = localStorage.autoNavigatePage;
 }
 
-const MessageHandler = {
-  Error: {
-    INVALID_USER_INPUT: ()=>{
-      console.log("WS Message ERR: §InvalidInput§");
-      return;
+class LiveBaseMessage{
+  constructor(client,channel,data){
+    this.channel = channel;
+    this.clientId = client.clientId;
+    if(data){this.data = data;}
+    this.ext = {};
+  }
+}
+class LiveTwoStepAnswer extends LiveBaseMessage{
+  constructor(client,sequence){
+    super(client,"/service/controller",{
+      id: 50,
+      type: "message",
+      gameid: client.gameid,
+      host: "kahoot.it",
+      content: JSON.stringify({
+        sequence: sequence.join("")
+      })
+    });
+  }
+}
+
+function sendQuizQuestionAnswers(){
+  if(game.sentQuizQuestionAnswers){
+    return;
+  }
+  game.sentQuizQuestionAnswers = true;
+  send(`QUIZ_QUESTION_ANSWERS;${JSON.stringify(game.client.quiz.quizQuestionAnswers)}`);
+}
+
+const BruteForces = [[0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,2,1],[0,3,1,2],[1,0,2,3],[1,0,3,2],[1,2,0,3],[1,2,3,0],[1,3,0,2],[1,3,2,0],[2,0,1,3],[2,0,3,1],[2,1,0,3],[2,1,3,0],[2,3,0,1],[2,3,1,0],[3,0,1,2],[3,0,2,1],[3,1,0,2],[3,1,2,0],[3,2,0,1],[3,2,1,0]],
+  MessageHandler = {
+    PING: ()=>{
+      console.log("Recieved ping from server");
     },
-    INVALID_PIN: ()=>{
-      resetGame();
-      return new ErrorHandler("§InvalidPIN§");
+    MAINTAINANCE: msg=>{
+      return new ErrorHandler("Maintainance Alert: " + msg);
     },
-    MAX_SESSION_COUNT: ()=>{
-      setTimeout(()=>{
-        new ErrorHandler("§MaxIP§");
-        activateLoading(true,true,"§MaxIP2§");
-        setTimeout(()=>{
-          resetGame();
-        },30000);
-      },5000);
+    ERROR: (msg)=>{
+      return new ErrorHandler("Search Socket Error: " + msg);
     },
-    INVALID_NAME: (err)=>{
-      clearTimeout(game.handshakeTimeout);
-      if(err.description !== "Duplicate name"){
-        new ErrorHandler("§ConnectFail§: " + (err.description || err.error || err));
-        return resetGame();
+    RESULTS: (data)=>{
+      if(game.opts.QuizLock){
+        return;
       }
-      new ErrorHandler("§InvalidName§");
-      return new LoginPage(true);
-    },
-    SESSION_NOT_CONNECTED: ()=>{
-      new ErrorHandler("§NoReconnect§");
-    },
-    EMPTY_NAME: ()=>{
-      new ErrorHandler("§EmptyName§");
-    },
-    HANDSHAKE: ()=>{
-      clearTimeout(game.handshakeTimeout);
-      new ErrorHandler("§Handshake§ ¯\\_(ツ)_/¯");
-      if(document.getElementById("handshake-fail-div")){
-        document.getElementById("handshake-fail-div").outerHTML = "";
+      const items = JSON.parse(data);
+      game.guesses = items;
+      if(!game.notifiedRandom &&
+        game.guesses.length &&
+        game.guesses[0].uuid === game.oldQuizUUID &&
+        game.gotWrong &&
+        game.pin[0] !== "0" &&
+        !game.opts.manual &&
+        !game.failedPurposely &&
+        !["survey","multiple_select_poll","jumble","brainstorming","word_cloud","content","open_ended"].includes(game.lastQuestionType)){
+        game.notifiedRandom = true;
+        return new ErrorHandler("You got a question wrong, but it appears to be the correct quiz. The questions may be randomized. Click this to enable manual control.",{
+          onclick: (evt,div)=>{
+            document.querySelector("#manual").checked = true;
+            game.saveOptions();
+            div.outerHTML = "";
+            new ErrorHandler("§ManualControl§: §ON§",{
+              isNotice: true
+            });
+          },
+          time: 60e3
+        });
       }
-      let url;
-      switch (detectPlatform()) {
-        case "Windows":
-          url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
-          break;
-        case "MacOS":
-          url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
-          break;
-        default:
-          url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
-      }
-      const div = document.createElement("div");
-      div.innerHTML = `<span>§Handshake1§</span>
-      <br>
-      <a class="mobihide" href="${url}" onclick="dataLayer.push({event:'download_app'})" target="_blank">§DownloadApp§</a>
-      <br>
-      <button onclick="send({type:'HANDSHAKE_ISSUES',message:'AAAA!'});this.innerHTML = '§IssueReported§';this.onclick = null;dataLayer.push({event:'report_error'});" title="§IssueReported2§">§IssueReported3§</button>`;
-      div.id = "handshake-fail-div";
-      div.style = `
-        position: fixed;
-        top: 4rem;
-        z-index: 1000;
-        width: 100%;
-        color: white;
-        background: #888;
-        text-align: center;
-        border-radius: 5rem;
-      `;
-      document.body.append(div);
     },
-    PRIVATE_ID: ()=>{
-      new ErrorHandler("§InvalidUUID§");
-    },
-    SERVER_OVERLOADED: (data)=>{
-      new ErrorHandler("§ServerOverloaded§ " + data);
-      game.proxyRetry = data;
-    },
-    SERVER_TRANSFER: (data)=>{
-      new ErrorHandler("Transferring to another server...");
-      game.proxyRetry = data;
+    SERVER_TRANSFER: (proxy)=>{
+      socket.onclose = null;
+      grecaptcha.ready(()=>{
+        grecaptcha.execute("6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n",{action:"search_session"}).then((token) => {
+          game.socket = new WebSocket(`${(location.protocol == "http:" ? "ws://" : "wss://")}${proxy}/search?token=${token}`);
+          socket = game.socket;
+          socket.onmessage = evt=>{
+            evt = evt.data;
+            const command = evt.match(/^[A-Z_]+?(?=;)/)[0],
+              data = evt.substr(command.length + 1);
+            if(MessageHandler[command]){
+              MessageHandler[command](data);
+            }
+          };
+          socket.onerror = (err)=>{
+            new ErrorHandler("Search WebSocket Error: " + err);
+          };
+          socket.onclose = () => {
+            new ErrorHandler("Search Socket Closed.");
+          };
+          game.loadOptions();
+        }).catch((err)=>{
+          new ErrorHandler("Failed to get captcha token: " + err ? err : "unknown error");
+        });
+      });
     }
   },
-  Message: {
-    SetName: name=>{
-      document.getElementById("loginInput").value = name;
-    },
-    PinGood: m=>{
-      const pin = m.match(/\d+/g)[0];
-      if(pin != game.pin){
-        game.pin = pin;
-      }
-      try{
-        TutorialDiv.innerHTML = "";
-      }catch(e){/* No TutorialDiv? */}
-      return new LoginPage(true);
-    },
-    JoinSuccess: data=>{
-      if(game.theme === "Music"){game.playSound("/resource/music/lobby.m4a");}
-      else if(game.theme === "Minecraft"){game.playSound("/resource/music/Minecraft.mp3");}
-      data = JSON.parse(data);
-      game.cid = data.cid;
-      game.quizEnded = false;
-      dataLayer.push({event:"join_game"});
-      activateLoading(false,false);
-      clearTimeout(game.handshakeTimeout);
-      return new LobbyPage;
-    },
-    QuizStart: ()=>{
+  Listeners = {
+    QuizStart: (data)=>{
       try{game.music.pause();}catch(e){/* No music */}
+      sendQuizQuestionAnswers();
+      send(`QUIZ_NAME;${data.quizTitle}`);
       return new QuizStartPage;
     },
-    QuestionGet: info=>{
-      const data = JSON.parse(info);
-      return new GetReadyPage(data);
+    QuestionReady: info=>{
+      game.questionReady = true;
+      game.teamAnswered = false;
+      if(game.fails.length === 1){
+        for(let i = 0;i<game.total - 1;i++){
+          if(+game.opts.fail === 0){
+            break;
+          }
+          game.fails.push(Math.random() > +game.opts.fail);
+        }
+        game.fails = shuffle(game.fails);
+      }
+      sendQuizQuestionAnswers();
+      return new GetReadyPage(info);
     },
-    QuestionBegin: question=>{
+    QuestionStart: async question=>{
+      if(game.questionReady === false){
+        return; // question already ended?
+      }
       game.questionAnswered = false;
-      return new QuestionAnswererPage(JSON.parse(question));
-    },
-    QuestionSubmit: message=>{
-      game.questionAnswered = true;
-      return new QuestionSnarkPage(message);
+      game.receivedTime = Date.now();
+      sendQuizQuestionAnswers();
+      new QuestionAnswererPage(question);
+      if(game.opts.manual || game.teamAnswered || +game.opts.searchLoosely === 2){
+        return;
+      }
+      game.answerQuestion(null);
     },
     QuestionEnd: info=>{
+      game.questionReady = false;
       try{game.music.pause();}catch(e){/* No music */}
+      try{
+        info.index = game.index;
+      }catch(e){
+        return new TimeUpPage(info);
+      }
+      game.got_answers.push(info);
+      sendQuizQuestionAnswers();
+      send(`SET_ANSWERS;${JSON.stringify(game.got_answers)}`);
       return new QuestionEndPage(info);
     },
-    QuizFinish: info=>{
+    QuizEnd: info=>{
       game.quizEnded = true;
-      game.end.info = JSON.parse(info);
-      dataLayer.push(Object.assign({event:"quiz_finish"},JSON.parse(info)));
+      game.end.info = info;
+      send(`QUIZ_ID;${info.quizId}`);
+      dataLayer.push(Object.assign({event:"quiz_finish"},info));
     },
-    FinishText: text=>{
+    Podium: text=>{
       if(game.theme === "Music"){game.playSound("/resource/music/podium.m4a");}
       else if(game.theme === "Minecraft"){game.playSound("/resource/music/Pigstep.m4a");}
       return new QuizEndPage(text);
     },
-    QuizEnd: (r)=>{
+    Disconnect: (r)=>{
       game.quizEnded = true;
       resetGame();
+      if(r === "Error connecting to Challenge"){
+        new ErrorHandler("Try using the Random Name button. This error can happen if your name is not valid.");
+      }
       return setTimeout(function(){new ErrorHandler("§QuizEnd§ " + "(" + r + ")");},300);
     },
-    RunTwoSteps: ()=>{
+    TwoFactorReset: async ()=>{
+      if(game.opts.brute){
+        const pack = [];
+        for(let i = 0; i < BruteForces.length; i++){
+          const m = new LiveTwoStepAnswer(game.client, BruteForces[i]);
+          m.id = `${++game.client.messageId}`;
+          pack.push(m);
+        }
+        // send in batches
+        for(let i = 0; i < pack.length; i+=2){
+          await sleep(.4);
+          game.client.socket.send(JSON.stringify(pack.slice(i,i + 2)));
+        }
+        return;
+      }
       game.two = [];
       return new TwoStepPage;
     },
-    Ping: ()=>{
-      console.log("Recieved ping from server");
-    },
-    FailTwoStep: ()=>{
+    TwoFactorWrong: ()=>{
       return new TwoStepPage(true);
     },
-    TwoStepSuccess: ()=>{
+    TwoFactorCorrect: ()=>{
       return new LobbyPage;
-    },
-    Maintainance: msg=>{
-      return new ErrorHandler("Maintainance Alert: " + msg);
-    },
-    OK: ()=>{
-      game.ready = true;
     },
     GameReset: ()=>{
       new LobbyPage;
@@ -176,13 +203,10 @@ const MessageHandler = {
       delete game.rawData;
       delete game.ans;
       delete game.got_answers;
-      game.index = 0;
-      game.streak = 0;
-      game.score = 0;
       game.quizEnded = false;
     },
     NameAccept: n=>{
-      const data = JSON.parse(n);
+      const data = n;
       game.name = data.playerName;
       try{document.getElementById("L2").innerHTML = `<p>${data.playerName}</p>`;}catch(e){/* No name object */}
     },
@@ -193,28 +217,67 @@ const MessageHandler = {
       new FeedbackPage;
     },
     TeamTalk: data=>{
-      new TeamTalkPage(JSON.parse(data));
+      game.teamTalkTime = Date.now();
+      game.questionAnswered = false;
+      new TeamTalkPage(data);
+      if(!game.opts.teamtalk || game.opts.manual || game.teamAnswered || +game.opts.searchLoosely === 2){
+        return;
+      }
+      game.answerQuestion(null);
     }
+  };
+
+function shuffle(array) {
+  array = Array.from(array);
+  let currentIndex = array.length, temporaryValue, randomIndex;
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
   }
-};
+  return array;
+}
 
 class Game{
   constructor(){
+    this.client = new KahootClient({
+      proxy:(opts)=>{
+        opts.host = location.hostname;
+        opts.port = location.port;
+        opts.path = "/kahoot" + opts.path;
+        opts.protocol = location.protocol;
+        return opts;
+      }
+    });
     this.socket = null;
+    this.gotWrong = false;
+    this.lastQuestionType = null;
+    this.failedPurposely = null;
+    this.notifiedRandom = false;
     this.oldQuizUUID = "";
-    this.name = "";
-    this.streak = 0;
+    // whether ready
     this.ready = false;
-    this.cid = "";
-    this.pin = 0;
-    this.score = 0;
+    this.teamTalkTime = 0;
+    this.sentQuizQuestionAnswers = false;
+    this.guesses = [];
+    this.fails = [true];
+    this.teamAnswered = false;
+    // correct answers
     this.answers = [];
+    // results of questions
+    this.got_answers = [];
     this.quizEnded = true;
-    this.total = 0;
-    this.index = 0;
+    // quiz end info
     this.end = {};
+    // two factor answers
     this.two = [];
     this.errorTimeout = null;
+    // jumble answers
     this.jumbleAnswer = [];
     this.multiAnswer = {
       0: false,
@@ -223,135 +286,180 @@ class Game{
       3: false
     };
     this.theme = "Kahoot";
+    // options
     this.opts = {};
+    // search loosely correct index
     this.correctIndex = null;
     this.questionStarted = false;
     this.questionAnswered = false;
     this.panicSettings = null;
   }
-  sendPin(pin,host){
+  get name(){
+    return this.client.name;
+  }
+  get streak(){
+    return this.client.data.streak;
+  }
+  get cid(){
+    return this.client.cid;
+  }
+  get pin(){
+    return this.gameid || this.client.gameid;
+  }
+  get score(){
+    return this.client.data.totalScore;
+  }
+  get total(){
+    return this.client.quiz.quizQuestionAnswers.length;
+  }
+  get index(){
+    return this.client.quiz.currentQuestion.index || this.client.quiz.currentQuestion.gameBlockIndex || this.client.quiz.currentQuestion.questionIndex || 0;
+  }
+  sendPin(pin){
     return new Promise((res)=>{
-      this.pin = pin;
-      grecaptcha.ready(()=>{
-        grecaptcha.execute("6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n",{action:"submit"}).then((token)=>{
-          this.socket = new WebSocket(`${(location.protocol == "http:" ? "ws://" : "wss://")}${host || location.host}?token=${token}`);
-          socket = this.socket;
-          socket.onmessage = evt=>{
-            evt = evt.data;
-            const data = JSON.parse(evt);
-            if(data.type == "Error"){
-              return MessageHandler.Error[data.message](data.data);
-            }
-            eval(`MessageHandler.${data.type}("${data.message.replace(/\\/img,"\\\\").replace(/"/img,"\\\"")}")`);
-          };
-          socket.onclose = ()=>{
-            game.disconnectTime = Date.now();
-            if (!game.proxyRetry) {
-              new ErrorHandler("Session disconnected.");
-            }
-            // attempt to reconnect
-            activateLoading(true,true,"<br><br><br><br><p>Reconnecting</p>");
-            let i = 0;
-            function check(t){
-              if(game.proxyRetry){
-                return resetGame(game.proxyRetry);
-              }
-              const x = new XMLHttpRequest();
-              x.open("GET","/up");
-              x.send();
-              x.onerror = x.ontimeout = function(){
-                if(++i > 10){
-                  return location.href="https://theusaf.github.io/kahoot%20winner%20error.html";
-                }
-                t *= 2;
-                if(t > 30){
-                  t = 30;
-                }
-                setTimeout(function(){
-                  check(t);
-                },t * 1000);
-              };
-              x.onload = function(){
-                if(x.status !== 200 && x.status !== 304){
-                  return x.onerror(t);
-                }
-                activateLoading(false,false);
-                if(game.proxyRetry){
-                  resetGame(game.proxyRetry);
-                }else if(!game.quizEnded && game.pin[0] != "0"){
-                  resetGame(true);
-                }else{
-                  resetGame();
-                }
-              };
-            }
-            check(0.5);
-          };
-          socket.onopen = ()=>{
-            const a = setInterval(()=>{
-              if(this.ready){
-                res();
-                send({type:"SET_PIN",message:pin});
-                this.loadOptions();
-                clearInterval(a);
-              }
-            },500);
-          };
-        }).catch((err)=>{
-          new ErrorHandler("Captcha failed: " + err);
-          new LoginPage();
-          activateLoading(false);
-        });
-      });
       activateLoading(true,true);
+      const weekly = ["weekly","weekly-previous","https://kahoot.com/kahoot-of-the-week-previous","https://kahoot.com/kahoot-of-the-week","https://kahoot.com/kahoot-of-the-week-previous/","https://kahoot.com/kahoot-of-the-week-previous","kahoot-of-the-week","kahoot-of-the-week-previous"];
+      if(isNaN(pin)){
+        if(weekly.includes(pin)){
+          let url;
+          if(pin.indexOf("previous") !== -1){
+            url = "/kahoot/weekly-previous";
+          }else{
+            url = "/kahoot/weekly";
+          }
+          const request = new XMLHttpRequest();
+          request.open("GET",url);
+          request.send();
+          request.onload = ()=>{
+            activateLoading(false,false);
+            this.gameid = request.response.match(/(?<=challenge\/)\d+/gm)[0];
+            new LoginPage(true);
+            res();
+          };
+          request.onerror = ()=>{
+            activateLoading(false,false);
+            new ErrorHandler("Failed to fetch weekly pin");
+            new LoginPage;
+            res();
+          };
+        }else{
+          try{
+            const url = new URL(pin),
+              path = url.pathname.split(/challenge\//g)[1],
+              // if it was an invalid link, this should throw an error
+              isPin = path.match(/\d+/g)[0];
+            if(path.length === isPin.length && path.length > 0){
+              // this means that the pin is in the link lol
+              this.gameid = path;
+              activateLoading(false,false);
+              new LoginPage(true);
+              res();
+            }else{
+              const request = new XMLHttpRequest();
+              request.open("GET",`/kahoot/rest/challenges/${path}`);
+              request.send();
+              request.onerror = ()=>{
+                activateLoading(false,false);
+                new ErrorHandler("Failed to fetch challenge pin");
+                new LoginPage;
+                res();
+              };
+              request.onload = ()=>{
+                const data = JSON.parse(request.response);
+                if(data.error){
+                  activateLoading(false,false);
+                  new ErrorHandler("Invalid PIN");
+                  new LoginPage;
+                  res();
+                }else{
+                  this.gameid = data.pin;
+                  activateLoading(false,false);
+                  new LoginPage(true);
+                  res();
+                }
+              };
+            }
+          }catch(err){
+            activateLoading(false,false);
+            new LoginPage();
+            new ErrorHandler("Invalid PIN");
+            res();
+          }
+        }
+      }else{
+        if(typeof pin === "undefined" || pin === ""){
+          activateLoading(false,false);
+          new ErrorHandler("Please enter a PIN");
+          new LoginPage;
+          res();
+          return;
+        }
+        activateLoading(false,false);
+        this.gameid = pin;
+        new LoginPage(true);
+        res();
+      }
     });
   }
   join(name){
-    this.name = name;
-    send({type:"JOIN_GAME",message:name});
     activateLoading(true,true);
-    this.handshakeTimeout = setTimeout(()=>{
-      if(document.getElementById("handshake-fail-div")){
-        document.getElementById("handshake-fail-div").outerHTML = "";
+    this.client.join(this.pin,name,this.opts.teamMembers ? this.opts.teamMembers.split(",") : null).then(()=>{
+      if(this.theme === "Music"){this.playSound("/resource/music/lobby.m4a");}
+      else if(this.theme === "Minecraft"){this.playSound("/resource/music/Minecraft.mp3");}
+      this.quizEnded = false;
+      dataLayer.push({event:"join_game"});
+      activateLoading(false,false);
+      new LobbyPage;
+      if(this.pin[0] === "0"){
+        this.guesses = [this.client.challengeData.kahoot];
+        return;
       }
-      new ErrorHandler("This is taking a long time. If this continues longer, you may need to try again.");
-      let url;
-      switch (detectPlatform()) {
-        case "Windows":
-          url = "https://www.mediafire.com/file/ju7sv43qn9pcio6/kahoot-win-win.zip/file";
-          break;
-        case "MacOS":
-          url = "https://www.mediafire.com/file/bcvxlwlfvbswe62/Kahoot_Winner.dmg/file";
-          break;
-        default:
-          url = "https://www.mediafire.com/file/zb5blm6a8dyrwtb/kahoot-win-linux.tar.gz/file";
-      }
-      const div = document.createElement("div");
-      div.innerHTML = `<span>§Handshake1§</span>
-      <br>
-      <a href="${url}" onclick="dataLayer.push({event:'download_app'})" target="_blank">§DownloadApp§</a>`;
-      div.className = "shortcut";
-      div.id = "handshake-fail-div";
-      div.style = `
-        position: fixed;
-        top: 4rem;
-        z-index: 1000;
-        width: 100%;
-        color: white;
-        background: #888;
-        text-align: center;
-        border-radius: 5rem;
-      `;
-      document.body.append(div);
-    },10000);
+      grecaptcha.ready(()=>{
+        grecaptcha.execute("6LcyeLEZAAAAAGlTegNXayibatWwSysprt2Fb22n",{action:"search_session"}).then((token) => {
+          if(typeof game.client.cid === "undefined"){
+            return;
+          }
+          this.socket = new WebSocket(`${(location.protocol == "http:" ? "ws://" : "wss://")}${location.host}/search?token=${token}`);
+          socket = this.socket;
+          socket.onmessage = evt=>{
+            evt = evt.data;
+            const command = evt.match(/^[A-Z_]+?(?=;)/)[0],
+              data = evt.substr(command.length + 1);
+            if(MessageHandler[command]){
+              MessageHandler[command](data);
+            }
+          };
+          socket.onerror = (err)=>{
+            new ErrorHandler("Search WebSocket Error: " + err);
+          };
+          socket.onclose = () => {
+            new ErrorHandler("Search Socket Closed.");
+          };
+          this.loadOptions();
+        }).catch((err)=>{
+          new ErrorHandler("Failed to get captcha token: " + err ? err : "unknown error");
+        });
+      });
+    }).catch((err)=>{
+      console.log(err);
+      new ErrorHandler("Failed to join: " + err.description || err.status || err);
+      resetGame();
+    });
+    for(const i in Listeners){
+      this.client.on(i,Listeners[i]);
+    }
   }
   getRandom(){
     dataLayer.push({event:"get_random_name"});
-    send({type:"GET_RANDOM_NAME",message:"please?"});
+    const First = ["Adorable","Agent","Agile","Amazing","Amazon","Amiable","Amusing","Aquatic","Arctic","Awesome","Balanced","Blue","Bold","Brave","Bright","Bronze","Captain","Caring","Champion","Charming","Cheerful","Classy","Clever","Creative","Cute","Dandy","Daring","Dazzled","Decisive","Diligent","Diplomat","Doctor","Dynamic","Eager","Elated","Epic","Excited","Expert","Fabulous","Fast","Fearless","Flying","Focused","Friendly","Funny","Fuzzy","Genius","Gentle","Giving","Glad","Glowing","Golden","Great","Green","Groovy","Happy","Helpful","Hero","Honest","Inspired","Jolly","Joyful","Kind","Knowing","Legend","Lively","Lovely","Lucky","Magic","Majestic","Melodic","Mighty","Mountain","Mystery","Nimble","Noble","Polite","Power","Prairie","Proud","Purple","Quick","Radiant","Rapid","Rational","Rockstar","Rocky","Royal","Shining","Silly","Silver","Smart","Smiling","Smooth","Snowy","Soaring","Social","Space","Speedy","Stellar","Sturdy","Super","Swift","Tropical","Winged","Wise","Witty","Wonder","Yellow","Zany"],
+      Last = ["Alpaca","Ant","Badger","Bat","Bear","Bee","Bison","Boa","Bobcat","Buffalo","Bunny","Camel","Cat","Cheetah","Chicken","Condor","Crab","Crane","Deer","Dingo","Dog","Dolphin","Dove","Dragon","Duck","Eagle","Echidna","Egret","Elephant","Elk","Emu","Falcon","Ferret","Finch","Fox","Frog","Gator","Gazelle","Gecko","Giraffe","Glider","Gnu","Goat","Goose","Gorilla","Griffin","Hamster","Hare","Hawk","Hen","Horse","Ibex","Iguana","Impala","Jaguar","Kitten","Koala","Lark","Lemming","Lemur","Leopard","Lion","Lizard","Llama","Lobster","Macaw","Meerkat","Monkey","Mouse","Newt","Octopus","Oryx","Ostrich","Otter","Owl","Panda","Panther","Pelican","Penguin","Pigeon","Piranha","Pony","Possum","Puffin","Quail","Rabbit","Raccoon","Raven","Rhino","Rooster","Sable","Seal","SeaLion","Shark","Sloth","Snail","Sphinx","Squid","Stork","Swan","Tiger","Turtle","Unicorn","Urchin","Wallaby","Wildcat","Wolf","Wombat","Yak","Yeti","Zebra"],
+      name = First[Math.floor(Math.random() * First.length)] + Last[Math.floor(Math.random() * Last.length)];
+    document.getElementById("loginInput").value = name;
   }
   saveOptions(){
     const settings = SettingDiv.querySelectorAll("input,select"),
-      opts = {};
+      opts = {},
+      old = Object.assign({},this.opts);
     for(let i = 0;i<settings.length;++i){
       opts[settings[i].id] = settings[i].type == "checkbox" ? settings[i].checked : settings[i].value;
     }
@@ -371,20 +479,204 @@ class Game{
       div_search_options: opts.div_search_options,
       div_challenge_options: opts.div_search_options
     });
-    const oldOpts = game.opts;
-    game.theme = opts.theme;
-    game.opts = opts;
-    send({type:"SET_OPTS",message:JSON.stringify(opts)});
-    if(game.questionStarted && !game.questionAnswered && oldOpts.manual && !game.opts.manual){
-      send({type:"ANSWER_QUESTION",message:null});
+    const oldOpts = this.opts;
+    this.theme = opts.theme;
+    this.opts = opts;
+    if(+opts.timeout < 0){
+      opts.timeout = Math.abs(opts.timeout);
+      opts.variableTimeout = true;
+    }else{
+      opts.variableTimeout = false;
     }
+    // disable autoplay
+    if(opts.ChallengeDisableAutoplay){
+      this.client.defaults.options.ChallengeAutoContinue = false;
+    }else{
+      this.client.defaults.options.ChallengeAutoContinue = true;
+    }
+    if(opts.challengePoints){
+      this.client.defaults.options.ChallengeScore = +this.opts.challengePoints;
+    }else{
+      this.client.defaults.options.ChallengeScore = 0;
+    }
+    if(opts.challengeCorrect){
+      this.client.defaults.options.ChallengeAlwaysCorrect = true;
+    }else{
+      this.client.defaults.options.ChallengeAlwaysCorrect = false;
+    }
+    if(opts.ChallengeEnableStreaks){
+      this.client.defaults.options.ChallengeUseStreakBonus = true;
+    }else{
+      this.client.defaults.options.ChallengeUseStreakBonus = false;
+    }
+    if(opts.ChallengeDisableTimer){
+      this.client.defaults.options.ChallengeWaitForInput = true;
+    }else{
+      this.client.defaults.options.ChallengeWaitForInput = false;
+    }
+    // remove default fail.
+    if((+opts.fail === 2 && +this.fails.length === 1) || opts.fail !== old.fail){
+      if(+opts.fail === 2){
+        this.fails = [false];
+      }else{
+        this.fails = [true];
+      }
+    }
+    // timeframe
+    if(isNaN(opts.timeout)){
+      try { // assume [-]d[s]-[s][-]d
+        const args = opts.timeout.split("-");
+        if(args.length === 2){
+          opts.timeout = +args[0];
+          opts.timeoutEnd = +args[1];
+        }else if(args.length === 3){
+          opts.timeout = -args[1];
+          opts.timeoutEnd = +args[2];
+        }else{ // assume 4
+          opts.timeout = -args[1];
+          opts.timeoutEnd = +args[3];
+        }
+        opts.timeout = opts.timeout || 0;
+      } catch (e) {
+        opts.timeout = 0;
+        opts.timeoutEnd = 0;
+      }
+    }
+
+    // changing timeout mid question.
+    if(old.timeout !== this.opts.timeout){
+      if(!this.opts.manual && this.questionStarted && !this.questionAnswered){
+        clearTimeout(this.waiter);
+        const start = +this.opts.timeout * 1000 + (+this.opts.variableTimeout * Math.random() * 1000),
+          end = Math.random() * ((+this.opts.timeoutEnd - (start/1000) || 0)) * 1000,
+          delayed = Date.now() - this.receivedTime;
+        this.waiter = setTimeout(()=>{
+          this.answerQuestion(null);
+        },start+end-delayed);
+      }
+    }
+    send(`SET_OPTS;${JSON.stringify(opts)}`);
+    if(this.questionStarted && !this.questionAnswered && oldOpts.manual && !this.opts.manual){
+      this.answerQuestion(null);
+    }
+  }
+  async answerQuestion(answer){
+    if(this.questionAnswered){
+      return;
+    }
+    if(answer === null){
+      answer = this.getCorrectAnswer();
+    }
+    this.failedPurposely = false;
+    if(+this.opts.fail && this.fails[this.index] && !this.opts.manual){
+      this.failedPurposely = true;
+      switch (this.client.quiz.currentQuestion.gameBlockType) {
+        case "open_ended":
+        case "word_cloud":
+          answer = "fgwadsfihwksdxfs";
+          break;
+        case "jumble":
+          answer = [0,1,2,3];
+          break;
+        case "multiple_select_poll":
+        case "multiple_select_quiz":
+          answer = [-1];
+          break;
+        default:
+          answer = -1;
+      }
+    }
+    this.teamAnswered = true;
+    this.questionAnswered = true;
+    if(this.opts.teamtalk){
+      const diff = Date.now() - this.teamTalkTime;
+      if(diff < 250){await sleep((250 - diff)/1000);}
+    }
+    const start = +game.opts.timeout + (+game.opts.variableTimeout * Math.random()),
+      end = Math.random() * ((+game.opts.timeoutEnd - start || 0));
+    if(!this.opts.manual){
+      await sleep(start+end);
+    }
+    this.client.answer(answer).finally(()=>{
+      const snark = ["Were you tooooooo fast?","Pure genius or guesswork?","Secret classroom superpowers?","Genius machine?","Classroom perfection?","Pure genius?","Lightning smart?"],
+        message = snark[Math.floor(Math.random() * snark.length)];
+      return new QuestionSnarkPage(message);
+    });
+  }
+  getCorrectAnswer(log,noset){
+    const question = this.question,
+      index = +this.opts.searchLoosely ? game.correctIndex : question.questionIndex;
+    let ans;
+    switch (question.gameBlockType) {
+      case "open_ended":
+      case "word_cloud":
+        ans = "honestly, i don't know";
+        break;
+      case "jumble":
+        ans = shuffle([0,1,2,3]);
+        break;
+      case "multiple_select_quiz":
+        ans = shuffle([0,1,2,3]).slice((question.quizQuestionAnswers || this.client.quiz.quizQuestionAnswers)[question.questionIndex] - Math.floor(Math.random() * (this.client.quiz.quizQuestionAnswers[question.questionIndex] + 1)));
+        break;
+      default:
+        ans = Math.floor(Math.random() * (question.quizQuestionAnswers || this.client.quiz.quizQuestionAnswers)[index]);
+    } // default values
+    try{
+      if(noset){
+        return ans;
+      }
+      if(log){console.log(`Using quiz id ${this.guesses[0].uuid}`);}
+      const choices = this.guesses[0].questions[index].choices;
+      if(!choices){
+        return ans;
+      }
+      if(this.guesses[0].questions[index].type !== question.gameBlockType){
+        return ans;
+      }
+      for(let i = 0;i<choices.length;++i){
+        if(choices[i].correct){
+          ans = i;
+          // open ended support
+          if(this.guesses[0].questions[index].type === "open_ended"){
+            return choices[i].answer;
+          }
+          break;
+        }
+      }
+      // jumble support
+      if(this.guesses[0].questions[index].type === "jumble"){
+        if(this.pin[0] === "0"){
+          return [0,1,2,3];
+        }
+        // since we cannot actually find out the correct answer as this is a program, we just guess...
+        return shuffle([0,1,2,3]);
+      }
+      // multiple_select_quiz support
+      if(this.guesses[0].questions[index].type === "multiple_select_quiz"){
+        const choices = this.guesses[0].questions[index].choices || [],
+          ok = [];
+        for(let i = 0;i<choices.length;i++){
+          if(choices[i].correct){
+            ok.push(i);
+          }
+        }
+        ans = ok;
+      }
+      return ans;
+    }catch(err){
+      return ans;
+    }
+  }
+  sendFeedback(feedback){
+    const {fun,learn,recommend,overall} = feedback;
+    this.client.sendFeedback(fun,learn,recommend,overall);
   }
   loadOptions(){
     let opts;
     try{
       opts = JSON.parse(localStorage.options);
-      game.opts = opts;
-      game.theme = opts.theme;
+      this.opts = opts;
+      this.theme = opts.theme;
     }catch(err){
       return;
     }
@@ -400,7 +692,7 @@ class Game{
       }
     }
     if(socket && socket.readyState === 1){
-      game.saveOptions();
+      this.saveOptions();
       dataLayer.push(Object.assign({event:"load_options"},opts));
       return new ErrorHandler("§Restored§",{
         isNotice: true
@@ -416,7 +708,7 @@ class Game{
   }
   answer(num){
     activateLoading(true,true);
-    send({type:"ANSWER_QUESTION",message:num});
+    this.answerQuestion(num);
     dataLayer.push({
       event: "answer",
       value: num,
@@ -430,7 +722,7 @@ class Game{
     }
     this.two.push(id);
     if(this.two.length == 4){
-      send({type:"DO_TWO_STEP",message:JSON.stringify(this.two)});
+      this.client.answerTwoFactorAuth(this.two);
       activateLoading(true,true,"");
       return;
     }
@@ -485,7 +777,7 @@ function send(message){
   if(socket === null){
     return;
   }
-  socket.send(JSON.stringify(message));
+  socket.send(message);
 }
 
 function setCookie(val){
@@ -602,6 +894,9 @@ window.addEventListener("keydown",async (e)=>{
     if(shouldStop){game.music.pause();shouldStop=false;}
   }
 });
+window.addEventListener("unload", () => {
+  game.client.leave();
+});
 
 function detectPlatform(){
   let OSName = "Linux";
@@ -612,7 +907,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v5.2.0";
+localStorage.KW_Version = "v6.0.0";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
@@ -665,3 +960,9 @@ checkVersion.onload = function(){
     localStorage.KW_Version = version;
   }
 };
+
+/*
+To Add:
+- Question Timer setting
+- Randomized Answer Checker
+ */

@@ -1,4 +1,4 @@
-/* global ErrorHandler,LoginPage,dataLayer,resetGame,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch,LobbyPage */
+/* global ErrorHandler,LoginPage,dataLayer,QuizEndPage,game,SettingSwitch,activateLoading,QuestionAnswererPage,AboutSwitch,LobbyPage */
 
 window.addEventListener("load",()=>{
   if(localStorage.returningUser === "3.3.0"){
@@ -57,6 +57,8 @@ function tutorialSteps(n){
     }
     case "1":{
       if (SettingSwitch.checked) {SettingSwitch.click();}
+      game.client.name = "§Tutorial§";
+      game.client.gameid = "12345-LUGGAGE";
       new LoginPage(true);
       info.innerHTML = `<strong>§Tut3§</strong>
       <p>§Tut3a§</p>
@@ -66,7 +68,6 @@ function tutorialSteps(n){
     case "2":{
       if (SettingSwitch.checked) {SettingSwitch.click();}
       game.name = "§Tutorial§";
-      game.pin = "12345-LUGGAGE";
       new LobbyPage;
       data.style.marginTop = "8rem";
       data.style.height = "calc(100% - 10rem)";
@@ -88,41 +89,41 @@ function tutorialSteps(n){
     case "4":{
       if (SettingSwitch.checked) {SettingSwitch.click();}
       data.style.marginTop = "";
-      game.question = {
-        type: "quiz",
-        index: 0,
-        data: [
-          {
-            answer: "§Correct§",
-            correct: true
-          },
-          {
-            answer: "§Incorrect§",
-            correct: false
-          },
-          {
-            answer: "§Tutorial§",
-            correct: false
-          },
-          {
-            answer: "",
-            correct: false,
-            image: {
-              id: "dfa9fc36-1122-4dc2-a00b-04d490c07765"
-            }
-          }
-        ],
-        total: "42.069",
-        currentGuesses: [{
-          questions: [
+      game.client.quiz = {
+        currentQuestion:{
+          quizQuestionAnswers:[4],
+          gameBlockIndex: 0,
+          gameBlockType: "quiz"
+        },
+        quizQuestionAnswers:[4]
+      };
+      game.guesses = [{
+        questions: [{
+          type: "quiz",
+          choices: [
             {
-              time: 20000
+              answer: "§Correct§",
+              correct: true
+            },
+            {
+              answer: "§Incorrect§",
+              correct: false
+            },
+            {
+              answer: "§Tutorial§",
+              correct: false
+            },
+            {
+              answer: "",
+              correct: false,
+              image: {
+                id: "dfa9fc36-1122-4dc2-a00b-04d490c07765"
+              }
             }
           ]
-        }],
-        raw: {},
-        ans: [4]
-      };
+        }]
+      }];
+      game.question = game.client.quiz.currentQuestion;
       game.score = -Infinity;
       new QuestionAnswererPage();
       activateLoading(false);
@@ -200,9 +201,9 @@ function tutorialSteps(n){
           rank: 1
         }
       };
-      new QuizEndPage(JSON.stringify({
+      new QuizEndPage({
         podiumMedalType: "gold"
-      }));
+      });
       next.outerHTML = "";
       info.innerHTML = `<p><strong>§Tut12§</strong></p>
       <p>§Tut12a§</p>

@@ -1,4 +1,4 @@
-/* global game, dataLayer, send, socket, Game */
+/* global game, dataLayer, socket, Game */
 const AprilFoolsThemes = ["KonoSuba","ReZero","FRANXX"],
   AprilFoolTheme = AprilFoolsThemes[Math.floor(Math.random() * AprilFoolsThemes.length)],
   KahootThemes = {
@@ -156,9 +156,6 @@ class LoginPage{
       rand.style.marginBottom = "0.5rem";
       div.append(logo,logoText,pin,rand,but);
       document.getElementsByClassName("grecaptcha-badge")[0].style.visibility = "hidden";
-      if(game.pin[0] != "0"){
-        document.getElementById("div_challenge_options").parentElement.className = "fadedm";
-      }
     }else{
       document.getElementById("div_challenge_options").parentElement.className = "";
       const abt = Element("label",{
@@ -315,7 +312,7 @@ class LobbyPage{
     };
     document.querySelector(".ad-container").style.display = "none";
     document.querySelector(".ad-container-2").style.display = "none";
-    if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
+    if(game.pin[0] === "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
     }
     const div = clearUI();
@@ -354,7 +351,7 @@ class LobbyPage{
     subcont.append(text,subtext);
     mid.append(subcont);
     div.append(pinDiv,nameDiv,mid);
-    if(typeof game.guesses == "undefined"){
+    if(game.guesses.length === 0){
       div.append(NotFoundDiv());
     }
     UIDiv.append(div);
@@ -370,8 +367,15 @@ class GetReadyPage{
   constructor(question,no){
     game.recievedTime = Date.now();
     game.questionStarted = false;
+    game.isAnswerPage = false;
     game.jumbleAnswer = [];
     game.question = question;
+    if(game.guesses.length){
+      const index = (+game.opts.searchLoosely && game.correctIndex) || game.index;
+      game.answers = game.guesses[0].questions[index].choices || [{correct:false,answer:""},{correct:false,answer:""},{correct:false,answer:""},{correct:false,answer:""}];
+    }else{
+      game.answers = [{correct:false,answer:""},{correct:false,answer:""},{correct:false,answer:""},{correct:false,answer:""}];
+    }
     const objects = new LobbyPage;
     try {
       document.querySelector(".noQuiz").outerHTML = "";
@@ -381,19 +385,13 @@ class GetReadyPage{
     objects.main.setAttribute("ui-event","GetReady");
     objects.mid.innerHTML = "";
     const quest = Element("h1",{
-      innerHTML: `§Question§ ${(question.index || 0) + 1}`,
+      innerHTML: `§Question§ ${(question.questionIndex || 0) + 1}`,
       className: "shadow"
     });
     quest.setAttribute("text",quest.innerText);
-    game.answers = question.data;
-    game.got_answers = question.cans;
-    game.guesses = question.currentGuesses;
-    game.total = question.ans.length;
-    game.index = question.index || 0;
-    game.ans = question.ans;
-    game.rawData = question.raw;
+    game.ans = question.quizQuestionAnswers;
     const timeinfo = {
-      time: question.raw.timeAvailable || 20000
+      time: question.timeAvailable || 20000
     };
     if(game.guesses.length >= 1){
       QuizResult.className = "button";
@@ -421,7 +419,7 @@ class GetReadyPage{
       document.getElementById("timeout").value = time / 1000;
       game.saveOptions();
     }
-    if(game.guesses && game.guesses.length && game.guesses[0].uuid != game.oldQuizUUID){
+    if(game.guesses && game.guesses.length && game.guesses[0].uuid !== game.oldQuizUUID){
       game.oldQuizUUID = game.guesses[0].uuid;
       dataLayer.push({
         event: "find_quiz",
@@ -445,33 +443,34 @@ class GetReadyPage{
         word_cloud: "§TypeWordCloud§",
         content: "§TypeContent§",
         multiple_select_poll: "§TypeSurvey§",
-        multiple_select_quiz: "§TypeQuiz§"
+        multiple_select_quiz: "§TypeQuiz§",
+        brainstorming: "§TypeBrainstorm§"
       },
       qoft = Element("p",{
         innerHTML: `${game.index + 1} §Of§ ${game.total}`
       }),
       typeimg = Element("img",{
         alt: "",
-        src: `/resource/img/game/type/${question.type}.svg`
+        src: `/resource/img/game/type/${question.gameBlockType}.svg`
       }),
       typetext = Element("span",{
-        innerHTML: typedefs[question.type]
+        innerHTML: typedefs[question.gameBlockType]
       }),
       typediv = Element("div",{
         id: "quizTypeImage"
       });
-    if(question.type === "multiple_select_quiz"){
+    if(question.gameBlockType === "multiple_select_quiz"){
       typeimg.src = "/resource/img/game/type/quiz.svg";
-    }else if(question.type === "multiple_select_poll"){
+    }else if(question.gameBlockType === "multiple_select_poll"){
       typeimg.src = "/resource/img/game/type/survey.svg";
-    }else if(question.type === "quiz" && game.rawData.gameBlockLayout === "TRUE_FALSE"){
+    }else if(question.gameBlockType === "quiz" && game.gameBlockLayout === "TRUE_FALSE"){
       typeimg.src = "/resource/img/game/type/true_false.svg";
       typetext.innerHTML = "§TypeTrueFalse§";
     }
     typediv.append(typeimg,typetext);
     objects.top.append(qoft,typediv);
     objects.bottom.append(score);
-    if(game.question.type == "content"){
+    if(question.gameBlockType == "content"){
       document.body.className = "blue2";
       const bdiv = Element("div"),
         breather = Element("h1",{
@@ -497,7 +496,7 @@ class GetReadyPage{
     }
     const timer = Element("h2",{
         id: "timer",
-        innerHTML: game.question.timeLeft || "5"
+        innerHTML: question.timeLeft || "5"
       }),
       mcont = Element("div"),
       ncont = Element("div"),
@@ -509,7 +508,7 @@ class GetReadyPage{
     ncont.append(spinimg,timer);
     mcont.append(quest,ncont,readything);
     objects.mid.append(mcont);
-    let secs = game.question.timeLeft || 5;
+    let secs = question.timeLeft || 5;
     const int = setInterval(()=>{
       try{
         if(--secs < 0){
@@ -555,14 +554,14 @@ class GetReadyPage{
         const as = game.guesses[0].questions,
           qs = [];
         for(let i = 0; i < as.length; i++){
-          if(as[i].type == game.question.type && (as[i].layout == game.rawData.gameBlockLayout || !as[i].layout) && ((typeof as[i].choices === "object" && as[i].choices.length) || null) == game.ans[game.index]){
+          if(as[i].type == question.gameBlockType && (as[i].layout == question.gameBlockLayout || !as[i].layout) && ((typeof as[i].choices === "object" && as[i].choices.length) || null) == game.ans[game.index]){
             // answer filter
             let add = true,
               add2 = 0;
             const ca = game.got_answers.slice(0);
             for(let j = 0; j < ca.length; j++){
               function chfilter(ch){
-                const {text,correct,type,choice} = ca[j];
+                const {text,isCorrect:correct,type,choice} = ca[j];
                 switch(type){
                   case "quiz":{
                     if(choice === null || typeof choice === "undefined"){
@@ -580,7 +579,7 @@ class GetReadyPage{
                   case "multiple_select_poll":
                   case "multiple_select_quiz":{
                     const texts = text.split("|");
-                    if(texts.includes(choice.answer)){
+                    if(texts.includes(choice.answer || "")){
                       return true;
                     }
                     return false;
@@ -653,16 +652,11 @@ class GetReadyPage{
                 match3 = qtext.replace(regex,"").match(new RegExp(search.replace(regex,""),"gmi"));
               if(match || match2 || match3){
                 if(!f){
-                  if(game.correctIndex == qs[i].i){
+                  if(game.correctIndex === qs[i].i){
                     f = true;
                   }else{
-                    send({
-                      type: "CHOOSE_QUESTION_INDEX",
-                      message: qs[i].i
-                    });
                     game.correctIndex = qs[i].i;
-                    game.question.data = game.guesses[0].questions[qs[i].i].choices;
-                    game.question.ans = game.ans;
+                    game.answers = game.guesses[0].questions[qs[i].i].choices;
                     f = true;
                   }
                 }
@@ -675,14 +669,9 @@ class GetReadyPage{
                 }
                 elem.innerHTML = parsed;
                 elem.addEventListener("click",()=>{
-                  send({
-                    type: "CHOOSE_QUESTION_INDEX",
-                    message: qs[i].i
-                  });
                   game.correctIndex = qs[i].i;
-                  game.question.data = game.guesses[0].questions[qs[i].i].choices;
+                  game.answers = game.guesses[0].questions[qs[i].i].choices;
                   game.ans[game.index] = game.question.data ? game.question.data.length : 4;
-                  game.question.ans = game.ans;
                   Array.from(qdiv.children).forEach((item) => {
                     item.className = "";
                   });
@@ -771,19 +760,9 @@ class GetReadyPage{
       choiceDiv.append(yes,yesl,no,nol);
       objects.main.append(choiceDiv);
       function sendFail(){
-        setTimeout(()=>{
-          if(yes.checked){
-            send({
-              type: "FAIL_CURRENT_QUESTION",
-              message: true
-            });
-          }else{
-            send({
-              type: "FAIL_CURRENT_QUESTION",
-              message: false
-            });
-          }
-        });
+        setTimeout(()=>{ // prevent weird sync issues
+          game.fails[game.index] = yes.checked;
+        },10);
       }
       yesl.onclick = nol.onclick = sendFail;
     }
@@ -828,11 +807,8 @@ class QuestionAnswererPage{
       return;
     }else if(game.opts.searchLoosely == 2 && !game.opts.manual){
       setTimeout(()=>{
-        send({
-          type: "ANSWER_QUESTION",
-          message: null
-        });
-      },(game.opts.timeout * 1000) - (Date.now() - game.recievedTime));
+        game.answerQuestion(null);
+      },(+game.opts.timeout * 1000) - (Date.now() - game.recievedTime));
     }
     const objects = new GetReadyPage(question || game.question,true);
     objects.main.setAttribute("ui-event","QuestionAnswer");
@@ -875,7 +851,7 @@ class QuestionAnswererPage{
           placeholder: answer ? answer.answer : "",
           onkeydown: (e)=>{
             if(e.code === "Enter"){
-              game.answer(input.value);
+              game.answerQuestion(input.value || null);
             }
           }
         }),
@@ -922,7 +898,7 @@ class QuestionAnswererPage{
       if(game.ans[game.index] == 2){
         r.style.maxHeight = "100%";
         b.style.maxHeight = "100%";
-        if(game.rawData.gameBlockLayout == "TRUE_FALSE"){
+        if(game.question.gameBlockLayout == "TRUE_FALSE"){
           r.setAttribute("css","layout-tfb");
           b.setAttribute("css","layout-tfr");
           r.src = b.src = `/resource/img/game/theme/${KahootThemes[game.theme].blue}`;
@@ -1103,17 +1079,17 @@ class QuestionAnswererPage{
     // music
     try{
       if(game.theme === "Music"){
-        if(question.raw.timeAvailable <= 5000){
+        if(question.timeAvailable <= 5000){
           const sounds = ["005","005-1"];
           game.playSound(`/resource/music/${sounds[Math.floor(Math.random() * sounds.length)]}.m4a`);
-        }else if(question.raw.timeAvailable <= 10000){
+        }else if(question.timeAvailable <= 10000){
           game.playSound("/resource/music/010.m4a");
-        }else if(question.raw.timeAvailable <= 20000){
+        }else if(question.timeAvailable <= 20000){
           const sounds = ["020","020-1","020-2"];
           game.playSound(`/resource/music/${sounds[Math.floor(Math.random() * sounds.length)]}.m4a`);
-        }else if(question.raw.timeAvailable <= 30000){
+        }else if(question.timeAvailable <= 30000){
           game.playSound("/resource/music/030.m4a");
-        }else if(question.raw.timeAvailable <= 60000){
+        }else if(question.timeAvailable <= 60000){
           game.playSound("/resource/music/060.m4a");
         }else{ // currently missing 90s and 240s assets
           const sounds = ["120","120-1"];
@@ -1124,20 +1100,20 @@ class QuestionAnswererPage{
       console.warn("[MUSIC] - Failed to play.\n" + e);
     }
     // challenge
-    if(game.pin[0] == "0"){
+    if(game.pin[0] === "0"){
       const chdiv = Element("div",{
           className: "ChallengeQuestion"
         }),
         sp = Element("span",{
-          innerHTML: game.rawData.question || game.rawData.title
+          innerHTML: game.question.question || game.question.title
         });
       chdiv.append(sp);
       div.append(chdiv);
       // create timer
-      if(game.options.ChallengeDisableTimer){
+      if(game.opts.ChallengeDisableTimer){
         return;
       }
-      let questionTime = question.raw.timeAvailable / 1000;
+      let questionTime = question.timeAvailable / 1000;
       const qdiv = Element("p",{
           className: "chtimer",
           innerHTML: questionTime
@@ -1180,19 +1156,13 @@ class QuestionSnarkPage{
 }
 class QuestionEndPage{
   constructor(info){
-    info = JSON.parse(info);
     if(typeof info.choice === "undefined"){
-      return new TimeUpPage;
+      return new TimeUpPage(info);
     }
-    if(info.isCorrect){
-      game.streak++;
-    }else{
-      game.streak = 0;
-    }
-    game.score = info.totalScore;
+    game.isAnswerPage = false;
     const objects = new GetReadyPage(game.question || info,true);
     objects.main.setAttribute("ui-event","QuestionEnd");
-    if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
+    if(game.pin[0] === "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
     }else if(game.guesses.length === 0){
       objects.main.append(NotFoundDiv());
@@ -1200,6 +1170,8 @@ class QuestionEndPage{
     objects.mid.innerHTML = "";
     document.body.className = info.isCorrect ? "green" : "red";
     objects.bottom.querySelector(".dark").innerHTML = info.totalScore;
+    game.gotWrong = !info.isCorrect;
+    game.lastQuestionType = info.type;
     const correct = Element("h1",{
       innerHTML: info.isCorrect ? "§Correct§" : "§Incorrect§",
       className: "shadow"
@@ -1267,7 +1239,6 @@ class QuestionEndPage{
 }
 class QuizEndPage{
   constructor(text){
-    text = JSON.parse(text);
     game.endData = text;
     let message;
     if(game.end.info.rank == 1){
@@ -1284,7 +1255,7 @@ class QuizEndPage{
     const objects = new GetReadyPage(game.question,true);
     objects.main.setAttribute("ui-event","QuizEnd");
     objects.mid.innerHTML = "";
-    if(game.pin[0] == "0" && game.opts.ChallengeDisableAutoplay){
+    if(game.pin[0] === "0" && game.opts.ChallengeDisableAutoplay){
       ChallengeContinueButton.style.display = "";
     }
     document.body.className = "purple";
@@ -1338,11 +1309,11 @@ class QuizEndPage{
 class TeamTalkPage{
   constructor(question){
     if(game.opts.teamtalk){
-      const o = new QuestionAnswererPage(this.question || question);
+      const o = new QuestionAnswererPage(game.question || question);
       game.isAnswerPage = true;
       return o;
     }
-    const {main,mid} = new GetReadyPage(this.question || question,true);
+    const {main,mid} = new GetReadyPage(game.question || question,true);
     main.setAttribute("ui-event","TeamTalk");
     mid.innerHTML = "";
     document.body.className = (game.theme == "Rainbow" && "rainbow") || "cyan";
@@ -1385,32 +1356,62 @@ class TeamTalkPage{
   }
 }
 class TimeUpPage{
-  constructor(){
+  constructor(info){
     if(game.receivedQuestion){return;}
-    const {main,mid} = new LobbyPage;
+    const {main,mid,top,bottom} = new LobbyPage;
     main.setAttribute("ui-event","TimeUp");
     mid.innerHTML = "";
     try{document.querySelector(".noQuiz").outerHTML = "";}catch(e){/* nothing to remove */}
     if(!game.guesses || game.guesses.length === 0){
       main.append(NotFoundDiv());
     }
-    document.body.className = (game.theme == "Rainbow" && "rainbow") || "red";
+    document.body.className = (game.theme == "Rainbow" && "rainbow") || "blue2";
     const title = Element("h1",{
-      innerHTML: "§TimeUp§",
+      innerHTML: "§GetReady§",
       className: "shadow"
     });
-    title.setAttribute("text","§TimeUp§");
-    const subtitle = Element("h2",{
-      innerHTML: "§YouIn§ 0th §Place§",
-      className: "shadow"
-    });
-    subtitle.setAttribute("text","§YouIn§ 0th §Place§");
-    const message = Element("h3",{
-      innerHTML: "§WeBelieve§"
-    });
-    message.setAttribute("text","§WeBelieve§");
+    title.setAttribute("text","§GetReady§");
+    const img = Element("img",{
+        src: "/resource/img/game/icon/late-join.svg",
+        id: "ContentImage"
+      }),
+      subtitle = Element("h2",{
+        innerHTML: "§JoinSoon§",
+        className: "shadow"
+      });
+    subtitle.setAttribute("text","§JoinSoon§");
     const cont = Element("div");
-    cont.append(title,subtitle,message);
+    cont.append(title,img,subtitle);
+    if(info){
+      const score = Element("p",{
+          innerHTML: "" + game.score,
+          className: "dark"
+        }),
+        typedefs = {
+          quiz: "§TypeQuiz§",
+          open_ended: "§TypeOpenEnded§",
+          survey: "§TypeSurvey§",
+          jumble: "§TypeJumble§",
+          word_cloud: "§TypeWordCloud§",
+          content: "§TypeContent§",
+          multiple_select_poll: "§TypeSurvey§",
+          multiple_select_quiz: "§TypeQuiz§",
+          brainstorming: "§TypeBrainstorm§"
+        },
+        typeimg = Element("img",{
+          alt: "",
+          src: `/resource/img/game/type/${info.type}.svg`
+        }),
+        typetext = Element("span",{
+          innerHTML: typedefs[info.type]
+        }),
+        typediv = Element("div",{
+          id: "quizTypeImage"
+        });
+      typediv.append(typeimg,typetext);
+      top.append(typediv);
+      bottom.append(score);
+    }
     mid.append(cont);
   }
 }
@@ -1492,14 +1493,11 @@ class FeedbackPage{
         learn = (document.querySelector("input[name=\"learn\"]:checked") || {}).value,
         recommend = (document.querySelector("input[name=\"rec\"]:checked") || {}).value,
         overall = document.querySelector("input[name=\"feel\"]:checked").value;
-      send({
-        type: "SEND_FEEDBACK",
-        message: {
-          fun: +fun,
-          learn: +learn,
-          recommend: +recommend,
-          overall: +overall
-        }
+      game.sendFeedback({
+        fun: +fun,
+        learn: +learn,
+        recommend: +recommend,
+        overall: +overall
       });
       return new QuizEndPage(JSON.stringify(game.endData));
     };
@@ -1537,7 +1535,7 @@ function setSchema(element,type,scope,prop){
 
 function sleep(n){return new Promise((res)=>{setTimeout(res,n*1000);});}
 
-async function resetGame(recover){
+async function resetGame(){
   try{game.music.pause();}catch(e){/* No music to pause */}
   const oldgame = game;
   if(socket){
@@ -1546,45 +1544,6 @@ async function resetGame(recover){
     socket = null;
   }
   game = new Game();
-  const wait = async evt=>{
-    evt = evt.data;
-    const data = JSON.parse(evt);
-    if(data.type == "Message.PinGood"){
-      new LobbyPage;
-      // wait 25 seconds to confirm client disconnect.
-      let t = (25000 - (Date.now() - oldgame.disconnectTime))/1000;
-      if(t <= 2){
-        t = 2;
-      }
-      new ErrorHandler("Reconnecting... Please wait. You should be reconnected when this message dissappears.",{
-        time: t * 1000
-      });
-      await sleep(t);
-      send({
-        message: {
-          cid: oldgame.cid,
-          answers: oldgame.got_answers
-        },
-        type: "RECOVER_DATA"
-      });
-      if(oldgame.oldQuizUUID){
-        document.getElementById("uuid").value = oldgame.oldQuizUUID;
-      }
-      game.saveOptions();
-    }else{ // asumming that the first result should be "pingood" after sending the pin.
-      resetGame();
-    }
-    socket.removeEventListener("message",wait);
-  };
-  if(recover === true){
-    await game.sendPin(oldgame.pin);
-    socket.addEventListener("message",wait);
-    return;
-  }else if(recover){
-    // reconnect using differnt proxy service
-    await game.sendPin(oldgame.pin,recover);
-    return;
-  }
   new LoginPage;
   document.body.className = "rainbow";
   document.getElementById("author").value = "";
@@ -1763,10 +1722,7 @@ ChangelogSwitch.addEventListener("click",()=>{
   }
 });
 ChallengeContinueButton.addEventListener("click",()=>{
-  send({
-    message: "",
-    type: "NEXT_CHALLENGE"
-  });
+  game.client.next();
 });
 SettingSwitch.onclick = ()=>{
   if(!SettingSwitch.checked){
@@ -1809,11 +1765,6 @@ const shortcuts = e=>{
     return;
   }
   switch (e.key) {
-    case "e":
-    // reconnect bot
-      send({type:"RECONNECT",message:"I think i lost connection"});
-      dataLayer.push({type:"reconnect",value:""});
-      break;
     case "b":
     // brute force
       document.getElementById("brute").click();
@@ -1910,6 +1861,9 @@ const shortcuts = e=>{
           document.getElementById("previewQuestion").checked = false;
         }else{
           game.opts = game.panicSettings;
+          document.getElementById("manual").checked = game.opts.manual;
+          document.getElementById("hideAnswers").checked = game.opts.hideAnswers;
+          document.getElementById("previewQuestion").checked = game.opts.previewQuestion;
         }
         game.saveOptions();
         // yes, that is a typo
@@ -1953,7 +1907,7 @@ window.addEventListener("keydown",(e)=>{
   if(+e.code.split("Digit")[1] <= 4){
     switch (+e.code.split("Digit")[1]) {
       case 0:
-        send({type:"ANSWER_QUESTION",message:null});
+        game.answerQuestion(null);
         break;
       case 1:
         document.querySelector("[alt=\"Red\"]").click();

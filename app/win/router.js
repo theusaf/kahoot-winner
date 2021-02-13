@@ -6,13 +6,15 @@ const appInformation = require("../../package.json"),
   globals = require("./globals.js"),
   got = require("got"),
   path = require("path"),
-  Search = require("kahoot-search");
+  Search = require("kahoot-search"),
+  ua = require("user-agents"),
+  {URL} = require("url");
 // Kahoot Winner Router
 module.exports = function(app) {
   app.enable("trust proxy");
   // cors
   app.use((req,res,next)=>{
-    const origins = ["theusaf.github.io","kahoot.it","play.kahoot.it","create.kahoot.it","code.org","studio.code.org"];
+    const origins = ["theusaf.github.io","kahoot.it","play.kahoot.it","create.kahoot.it","code.org","studio.code.org","kahoot-win.com","tooooooo-fast.herokuapp.com","kashoot-this.herokuapp.com","kahoot-win.herokuapp.com"];
     if(req.get("origin") && origins.includes(req.get("origin").split("://")[1])){
       res.header("Access-Control-Allow-Origin",req.get("origin"));
     }
@@ -140,6 +142,136 @@ module.exports = function(app) {
       a.search().then(o=>{
         res.send(o);
       });
+    }
+  });
+  // kahoot externals
+  app.get("/kahoot/*",async(req,res,next)=>{
+    const kahootPath = req.url.substr(7);
+    if(/^\/reserve\/session\/\d+\/?\?\d+$/.test(kahootPath)){
+      // Getting kahoot live challenge.
+      const url = new URL(`https://kahoot.it${kahootPath}`),
+        options = {
+          protocol: url.protocol,
+          host: url.host,
+          path: url.pathname + url.search
+        };
+      options.headers = {
+        "User-Agent": (new ua).toString(),
+        "Origin": "kahoot.it",
+        "Referer": "https://kahoot.it/",
+        "Accept-Language": "en-US,en;q=0.8",
+        "Accept": "*/*"
+      };
+      const request = got(options);
+      res.header("Cache-Control", "no-cache");
+      if(options.timeout){
+        setTimeout(() => {
+          request.cancel();
+        },options.timeout);
+      }
+      try{
+        const response = await request,
+          token = response.headers["x-kahoot-session-token"];
+        if(token){
+          res.header("x-kahoot-session-token",token);
+        }
+        res.send(response.body);
+      }catch(e){
+        const {response} = e;
+        if(typeof response === "undefined"){
+          res.status(500);
+          res.send("Request Timed Out");
+        }else{
+          res.status(response.statusCode);
+          res.send(response.body);
+        }
+      }
+    }else if(/^\/rest\/challenges\/.*/.test(kahootPath)){
+      // Getting challenge data
+      const url = new URL(`https://kahoot.it${kahootPath}`),
+        options = {
+          protocol: url.protocol,
+          host: url.host,
+          pathname: url.pathname,
+          search: url.search
+        };
+      options.headers = {
+        "User-Agent": (new ua).toString(),
+        "Origin": "kahoot.it",
+        "Referer": "https://kahoot.it/",
+        "Accept-Language": "en-US,en;q=0.8",
+        "Accept": "*/*"
+      };
+      const request = got(options);
+      res.header("Cache-Control", "no-cache");
+      if(options.timeout){
+        setTimeout(() => {
+          request.cancel();
+        },options.timeout*2);
+      }
+      try{
+        const response = await request;
+        res.send(response.body);
+      }catch(e){
+        const {response} = e;
+        if(typeof response === "undefined"){
+          res.status(500);
+          res.send("Request Timed Out");
+        }else{
+          res.status(response.statusCode);
+          res.send(response.body);
+        }
+      }
+    }else if(/^\/weekly(-previous)?\/?$/.test(kahootPath)){
+      let url = "https://kahoot.com/kahoot-of-the-week";
+      if(kahootPath.indexOf("previous") !== -1){
+        url = "https://kahoot.com/kahoot-of-the-week-previous";
+      }
+      got.stream(url).pipe(res);
+    }else{
+      next();
+    }
+  });
+  // kahoot challenge posting
+  app.post("/kahoot/rest/challenges/*",async(req,res)=>{
+    const kahootPath = req.url.substr(7),
+      body = Object.keys(req.body).length ? req.body : undefined,
+      url = new URL(`https://kahoot.it${kahootPath}`),
+      options = {
+        protocol: url.protocol,
+        host: url.host,
+        path: url.pathname + url.search
+      };
+    options.method = "POST";
+    options.headers = {
+      "User-Agent": (new ua).toString(),
+      "Origin": "kahoot.it",
+      "Referer": "https://kahoot.it/",
+      "Accept-Language": "en-US,en;q=0.8",
+      "Accept": "*/*"
+    };
+    if(body){
+      options.json = body;
+    }
+    const request = got(options);
+    res.header("Cache-Control", "no-cache");
+    if(options.timeout){
+      setTimeout(() => {
+        request.cancel();
+      },options.timeout*2);
+    }
+    try{
+      const response = await request;
+      res.send(response.body);
+    }catch(e){
+      const {response} = e;
+      if(typeof response === "undefined"){
+        res.status(500);
+        res.send("Request Timed Out");
+      }else{
+        res.status(response.statusCode);
+        res.send(response.body);
+      }
     }
   });
 };

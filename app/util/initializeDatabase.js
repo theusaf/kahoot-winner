@@ -3,11 +3,13 @@ const fs = require("fs"),
   globals = require("../win/globals.js"),
   {mainPath} = globals,
   path = require("path"),
+  readJSON = require("./readjson.js"),
   sleep = require("./sleep.js"),
   yauzl = require("yauzl");
-function loadDatabase(){
+async function loadDatabase(){
   globals.ebar(-1);
   globals.KahootDatabaseInitialized = true;
+  globals.keys = await readJSON("keys.json");
 }
 module.exports = async function initializeDatabase(){
   if(fs.existsSync(path.join(mainPath,"kdb.json"))){

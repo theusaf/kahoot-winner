@@ -1,27 +1,29 @@
-const Cheater = require("./cheater.js"),
-  clearMemory = require("../util/clearMemory.js"),
+const QuizSearcher = require("./QuizSearcher.js"),
   ws = require("ws");
 module.exports = (server) => {
   const wss = new ws.Server({server: server});
-  wss.on("connection",(c,request)=>{
-    const a = new Cheater(c,request),
+  wss.on("connection",async (c,req)=>{
+    // Others
+    if(!/^\/search/.test(req.url)){
+      c.send(JSON.stringify({
+        type: "Message.Maintainance",
+        message: "Kahoot Winner is at Version 6! Update your page (clear your cache) to use Kahoot Winner!"
+      }));
+      c.close();
+      return;
+    }
+    const a = new QuizSearcher(c,req),
       msgl = m=>{a.message(m);};
     c.on("message",msgl);
     const cl = ()=>{
+      clearInterval(a.pinger);
       c.removeListener("message",msgl);
       c.removeListener("close",cl);
-      if(a.handshakeIssues){
-        try {
-          a.kahoot.socket.close();
-        } catch (e) {
-          a.kahoot.leave();
-        }
-      }else{
-        a.kahoot.leave();
-      }
-      a.finder.hax.stop = true;
-      clearMemory(a);
     };
     c.on("close",cl);
+    c.on("error",(e)=>{
+      console.log(e);
+      try{c.close();}catch(e){/* ignore */}
+    });
   });
 };
