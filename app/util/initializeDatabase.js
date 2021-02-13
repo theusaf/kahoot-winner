@@ -9,9 +9,16 @@ const fs = require("fs"),
 async function loadDatabase(){
   globals.ebar(-1);
   globals.KahootDatabaseInitialized = true;
-  globals.keys = await readJSON("keys.json");
+  try{
+    globals.keys = await readJSON("keys.json");
+  }catch(e){
+    globals.KahootDatabaseInitialized = false;
+  }
 }
 module.exports = async function initializeDatabase(){
+  if(!process.argv.includes("--enable-database")){
+    return loadDatabase();
+  }
   if(fs.existsSync(path.join(mainPath,"kdb.json"))){
     fs.unlinkSync(path.join(mainPath,"kdb.json"));
   }

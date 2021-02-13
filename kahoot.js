@@ -2,13 +2,18 @@ let electron;
 if(!process.argv.includes("--disable-electron")){
   electron = require("electron");
 }
-const express = require("express"),
+const dotenv = require("dotenv"),
+  express = require("express"),
   path = require("path"),
   ip = require("ip"),
   http = require("http"),
   got = require("got"),
   globals = require("./app/win/globals.js"),
   app = express();
+
+dotenv.config({
+  path: path.join(globals.mainPath, ".env")
+});
 
 const port = process.env.PORT || 2000,
   server = http.createServer(app);

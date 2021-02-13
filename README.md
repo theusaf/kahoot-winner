@@ -44,6 +44,9 @@ Alternatively, I have uploaded various versions of the files in [archive.org](ht
 - `json.zip` A zip file with sub files (00 - ff) containing json quiz objects. (Files stored in a folder named "json")
 - `json-full.zip` A zip file containing all items. (Stored in a folder named "json-full")
 
+## Enable Database
+As of version 6.0.0, Kahoot Winner no longer automatically downloads the database by default. Add `--enable-database` when running the app to enable this functionality.
+
 ## Reformat for use in non-gui devices
 Just run the following command:
 ```bash
