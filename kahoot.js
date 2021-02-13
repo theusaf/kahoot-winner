@@ -94,7 +94,7 @@ if(electron){
     }
 
     // and load the index.html of the app.
-    win.loadURL("http://localhost:2000");
+    win.loadURL("http://localhost:" + process.env.PORT || 2000);
 
     win.on("close",async evt=>{
       const {response} = await electron.dialog.showMessageBox({
