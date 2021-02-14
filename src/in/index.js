@@ -31,10 +31,6 @@ class LiveTwoStepAnswer extends LiveBaseMessage{
 }
 
 function sendQuizQuestionAnswers(){
-  if(game.sentQuizQuestionAnswers){
-    return;
-  }
-  game.sentQuizQuestionAnswers = true;
   send(`QUIZ_QUESTION_ANSWERS;${JSON.stringify(game.client.quiz.quizQuestionAnswers)}`);
 }
 
@@ -263,7 +259,6 @@ class Game{
     // whether ready
     this.ready = false;
     this.teamTalkTime = 0;
-    this.sentQuizQuestionAnswers = false;
     this.guesses = [];
     this.fails = [true];
     this.teamAnswered = false;
@@ -332,7 +327,7 @@ class Game{
           request.send();
           request.onload = ()=>{
             activateLoading(false,false);
-            this.gameid = request.response.match(/(?<=challenge\/)\d+/gm)[0];
+            this.gameid = request.response.match(/challenge\/\d+/gm)[0].replace("challenge/","");
             new LoginPage(true);
             res();
           };
@@ -907,7 +902,7 @@ function detectPlatform(){
   return OSName;
 }
 
-localStorage.KW_Version = "v6.0.0";
+localStorage.KW_Version = "v6.0.1";
 const checkVersion = new XMLHttpRequest();
 checkVersion.open("GET","/up");
 checkVersion.send();
@@ -960,9 +955,3 @@ checkVersion.onload = function(){
     localStorage.KW_Version = version;
   }
 };
-
-/*
-To Add:
-- Question Timer setting
-- Randomized Answer Checker
- */

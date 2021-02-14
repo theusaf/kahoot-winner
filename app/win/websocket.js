@@ -16,6 +16,7 @@ module.exports = (server) => {
       msgl = m=>{a.message(m);};
     c.on("message",msgl);
     const cl = ()=>{
+      a.stop = true;
       clearInterval(a.pinger);
       c.removeListener("message",msgl);
       c.removeListener("close",cl);

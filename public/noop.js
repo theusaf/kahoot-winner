@@ -1,5 +1,5 @@
 const CACHES = {
-  "kahoot-win-cache-v6.0.0": [
+  "kahoot-win-cache-v6.0.1": [
     "/",
     "/index.js",
     "/index.css",
