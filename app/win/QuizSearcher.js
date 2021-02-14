@@ -233,6 +233,9 @@ class QuizSearcher{
     if(databaseResults.length === 0){
       this.ignoreDatabase = true;
     }
+    if(!quizSpecified && databaseResults.length === 0){
+      return
+    }
     // Filtering
     const filteredSearchResults = searchResults.filter(filter),
       filteredDatabaseResults = databaseResults.filter(filter);
