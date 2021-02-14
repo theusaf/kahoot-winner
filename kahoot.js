@@ -110,35 +110,6 @@ if(electron){
     });
   }
 
-  // Check latest version with live site
-  got("https://kahoot-win.com/up").then(async (data)=>{
-    const {body} = data;
-    if(body && typeof body === "string"){
-      if(body.includes(require("./package.json").version)){
-        console.log("Client is up to date.");
-      }else{
-        const semver = require("semver"),
-          kv = semver.clean(body.split(":")[1]);
-        if(semver.gt(require("./package.json").version,kv)){
-          console.log("Client is ahead of current version.");
-          return;
-        }
-        console.log("Client is not up to date.");
-        const {response} = await electron.dialog.showMessageBox({
-          buttons: ["Later","Update"],
-          message: `An update is available [v${body.match(/(?<=v)\d+\.\d+\.\d+/)[0]}]. Currently using v${require("./package.json").version} Would you like to download it now?`,
-          title: "New Version"
-        });
-        if(response === 1){
-          electron.shell.openExternal("https://kahoot-win.com/blog/download");
-          electron.app.exit(0);
-        }
-      }
-    }
-  }).catch(()=>{
-    console.log("Error fetching latest version information");
-  });
-
   electron.app.whenReady().then(createWindow);
 
   electron.app.on("window-all-closed", () => {
