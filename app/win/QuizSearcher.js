@@ -218,7 +218,7 @@ class QuizSearcher{
     if(!this.ignoreDatabase){
       databaseResults = await SearchDatabase(term,options,length,this);
       if(n === this.searchNum){
-        this.searchIndex += globals.DBAmount;
+        this.databaseIndex += globals.DBAmount;
       }
     }
     if(!this.ignoreSearch && quizSpecified){
